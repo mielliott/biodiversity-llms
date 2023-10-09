@@ -6,6 +6,7 @@
 # Any "{0}", "{1}", etc. in the question are replaced by columns from the TSV input
 # e.g. echo -e "Acer saccharum\tArkansas" | python qa.py "Does {0} naturally occur in {1}? Yes or no"
 
+import argparse
 import os
 import sys
 import time
@@ -15,9 +16,23 @@ from torch.nn.functional import softmax
 import openai
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def make_question(query, line):
-    line = line.split("\t")
-    return query.format(*line)
+def unescape(string):
+    if '"' == string[0] == string[-1] or "'" == string[0] == string[-1]:
+        return eval(string)
+    else:
+        return string
+
+def get_questions(patterns, lines, do_unescape, filter=lambda x: True):
+    for line in lines:
+        line = line.strip()
+        values = line.split("\t")
+        
+        if do_unescape:
+            values = [v for v in map(unescape, values)]
+        
+        for pattern in patterns:
+            if filter(pattern.format(*values)):
+                yield (line, pattern.format(*values))
 
 def prep_local_model():
     global tokenizer, model, qa
@@ -69,29 +84,50 @@ def query_openai(model: str, query: str, **kwargs) -> list[str]:
             print("Request failed:", e, file=sys.stderr)
             time.sleep(5)
 
-def run_openai_model(model):
-    print("responses", "input token count", "output token count", sep="\t")
+def run_openai_model(model, header_in, max_tokens, num_responses, top_p, combine_responses, timeout, escape):
+    print(header_in, "query", "responses", "input token count", "output token count", "question number", sep="\t")
 
-    for question in questions:
+    for i, (input, question) in enumerate(questions):
         # See https://platform.openai.com/docs/api-reference/chat/create
-        response = query_openai(model, question, n=10, top_p=0.8, max_tokens=1)
+        response = query_openai(model, question, n=num_responses, top_p=top_p, max_tokens=max_tokens, request_timeout=timeout)
         answers = [choice["message"]["content"] for choice in response["choices"]]
-        print(" ".join(answers), response.usage.prompt_tokens, response.usage.completion_tokens, sep="\t", flush=True)
+        if combine_responses:
+            answers = [" ".join(answers)]
+        for answer in answers:
+            print(input, repr(question), repr(answer) if escape else answer, response.usage.prompt_tokens, response.usage.completion_tokens, i, sep="\t", flush=True)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Submit questions to GPT 3.5 turbo")
+    parser.add_argument("patterns", nargs="+")
+    parser.add_argument("--num-responses", "-r", default=10, type=int)
+    parser.add_argument("--max-tokens", "-t", default=1, type=int)
+    parser.add_argument("--top-p", "-p", default=0.8, type=float)
+    parser.add_argument("--filter-keyword", "-f", default="MISSING", type=str)
+    parser.add_argument("--combine_responses", "-c", action="store_true")
+    parser.add_argument("--timeout", default=10, type=int)
+    parser.add_argument("--unescape-input", action="store_true")
+    parser.add_argument("--escape-responses", action="store_true")
+    parser.add_argument("--test", "-x", action="store_true")
+    args = parser.parse_args()
+
     sys.stdin.reconfigure(encoding='utf-8')
     lines = (line for line in sys.stdin)
-    next(lines) # skip header line
+    header_in = next(lines).rstrip() # Get header of input data
+    questions = get_questions(args.patterns, (l for l in lines), args.unescape_input, lambda query: args.filter_keyword not in query)
 
-    query_pattern = "Does {0} {1} naturally occur in {3}, {2}? Yes or no."
-    if len(sys.argv) > 1:
-        query_pattern = sys.argv[1]
-
-    questions = (make_question(query_pattern, l[:-1]) for l in lines)
-
-    if len(sys.argv) > 2:
-        print(next(questions))
+    if args.test:
+        for q in questions:
+                print(q[1])
     else:
         gpt3 = "gpt-3.5-turbo-0613"
         gpt4 = "text-davinci-003"
-        run_openai_model(gpt3)
+        run_openai_model(
+            gpt3,
+            header_in,
+            num_responses=args.num_responses,
+            max_tokens=args.max_tokens,
+            top_p=args.top_p,
+            combine_responses=args.combine_responses,
+            timeout=args.timeout,
+            escape=args.escape_responses
+        )
