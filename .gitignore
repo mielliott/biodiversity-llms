@@ -1,2 +1,4 @@
 __pycache__/
-idigbio-records/
+raw/
+processed/
+results/
