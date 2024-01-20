@@ -1,3 +1,5 @@
+Occurrence records, processed test set, and ChatGPT responses are available in Zenodo at https://doi.org/10.5281/zenodo.8417791.
+
 # Test set T1.1
 
 In total, about 20,000 questions; half are presence (correct answer is "yes") and half are pseudo-absence (correct answer is probably "no"). Includes both terrestrial and aquatic species, mostly in North America.
@@ -61,17 +63,6 @@ T1_CHUNK=1
 Submit rephrased questions
 
 ```bash
-# IN=$T1_2
-# IN=$T1_2_ABS
-# RES_PREFIX_PHRASING="$IN-$T1_CHUNK-$T1_CHUNK_SIZE-phrasing"
-# QA_ARGS="--max-tokens 1 --timeout 10 --num-responses 10 --combine_responses"
-
-# Q1="Is it natural for species {3} {4} to be found in {7}, {6}, {5}? Only respond yes or no." 
-# Q2="Does species {3} {4} exist in {7}, {6}, {5} as part of its natural habitat? Only respond yes or no."
-# Q3="Can species {3} {4} be typically found in {7}, {6}, {5} in its native state? Only respond yes or no."
-# Q4="Is {7}, {6}, {5} a natural habitat for species {3} {4}? Only respond yes or no."
-# Q5="Does species {3} {4} occur naturally in the environment of {7}, {6}, {5}? Only respond yes or no."
-
 # ./batch.sh processed/$IN.tsv $T1_CHUNK $T1_CHUNK_SIZE \
 
 IN=$T1_2
