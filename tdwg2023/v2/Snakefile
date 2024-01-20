@@ -2,11 +2,19 @@ from glob import glob
 
 configfile: "config.yml"
 
+presence_unfiltered_tsv = f"{config['processed_dir']}/presence-unfiltered.tsv"
+presence_tsv = f"{config['processed_dir']}/presence.tsv"
+absence_tsv = f"{config['processed_dir']}/absence2.tsv"
+
+rule all:
+    input:
+        absence_tsv
+
 rule clean_inputs:
     input:
-        glob(f"{config['raw_dir']}*.jsonl")
+        glob(f"{config['raw_dir']}/*.jsonl")
     output:
-        f"{config['processed_dir']}/presence-unfiltered.tsv"
+        presence_unfiltered_tsv
     shell:
         "cat {input:q} " # :q surrounds paths with quotes
         "| jq .indexTerms "
@@ -14,4 +22,24 @@ rule clean_inputs:
         "| grep -v MISSING "
         "| mlr --tsv uniq -a "
         "| python3 clean-records.py "
+        "> {output}"
+
+rule filter_inputs:
+    input:
+        presence_unfiltered_tsv
+    output:
+        presence_tsv
+    script:
+        "filter-records.py"
+
+rule create_pseudo_absence_dataset:
+    input:
+        presence_tsv
+    output:
+        absence_tsv
+    params:
+        shuffle_fields="'country','stateprovince','county'"
+    shell:
+        "paste <(cat {input} | mlr --tsv cut -x -f {params.shuffle_fields}) "
+        "      <(cat {input} | mlr --tsv cut -f {params.shuffle_fields} | mlr --tsv --seed 0 shuffle) "
         "> {output}"
