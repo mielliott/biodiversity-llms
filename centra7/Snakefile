@@ -1,0 +1,17 @@
+# Do stuff
+
+configfile: "config.yml"
+
+def make_url(path):
+    from os.path import abspath
+    from urllib.parse import urlparse
+    url = urlparse(path)
+    return f"file://{abspath(path)}" if url.scheme == "" else path
+
+rule get_taxonomy:
+    output:
+        "preston/data/"
+    params:
+        remotes=",".join([make_url(remote) for remote in config["preston_remotes"]])
+    shell:
+        "preston verify --remote {params.remotes} --anchor "

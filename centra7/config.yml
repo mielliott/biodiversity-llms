@@ -1,0 +1,7 @@
+preston_remotes:
+  - ../tdwg2023/preston/data/
+  - https://linker.bio
+  - https://zenodo.org
+
+preston_anchor:
+  hash://sha256/7d97c61822599fc780ae7f200cf07fdf817f5f51e8eeeec5f0332f8a5cf0257d
