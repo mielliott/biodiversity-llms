@@ -1,0 +1,17 @@
+from glob import glob
+
+configfile: "config.yml"
+
+rule clean_inputs:
+    input:
+        glob(f"{config['raw_dir']}*.jsonl")
+    output:
+        f"{config['processed_dir']}/presence-unfiltered.tsv"
+    shell:
+        "cat {input:q} " # :q surrounds paths with quotes
+        "| jq .indexTerms "
+        "| mlr --ijson --otsv template -f 'kingdom','phylum','family','genus','specificepithet','country','stateprovince','county' --fill-with MISSING "
+        "| grep -v MISSING "
+        "| mlr --tsv uniq -a "
+        "| python3 clean-records.py "
+        "> {output}"
