@@ -30,7 +30,7 @@ def get_batches(wildcards):
 def get_batch_path(wildcards, batch, batch_size, limit):
     first = batch * batch_size
     last = min(limit - 1, (batch + 1) * batch_size - 1)
-    return f"{BATCH_RESULTS_DIR}/{wildcards.group}-{first}-{last}.tsv"
+    return f"{BATCH_RESULTS_DIR}/{wildcards.group}/{first}-{last}.tsv"
 
 
 rule all:
@@ -83,7 +83,7 @@ rule qa_presence_batch:
     input:
         PROCESSED_DIR + "/{group}.tsv"
     output:
-        BATCH_RESULTS_DIR + "/{group}-{first}-{last}.tsv"
+        BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
     params:
         qa_command=config["qa_command"],
         qa_args=" ".join(config["qa_args"]),
