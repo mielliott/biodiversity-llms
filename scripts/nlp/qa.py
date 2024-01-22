@@ -3,8 +3,8 @@
 # Usage:
 #  echo [TSV lines] | python qa.py [question]
 #
-# Any "{0}", "{1}", etc. in the question are replaced by columns from the TSV input
-# e.g. echo -e "Acer saccharum\tArkansas" | python qa.py "Does {0} naturally occur in {1}? Yes or no"
+# Plug in field values using the field name, e.g. "Who is {name}?"
+# e.g. echo -e "species\tlocation\nAcer saccharum\tArkansas" | python qa.py "Does {species} naturally occur in {location}? Yes or no"
 
 import argparse
 import os
@@ -22,7 +22,9 @@ def unescape(string):
     else:
         return string
 
-def get_questions(patterns, lines, do_unescape, filter=lambda x: True):
+def get_questions(patterns, header, lines, do_unescape, filter=lambda x: True):
+    fields = header.split("\t")
+
     for line in lines:
         line = line.strip()
         values = line.split("\t")
@@ -31,8 +33,9 @@ def get_questions(patterns, lines, do_unescape, filter=lambda x: True):
             values = [v for v in map(unescape, values)]
         
         for pattern in patterns:
-            if filter(pattern.format(*values)):
-                yield (line, pattern.format(*values))
+            if filter(line):
+                field_values = dict(zip(fields, values))
+                yield (line, pattern.format(**field_values))
 
 def prep_local_model():
     global tokenizer, model, qa
@@ -113,7 +116,7 @@ if __name__ == '__main__':
     sys.stdin.reconfigure(encoding='utf-8')
     lines = (line for line in sys.stdin)
     header_in = next(lines).rstrip() # Get header of input data
-    questions = get_questions(args.patterns, (l for l in lines), args.unescape_input, lambda query: args.filter_keyword not in query)
+    questions = get_questions(args.patterns, header_in, (l for l in lines), args.unescape_input, lambda query: args.filter_keyword not in query)
 
     if args.test:
         for q in questions:

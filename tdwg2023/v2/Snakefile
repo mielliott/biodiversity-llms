@@ -19,20 +19,23 @@ ABSENCE_IN = config['processed_dir'] + "/absence.tsv"
 PRESENCE_OUT = RESULTS_DIR + "/presence.tsv"
 ABSENCE_OUT = RESULTS_DIR + "/absence.tsv"
 
-def get_batches(group):
+def get_batches(wildcards):
     from math import ceil
     batch_size = config["qa_batch_size"]
-    Q_num_lines = 27 # sum(1 for line in open(PRESENCE_TSV)) - 1 # Don't count the header line
-    return [f"{BATCH_RESULTS_DIR}/{group}-{batch * batch_size}-{min(num_lines - 1, (batch + 1) * batch_size - 1)}.tsv"\
-            for batch in range(ceil(num_lines / batch_size))]
+    num_lines = sum(1 for line in open(f"{PROCESSED_DIR}/{wildcards.group}.tsv")) - 1 # Don't count the header line
+    limit = num_lines if config["qa_limit"] <= 0 else min(num_lines, config["qa_limit"])
 
-def get_batch_output(wildcards):
-    f"{BATCH_RESULTS_DIR}/{wildcards.group}-{wildcards.batch * QA_BATCH_SIZE}-{(wildcards.batch + 1) * QA_BATCH_SIZE - 1}"
+    return [get_batch_path(wildcards, batch, batch_size, limit) for batch in range(ceil(limit / batch_size))]
+
+def get_batch_path(wildcards, batch, batch_size, limit):
+    first = batch * batch_size
+    last = min(limit - 1, (batch + 1) * batch_size - 1)
+    return f"{BATCH_RESULTS_DIR}/{wildcards.group}-{first}-{last}.tsv"
 
 
 rule all:
     input:
-        PRESENCE_OUT
+        PRESENCE_OUT,
         ABSENCE_OUT
 
 rule clean_inputs:
@@ -40,11 +43,13 @@ rule clean_inputs:
         glob(f"{RAW_DIR}/*.jsonl")
     output:
         PRESENCE_UNFILTERED_TSV
+    params:
+        fields=",".join([f'"{field}' for field in config["qa_fields"]])
     shell:
         """
         cat {input:q}\
         | jq .indexTerms\
-        | mlr --ijson --otsv template -f 'kingdom','phylum','family','genus','specificepithet','country','stateprovince','county' --fill-with MISSING\
+        | mlr --ijson --otsv template -f {params.fields} --fill-with MISSING\
         | grep -v MISSING\
         | mlr --tsv uniq -a\
         | python3 scripts/clean-records.py\
@@ -76,9 +81,9 @@ rule create_pseudo_absence_dataset:
 
 rule qa_presence_batch:
     input:
-        PRESENCE_IN
+        PROCESSED_DIR + "/{group}.tsv"
     output:
-        protected(f"{BATCH_RESULTS_DIR}/presence-{{first}}-{{last}}.tsv")
+        BATCH_RESULTS_DIR + "/{group}-{first}-{last}.tsv"
     params:
         qa_command=config["qa_command"],
         qa_args=" ".join(config["qa_args"]),
@@ -90,18 +95,10 @@ rule qa_presence_batch:
         > {output}
         """
 
-rule qa_presence:
+rule qa:
     input:
-        lambda wildcards: get_batches("presence")
+        get_batches
     output:
-        PRESENCE_OUT
-    shell:
-        "mlr --tsvlite cat {input} > {output}"
-
-rule qa_absence:
-    input:
-        lambda wildcards: get_batches("absence")
-    output:
-        ABSENCE_OUT
+        RESULTS_DIR + "/{group,[^/]+}.tsv"
     shell:
         "mlr --tsvlite cat {input} > {output}"
