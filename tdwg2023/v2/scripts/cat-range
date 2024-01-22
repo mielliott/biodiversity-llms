@@ -1,0 +1,5 @@
+IN=$1         # TSV with header
+FIRST_LINE=$2 # Arguments id lines starting from 0
+LAST_LINE=$3  # Inclusive
+
+cat $IN | mlr --tsvlite head -n $(($LAST_LINE + 1)) | mlr --tsvlite tail -n $(($LAST_LINE - $FIRST_LINE + 1))

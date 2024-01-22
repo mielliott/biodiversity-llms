@@ -1,2 +1,20 @@
-raw_dir: "../raw"
-processed_dir: "processed"
+job_name: gpt35
+raw_dir: ../raw
+processed_dir: processed
+results_dir: results
+random_seed: 69847
+qa_batch_size: 10
+qa_command: python3 ~/biodiversity-llms/scripts/nlp/qa.py
+qa_base_queries:
+  - Can species {3} {4} be found in {7}, {6}, {5}?
+  - Is it possible to encounter species {3} {4} in {7}, {6}, {5}?
+  - Is there a presence of species {3} {4} within {7}, {6}, {5}?
+  - Does {7}, {6}, {5} harbor species {3} {4}?
+  - Is species {3} {4} present in {7}, {6}, {5}?
+  - Can one observe species {3} {4} in {7}, {6}, {5}?
+qa_query_suffix: Only respond yes or no.
+qa_args:
+  - --max-tokens 1
+  - --timeout 10
+  - --num-responses 10
+  - --combine_responses

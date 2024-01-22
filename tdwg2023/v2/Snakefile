@@ -1,45 +1,107 @@
+import os
 from glob import glob
 
 configfile: "config.yml"
 
-presence_unfiltered_tsv = f"{config['processed_dir']}/presence-unfiltered.tsv"
-presence_tsv = f"{config['processed_dir']}/presence.tsv"
-absence_tsv = f"{config['processed_dir']}/absence2.tsv"
+
+JOB_NAME = config["job_name"]
+QA_BATCH_SIZE = config["qa_batch_size"]
+
+RAW_DIR = config['raw_dir']
+PROCESSED_DIR = config['processed_dir']
+RESULTS_DIR = config['results_dir']
+BATCH_RESULTS_DIR = RESULTS_DIR + "/" + JOB_NAME + "/" + str(QA_BATCH_SIZE)
+
+PRESENCE_UNFILTERED_TSV = config['processed_dir'] + "/presence-unfiltered.tsv"
+PRESENCE_IN = config['processed_dir'] + "/presence.tsv"
+ABSENCE_IN = config['processed_dir'] + "/absence.tsv"
+
+PRESENCE_OUT = RESULTS_DIR + "/presence.tsv"
+ABSENCE_OUT = RESULTS_DIR + "/absence.tsv"
+
+def get_batches(group):
+    from math import ceil
+    batch_size = config["qa_batch_size"]
+    Q_num_lines = 27 # sum(1 for line in open(PRESENCE_TSV)) - 1 # Don't count the header line
+    return [f"{BATCH_RESULTS_DIR}/{group}-{batch * batch_size}-{min(num_lines - 1, (batch + 1) * batch_size - 1)}.tsv"\
+            for batch in range(ceil(num_lines / batch_size))]
+
+def get_batch_output(wildcards):
+    f"{BATCH_RESULTS_DIR}/{wildcards.group}-{wildcards.batch * QA_BATCH_SIZE}-{(wildcards.batch + 1) * QA_BATCH_SIZE - 1}"
+
 
 rule all:
     input:
-        absence_tsv
+        PRESENCE_OUT
+        ABSENCE_OUT
 
 rule clean_inputs:
     input:
-        glob(f"{config['raw_dir']}/*.jsonl")
+        glob(f"{RAW_DIR}/*.jsonl")
     output:
-        presence_unfiltered_tsv
+        PRESENCE_UNFILTERED_TSV
     shell:
-        "cat {input:q} " # :q surrounds paths with quotes
-        "| jq .indexTerms "
-        "| mlr --ijson --otsv template -f 'kingdom','phylum','family','genus','specificepithet','country','stateprovince','county' --fill-with MISSING "
-        "| grep -v MISSING "
-        "| mlr --tsv uniq -a "
-        "| python3 clean-records.py "
-        "> {output}"
+        """
+        cat {input:q}\
+        | jq .indexTerms\
+        | mlr --ijson --otsv template -f 'kingdom','phylum','family','genus','specificepithet','country','stateprovince','county' --fill-with MISSING\
+        | grep -v MISSING\
+        | mlr --tsv uniq -a\
+        | python3 scripts/clean-records.py\
+        > {output}
+        """
 
 rule filter_inputs:
     input:
-        presence_unfiltered_tsv
+        PRESENCE_UNFILTERED_TSV
     output:
-        presence_tsv
+        PRESENCE_IN
     script:
-        "filter-records.py"
+        "scripts/filter-records.py"
 
 rule create_pseudo_absence_dataset:
     input:
-        presence_tsv
+        PRESENCE_IN
     output:
-        absence_tsv
+        ABSENCE_IN
     params:
-        shuffle_fields="'country','stateprovince','county'"
+        shuffle_fields="'country','stateprovince','county'",
+        seed=config["random_seed"]
     shell:
-        "paste <(cat {input} | mlr --tsv cut -x -f {params.shuffle_fields}) "
-        "      <(cat {input} | mlr --tsv cut -f {params.shuffle_fields} | mlr --tsv --seed 0 shuffle) "
-        "> {output}"
+        """
+        paste <(cat {input} | mlr --tsv cut -x -f {params.shuffle_fields})\
+              <(cat {input} | mlr --tsv cut -f {params.shuffle_fields} | mlr --tsv --seed {params.seed} shuffle)\
+        > {output}
+        """
+
+rule qa_presence_batch:
+    input:
+        PRESENCE_IN
+    output:
+        protected(f"{BATCH_RESULTS_DIR}/presence-{{first}}-{{last}}.tsv")
+    params:
+        qa_command=config["qa_command"],
+        qa_args=" ".join(config["qa_args"]),
+        qa_questions=lambda wildcards: " ".join([f'"{q} {config["qa_query_suffix"]}"' for q in config["qa_base_queries"]])
+    shell:
+        """
+        scripts/cat-range {input} {wildcards.first} {wildcards.last}\
+        | {params.qa_command} {params.qa_args} {params.qa_questions}\
+        > {output}
+        """
+
+rule qa_presence:
+    input:
+        lambda wildcards: get_batches("presence")
+    output:
+        PRESENCE_OUT
+    shell:
+        "mlr --tsvlite cat {input} > {output}"
+
+rule qa_absence:
+    input:
+        lambda wildcards: get_batches("absence")
+    output:
+        ABSENCE_OUT
+    shell:
+        "mlr --tsvlite cat {input} > {output}"
