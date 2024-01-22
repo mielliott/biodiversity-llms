@@ -8,21 +8,19 @@ JOB_NAME = config["job_name"]
 QA_BATCH_SIZE = config["qa_batch_size"]
 
 RAW_DIR = config['raw_dir']
-PROCESSED_DIR = config['processed_dir']
-RESULTS_DIR = config['results_dir']
-BATCH_RESULTS_DIR = RESULTS_DIR + "/" + JOB_NAME + "/" + str(QA_BATCH_SIZE)
+BATCH_RESULTS_DIR = f"results/{JOB_NAME}/{str(QA_BATCH_SIZE)}"
 
-PRESENCE_UNFILTERED_TSV = config['processed_dir'] + "/presence-unfiltered.tsv"
-PRESENCE_IN = config['processed_dir'] + "/presence.tsv"
-ABSENCE_IN = config['processed_dir'] + "/absence.tsv"
+PRESENCE_UNFILTERED_TSV = "resources/presence-unfiltered.tsv"
+PRESENCE_IN = "resources/presence.tsv"
+ABSENCE_IN = "resources/absence.tsv"
 
-PRESENCE_OUT = RESULTS_DIR + "/presence.tsv"
-ABSENCE_OUT = RESULTS_DIR + "/absence.tsv"
+PRESENCE_OUT = "results/presence.tsv"
+ABSENCE_OUT = "results/absence.tsv"
 
 def get_batches(wildcards):
     from math import ceil
     batch_size = config["qa_batch_size"]
-    num_lines = sum(1 for line in open(f"{PROCESSED_DIR}/{wildcards.group}.tsv")) - 1 # Don't count the header line
+    num_lines = sum(1 for line in open(f"resources/{wildcards.group}.tsv")) - 1 # Don't count the header line
     limit = num_lines if config["qa_limit"] <= 0 else min(num_lines, config["qa_limit"])
 
     return [get_batch_path(wildcards, batch, batch_size, limit) for batch in range(ceil(limit / batch_size))]
@@ -32,15 +30,14 @@ def get_batch_path(wildcards, batch, batch_size, limit):
     last = min(limit - 1, (batch + 1) * batch_size - 1)
     return f"{BATCH_RESULTS_DIR}/{wildcards.group}/{first}-{last}.tsv"
 
-
-rule analyze:
-    input:
-        PRESENCE_OUT,
-        ABSENCE_OUT
-    output:
-        "results/plots/quals.svg"
-    notebook:
-        "notebooks/plot-quals.py.ipynb"
+# rule analyze:
+#     input:
+#         PRESENCE_OUT,
+#         ABSENCE_OUT
+#     output:
+#         "results/plots/quals.svg"
+#     notebook:
+#         "notebooks/plot-quals.py.ipynb"
 
 rule all:
     input:
@@ -90,24 +87,26 @@ rule create_pseudo_absence_dataset:
 
 rule qa_presence_batch:
     input:
-        PROCESSED_DIR + "/{group}.tsv"
+        "resources/{group}.tsv"
     output:
         BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
     params:
         qa_command=config["qa_command"],
         qa_args=" ".join(config["qa_args"]),
-        qa_questions=lambda wildcards: " ".join([f'"{q} {config["qa_query_suffix"]}"' for q in config["qa_base_queries"]])
+        qa_questions=lambda wildcards: " ".join([f'"{q} {config["qa_query_suffix"]}"' for q in config["qa_base_queries"]]),
+    log:
+        "logs/" + BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
     shell:
         """
-        scripts/cat-range {input} {wildcards.first} {wildcards.last}\
+        workflow/scripts/cat-range {input} {wildcards.first} {wildcards.last}\
         | {params.qa_command} {params.qa_args} {params.qa_questions}\
-        > {output}
+        1> {output} 2> {log}
         """
 
 rule qa:
     input:
         get_batches
     output:
-        RESULTS_DIR + "/{group,[^/]+}.tsv"
+        "results/{group,[^/]+}.tsv"
     shell:
         "mlr --tsvlite cat {input} > {output}"

@@ -1,9 +1,7 @@
 job_name: gpt35
 random_seed: 69847
 
-raw_dir: ../raw
-processed_dir: processed
-results_dir: results
+raw_dir: ~/biodiversity-llms/tdwg2023/raw
 
 qa_limit: 3 # Set to 0 to run all queries, otherwise only run this many (x2, presence and absence)
 qa_batch_size: 100

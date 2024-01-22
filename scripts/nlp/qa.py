@@ -34,6 +34,8 @@ def get_questions(patterns, header, lines, do_unescape, filter=lambda x: True):
         for pattern in patterns:
             if filter(line):
                 field_values = dict(zip(fields, values))
+                print(line, file=sys.stderr)
+                print(field_values, file=sys.stderr)
                 yield (line, pattern.format(**field_values))
 
 # def prep_local_model():
@@ -116,6 +118,7 @@ if __name__ == '__main__':
     sys.stdin.reconfigure(encoding='utf-8')
     lines = (line for line in sys.stdin)
     header_in = next(lines).rstrip() # Get header of input data
+    print("HEADER:", header_in, file=sys.stderr)
     questions = get_questions(args.patterns, header_in, (l for l in lines), args.unescape_input, lambda query: args.filter_keyword not in query)
 
     if args.test:

@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "args": ["{9}\\n\\nDoes {3} {4} naturally occur in {7}, {6}, {5}? Yes or no.", "<", "tdwg2023/datasets/d2-idb-top-3-families/results/t1-3-presence-0-999-thinking.tsv", "--unescape-input"],
+            "args": ["Does {genus}  naturally occur in? Yes or no.", "<", "tdwg2023/v2/resources/presence.tsv", "--unescape-input"],
             "console": "integratedTerminal",
             "justMyCode": true
         }
