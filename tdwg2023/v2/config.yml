@@ -23,10 +23,11 @@ qa_fields:
   - stateprovince
   - county
 qa_base_queries:
+  - Does {genus} {specificepithet} naturally occur in {county}, {stateprovince}, {country}?
   - Can species {genus} {specificepithet} be found in {county}, {stateprovince}, {country}?
-  # - Is it possible to encounter species {3} {4} in {7}, {6}, {5}?
-  # - Is there a presence of species {3} {4} within {7}, {6}, {5}?
-  # - Does {7}, {6}, {5} harbor species {3} {4}?
-  # - Is species {3} {4} present in {7}, {6}, {5}?
-  # - Can one observe species {3} {4} in {7}, {6}, {5}?
+  - Is it possible to encounter species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
+  - Is there a presence of species {genus} {specificepithet} within {county}, {stateprovince}, {country}?
+  - Does {county}, {stateprovince}, {country} harbor species {genus} {specificepithet}?
+  - Is species {genus} {specificepithet} present in {county}, {stateprovince}, {country}?
+  - Can one observe species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
 qa_query_suffix: Only respond yes or no.
