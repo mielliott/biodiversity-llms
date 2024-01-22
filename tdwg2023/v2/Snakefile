@@ -33,6 +33,15 @@ def get_batch_path(wildcards, batch, batch_size, limit):
     return f"{BATCH_RESULTS_DIR}/{wildcards.group}/{first}-{last}.tsv"
 
 
+rule analyze:
+    input:
+        PRESENCE_OUT,
+        ABSENCE_OUT
+    output:
+        "results/plots/quals.svg"
+    notebook:
+        "notebooks/plot-quals.py.ipynb"
+
 rule all:
     input:
         PRESENCE_OUT,
