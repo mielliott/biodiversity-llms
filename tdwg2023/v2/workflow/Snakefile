@@ -14,5 +14,16 @@ include: "rules/qa.smk"
 
 rule all:
     input:
-        PRESENCE_OUT,
-        ABSENCE_OUT
+        "all.done"
+
+rule analyze_results:
+    input:
+        presence=PRESENCE_OUT,
+        absence=ABSENCE_OUT,
+        absence_valid="results/absence-valid.tsv"
+    output:
+        "all.done"
+    conda:
+        "envs/analysis.yml"
+    notebook:
+        "notebooks/results.py.ipynb"

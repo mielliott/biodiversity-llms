@@ -1,8 +1,8 @@
-import json
 import requests as rq
-import os
-import time
 import pandas as pd
+
+file_in = snakemake.input[0]
+file_out = snakemake.output[0]
 
 def make_species_location_query(record):
     return {
@@ -18,8 +18,7 @@ def make_species_location_query(record):
         "offset": 0
     }
 
-presences = pd.read_csv(open("processed/t1-1-presence.tsv"), sep="\t")
-absences = pd.read_csv(open("processed/t1-1-absence.tsv"), sep="\t")
+absences = pd.read_csv(open(file_in), sep="\t")
 
 n = len(absences)
 responses = {}
@@ -34,4 +33,4 @@ m = sum(absence_matches == 0)
 print(f"Records missing location: {m}/{n} ({100*m/n:2.2f}%)")
 
 absences["valid"] = absence_matches == 0
-absences["valid"].to_csv(open("processed/t1-1-absence-valid.tsv", "w"), sep="\t")
+absences["valid"].to_csv(open(file_out, "w"), sep="\t")

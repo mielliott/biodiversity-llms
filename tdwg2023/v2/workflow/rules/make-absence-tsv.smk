@@ -12,3 +12,13 @@ rule create_pseudo_absence_dataset:
               <(cat {input} | mlr --tsv cut -f {params.shuffle_fields} | mlr --tsv --seed {params.seed} shuffle)\
         > {output}
         """
+
+rule validate_absences:
+    input:
+        ABSENCE_IN
+    output:
+        "results/absence-valid.tsv"
+    conda:
+        "../envs/analysis.yml"
+    script:
+        "../scripts/validate-absences.py"
