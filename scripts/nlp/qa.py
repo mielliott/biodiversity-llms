@@ -87,10 +87,10 @@ def query_openai(client: OpenAI, model: str, query: str, **kwargs) -> ChatComple
             print("Request failed:", e, file=sys.stderr)
             time.sleep(5)
 
-def run_openai_model(model, header_in, max_tokens, num_responses, top_p, combine_responses, timeout, escape):
+def run_openai_model(model, header, max_tokens, num_responses, top_p, combine_responses, timeout, escape):
     client = OpenAI(api_key = os.getenv("OPENAI_API_KEY"))
 
-    print(header_in, "query", "responses", "input token count", "output token count", "question number", sep="\t")
+    print(header, "query", "responses", "input token count", "output token count", "question number", sep="\t")
 
     for i, (input, question) in enumerate(questions):
         # See https://platform.openai.com/docs/api-reference/chat/create
@@ -101,9 +101,14 @@ def run_openai_model(model, header_in, max_tokens, num_responses, top_p, combine
         for answer in answers:
             print(input, repr(question), repr(answer) if escape else answer, response.usage.prompt_tokens, response.usage.completion_tokens, i, sep="\t", flush=True)
 
+MODELS = [
+    "gpt-3.5-turbo-0613"
+    "gpt-4-1106-preview"
+]
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Submit questions to GPT 3.5 turbo")
     parser.add_argument("patterns", nargs="+")
+    parser.add_argument("--model", "-m", default="gpt-3.5-turbo-0613", type=str, choices=)
     parser.add_argument("--num-responses", "-r", default=10, type=int)
     parser.add_argument("--max-tokens", "-t", default=1, type=int)
     parser.add_argument("--top-p", "-p", default=0.8, type=float)
@@ -117,19 +122,17 @@ if __name__ == '__main__':
 
     sys.stdin.reconfigure(encoding='utf-8')
     lines = (line for line in sys.stdin)
-    header_in = next(lines).rstrip() # Get header of input data
-    print("HEADER:", header_in, file=sys.stderr)
-    questions = get_questions(args.patterns, header_in, (l for l in lines), args.unescape_input, lambda query: args.filter_keyword not in query)
+    header = next(lines).rstrip() # Get header of input data
+    print("HEADER:", header, file=sys.stderr)
+    questions = get_questions(args.patterns, header, (l for l in lines), args.unescape_input, lambda query: args.filter_keyword not in query)
 
     if args.test:
         for q in questions:
                 print(q[1])
     else:
-        gpt3 = "gpt-3.5-turbo-0613"
-        gpt4 = "text-davinci-003"
         run_openai_model(
-            gpt3,
-            header_in,
+            model=args.model,
+            header=header,
             num_responses=args.num_responses,
             max_tokens=args.max_tokens,
             top_p=args.top_p,

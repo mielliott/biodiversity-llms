@@ -11,6 +11,7 @@ qa_args:
   - --timeout 10
   - --num-responses 10
   - --combine_responses
+  - --model gpt-3.5-turbo-0613
 qa_fields:
   - kingdom
   - phylum
