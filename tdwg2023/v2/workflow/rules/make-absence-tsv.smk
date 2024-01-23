@@ -17,7 +17,7 @@ rule validate_absences:
     input:
         ABSENCE_IN
     output:
-        "results/absence-valid.tsv"
+        ABSENCE_VALID
     conda:
         "../envs/analysis.yml"
     script:

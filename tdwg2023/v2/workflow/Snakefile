@@ -4,25 +4,28 @@ LLM = config["llm"]
 
 PRESENCE_IN = "resources/presence.tsv"
 ABSENCE_IN = "resources/absence.tsv"
+ALL_IN = "resources/all.tsv"
+
+ABSENCE_VALID = "results/absence-valid.tsv"
 
 PRESENCE_OUT = f"results/{LLM}/presence.tsv"
 ABSENCE_OUT = f"results/{LLM}/absence.tsv"
+ALL_OUT = f"results/{LLM}/all.tsv"
 
 include: "rules/make-presence-tsv.smk"
 include: "rules/make-absence-tsv.smk"
+include: "rules/combine-tsv.smk"
 include: "rules/qa.smk"
 
 rule all:
     input:
-        "all.done"
+        ALL_OUT #"all.done"
 
 rule analyze_results:
     input:
-        presence=PRESENCE_OUT,
-        absence=ABSENCE_OUT,
-        absence_valid="results/absence-valid.tsv"
+        responses=ALL_OUT
     output:
-        "all.done"
+        temp("all.done")
     conda:
         "envs/analysis.yml"
     notebook:
