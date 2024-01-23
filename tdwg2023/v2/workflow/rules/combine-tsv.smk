@@ -6,7 +6,7 @@ rule combine_presence_and_absence:
         ALL_IN
     shell:
         """
-        cat <(cat {input.presence} | mlr --tsvlite put '$present = "Yes"')\
-            <(cat {input.absence} | mlr --tsvlite put '$present = "No"')\
+        mlr --tsvlite cat <(mlr --tsvlite put '$present = "Yes"' {input.presence})\
+                          <(mlr --tsvlite put '$present = "No"' {input.absence})\
         > {output}
         """
