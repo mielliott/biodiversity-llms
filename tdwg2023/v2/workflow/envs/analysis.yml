@@ -1,11 +1,8 @@
 channels:
   - conda-forge
-  - bioconda
 dependencies:
-  - python >=3.10
-  - snakemake >=8.2
+  - python ~=3.10
   - pandas
   - matplotlib
   - graphviz
   - jupyter =1.0
-  - openai

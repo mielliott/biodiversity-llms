@@ -25,6 +25,8 @@ rule qa_presence_batch:
         qa_questions=lambda wildcards: " ".join([f'"{q} {config["qa_query_suffix"]}"' for q in config["qa_base_queries"]]),
     log:
         "logs/" + BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
+    conda:
+        "../envs/qa.yml"
     shell:
         """
         workflow/scripts/cat-range {input} {wildcards.first} {wildcards.last}\
