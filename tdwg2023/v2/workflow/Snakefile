@@ -1,15 +1,12 @@
 configfile: "config.yml"
 
 LLM = config["llm"]
-QA_BATCH_SIZE = config["qa_batch_size"]
-
-BATCH_RESULTS_DIR = f"results/{LLM}/{str(QA_BATCH_SIZE)}"
 
 PRESENCE_IN = "resources/presence.tsv"
 ABSENCE_IN = "resources/absence.tsv"
 
-PRESENCE_OUT = "results/presence.tsv"
-ABSENCE_OUT = "results/absence.tsv"
+PRESENCE_OUT = f"results/{LLM}/presence.tsv"
+ABSENCE_OUT = f"results/{LLM}/absence.tsv"
 
 include: "rules/make-presence-tsv.smk"
 include: "rules/make-absence-tsv.smk"

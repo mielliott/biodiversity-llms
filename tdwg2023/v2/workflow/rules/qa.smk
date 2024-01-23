@@ -1,3 +1,6 @@
+QA_BATCH_SIZE = config["qa_batch_size"]
+BATCH_RESULTS_DIR = f"results/{LLM}/{str(QA_BATCH_SIZE)}"
+
 def get_batches(wildcards):
     from math import ceil
     batch_size = config["qa_batch_size"]
@@ -33,6 +36,6 @@ rule qa:
     input:
         get_batches
     output:
-        "results/{group,[^/]+}.tsv"
+        "results/" + LLM + "/{group,[^/]+}.tsv"
     shell:
         "mlr --tsvlite cat {input} > {output}"
