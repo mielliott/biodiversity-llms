@@ -1,112 +1,21 @@
-import os
-from glob import glob
-
 configfile: "config.yml"
 
-
-JOB_NAME = config["job_name"]
+LLM = config["llm"]
 QA_BATCH_SIZE = config["qa_batch_size"]
 
-RAW_DIR = config['raw_dir']
-BATCH_RESULTS_DIR = f"results/{JOB_NAME}/{str(QA_BATCH_SIZE)}"
+BATCH_RESULTS_DIR = f"results/{LLM}/{str(QA_BATCH_SIZE)}"
 
-PRESENCE_UNFILTERED_TSV = "resources/presence-unfiltered.tsv"
 PRESENCE_IN = "resources/presence.tsv"
 ABSENCE_IN = "resources/absence.tsv"
 
 PRESENCE_OUT = "results/presence.tsv"
 ABSENCE_OUT = "results/absence.tsv"
 
-def get_batches(wildcards):
-    from math import ceil
-    batch_size = config["qa_batch_size"]
-    num_lines = sum(1 for line in open(f"resources/{wildcards.group}.tsv")) - 1 # Don't count the header line
-    limit = num_lines if config["qa_limit"] <= 0 else min(num_lines, config["qa_limit"])
-
-    return [get_batch_path(wildcards, batch, batch_size, limit) for batch in range(ceil(limit / batch_size))]
-
-def get_batch_path(wildcards, batch, batch_size, limit):
-    first = batch * batch_size
-    last = min(limit - 1, (batch + 1) * batch_size - 1)
-    return f"{BATCH_RESULTS_DIR}/{wildcards.group}/{first}-{last}.tsv"
-
-# rule analyze:
-#     input:
-#         PRESENCE_OUT,
-#         ABSENCE_OUT
-#     output:
-#         "results/plots/quals.svg"
-#     notebook:
-#         "notebooks/plot-quals.py.ipynb"
+include: "rules/make-presence-tsv.smk"
+include: "rules/make-absence-tsv.smk"
+include: "rules/qa.smk"
 
 rule all:
     input:
         PRESENCE_OUT,
         ABSENCE_OUT
-
-rule clean_inputs:
-    input:
-        glob(f"{RAW_DIR}/*.jsonl")
-    output:
-        PRESENCE_UNFILTERED_TSV
-    params:
-        fields=",".join([f'"{field}' for field in config["qa_fields"]])
-    shell:
-        """
-        cat {input:q}\
-        | jq .indexTerms\
-        | mlr --ijson --otsv template -f {params.fields} --fill-with MISSING\
-        | grep -v MISSING\
-        | mlr --tsv uniq -a\
-        | python3 scripts/clean-records.py\
-        > {output}
-        """
-
-rule filter_inputs:
-    input:
-        PRESENCE_UNFILTERED_TSV
-    output:
-        PRESENCE_IN
-    script:
-        "scripts/filter-records.py"
-
-rule create_pseudo_absence_dataset:
-    input:
-        PRESENCE_IN
-    output:
-        ABSENCE_IN
-    params:
-        shuffle_fields="'country','stateprovince','county'",
-        seed=config["random_seed"]
-    shell:
-        """
-        paste <(cat {input} | mlr --tsv cut -x -f {params.shuffle_fields})\
-              <(cat {input} | mlr --tsv cut -f {params.shuffle_fields} | mlr --tsv --seed {params.seed} shuffle)\
-        > {output}
-        """
-
-rule qa_presence_batch:
-    input:
-        "resources/{group}.tsv"
-    output:
-        BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
-    params:
-        qa_command=config["qa_command"],
-        qa_args=" ".join(config["qa_args"]),
-        qa_questions=lambda wildcards: " ".join([f'"{q} {config["qa_query_suffix"]}"' for q in config["qa_base_queries"]]),
-    log:
-        "logs/" + BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
-    shell:
-        """
-        workflow/scripts/cat-range {input} {wildcards.first} {wildcards.last}\
-        | {params.qa_command} {params.qa_args} {params.qa_questions}\
-        1> {output} 2> {log}
-        """
-
-rule qa:
-    input:
-        get_batches
-    output:
-        "results/{group,[^/]+}.tsv"
-    shell:
-        "mlr --tsvlite cat {input} > {output}"
