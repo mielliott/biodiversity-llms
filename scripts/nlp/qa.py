@@ -34,8 +34,6 @@ def get_questions(patterns, header, lines, do_unescape, filter=lambda x: True):
         for pattern in patterns:
             if filter(line):
                 field_values = dict(zip(fields, values))
-                print(line, file=sys.stderr)
-                print(field_values, file=sys.stderr)
                 yield (line, pattern.format(**field_values))
 
 # def prep_local_model():
@@ -102,13 +100,14 @@ def run_openai_model(model, header, max_tokens, num_responses, top_p, combine_re
             print(input, repr(question), repr(answer) if escape else answer, response.usage.prompt_tokens, response.usage.completion_tokens, i, sep="\t", flush=True)
 
 MODELS = [
-    "gpt-3.5-turbo-0613"
+    "gpt-3.5-turbo-0613",
     "gpt-4-1106-preview"
 ]
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Submit questions to GPT 3.5 turbo")
     parser.add_argument("patterns", nargs="+")
-    parser.add_argument("--model", "-m", default="gpt-3.5-turbo-0613", type=str, choices=)
+    parser.add_argument("--model", "-m", default="gpt-3.5-turbo-0613", type=str, choices=MODELS)
     parser.add_argument("--num-responses", "-r", default=10, type=int)
     parser.add_argument("--max-tokens", "-t", default=1, type=int)
     parser.add_argument("--top-p", "-p", default=0.8, type=float)
@@ -123,7 +122,6 @@ if __name__ == '__main__':
     sys.stdin.reconfigure(encoding='utf-8')
     lines = (line for line in sys.stdin)
     header = next(lines).rstrip() # Get header of input data
-    print("HEADER:", header, file=sys.stderr)
     questions = get_questions(args.patterns, header, (l for l in lines), args.unescape_input, lambda query: args.filter_keyword not in query)
 
     if args.test:
