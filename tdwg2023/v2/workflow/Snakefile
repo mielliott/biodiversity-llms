@@ -2,6 +2,7 @@ configfile: "config.yml"
 
 LLM = config["llm"]
 
+PRESENCE_IN_UNFILTERED = "resources/presence-unfiltered.tsv"
 PRESENCE_IN = "resources/presence.tsv"
 ABSENCE_IN = "resources/absence.tsv"
 ALL_IN = "resources/all.tsv"

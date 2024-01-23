@@ -4,7 +4,7 @@ rule clean_raws:
     input:
         glob(config["raw_dir"] + "/*.jsonl")
     output:
-        "resources/presence-unfiltered.tsv"
+        PRESENCE_IN_UNFILTERED
     params:
         fields=",".join([f'"{field}' for field in config["qa_fields"]])
     log:
@@ -22,8 +22,8 @@ rule clean_raws:
 
 checkpoint filter_raws_to_presence_tsv:
     input:
-        "resources/presence-unfiltered.tsv"
+        PRESENCE_IN_UNFILTERED
     output:
-        "resources/presence.tsv"
+        PRESENCE_IN
     script:
         "../scripts/filter-records.py"
