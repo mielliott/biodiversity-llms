@@ -7,7 +7,7 @@ PRESENCE_IN = "resources/presence.tsv"
 ABSENCE_IN = "resources/absence.tsv"
 ALL_IN = "resources/all.tsv"
 
-ABSENCE_VALID = "results/absence-valid.tsv"
+ABSENCE_VALID = "resources/absence-valid.tsv"
 
 PRESENCE_OUT = f"results/{LLM}/presence.tsv"
 ABSENCE_OUT = f"results/{LLM}/absence.tsv"
