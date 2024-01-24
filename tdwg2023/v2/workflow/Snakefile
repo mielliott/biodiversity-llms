@@ -6,12 +6,14 @@ PRESENCE_IN_UNFILTERED = "results/input/presence-unfiltered.tsv"
 PRESENCE_IN = "results/input/presence.tsv"
 ABSENCE_IN = "results/input/absence.tsv"
 ALL_IN = "results/input/all.tsv"
+ALL_IN_SHUFFLED = "results/input/all-shuffled.tsv"
 
 ABSENCE_VALID = "results/input/absence-valid.tsv"
 
 PRESENCE_OUT = f"results/{LLM}/presence.tsv"
 ABSENCE_OUT = f"results/{LLM}/absence.tsv"
 ALL_OUT = f"results/{LLM}/all.tsv"
+ALL_OUT_SHUFFLED = f"results/{LLM}/all-shuffled.tsv"
 
 include: "rules/make-presence-tsv.smk"
 include: "rules/make-absence-tsv.smk"
@@ -20,13 +22,17 @@ include: "rules/qa.smk"
 
 rule all:
     input:
-        ALL_OUT #"all.done"
+        "all.done"
 
 rule analyze_results:
     input:
-        responses=ALL_OUT
+        responses=ALL_OUT_SHUFFLED if config["qa_random_sample"] else ALL_OUT
     output:
         temp("all.done")
+    params:
+        num_phrasings=len(config["qa_base_queries"])
+    log:
+        notebook="logs/notebooks/processed_notebook.ipynb"
     conda:
         "envs/analysis.yml"
     notebook:

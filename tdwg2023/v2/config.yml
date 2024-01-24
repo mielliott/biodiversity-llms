@@ -3,7 +3,8 @@ random_seed: 69847
 
 raw_dir: /home/mielliott/biodiversity-llms/tdwg2023/raw
 
-qa_limit: 3 # Set to 0 to run all queries, otherwise only run this many (x2, presence and absence)
+qa_random_sample: true # Whether to submit queries sequentially or shuffled
+qa_limit: 3 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
 qa_batch_size: 100
 qa_command: python3 ~/biodiversity-llms/scripts/nlp/qa.py
 qa_args:
