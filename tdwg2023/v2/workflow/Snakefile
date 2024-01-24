@@ -14,6 +14,7 @@ PRESENCE_OUT = f"results/{LLM}/presence.tsv"
 ABSENCE_OUT = f"results/{LLM}/absence.tsv"
 ALL_OUT = f"results/{LLM}/all.tsv"
 ALL_OUT_SHUFFLED = f"results/{LLM}/all-shuffled.tsv"
+NOTEBOOK_OUT = f"results/{LLM}/results.py.ipynb"
 
 include: "rules/make-presence-tsv.smk"
 include: "rules/make-absence-tsv.smk"
@@ -22,18 +23,18 @@ include: "rules/qa.smk"
 
 rule all:
     input:
-        "all.done"
+        NOTEBOOK_OUT
 
 rule analyze_results:
     input:
         responses=ALL_OUT_SHUFFLED if config["qa_random_sample"] else ALL_OUT
     output:
-        temp("all.done")
+        NOTEBOOK_OUT
     params:
-        phrasings=config["qa_base_queries"]
+        phrasings=lambda wildcards: config["qa_base_queries"],
         query_fields=config["qa_fields"]
     log:
-        notebook="logs/notebooks/processed_notebook.ipynb"
+        notebook=NOTEBOOK_OUT
     conda:
         "envs/analysis.yml"
     notebook:
