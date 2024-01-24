@@ -16,7 +16,7 @@ def get_batch_path(wildcards, batch, batch_size, limit):
 
 rule qa_presence_batch:
     input:
-        "resources/{group}.tsv"
+        "results/input/{group}.tsv"
     output:
         BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
     params:
