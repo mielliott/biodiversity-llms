@@ -1,6 +1,6 @@
 # gpt-3.5-turbo-0613
 # gpt-4-1106-preview
-llm: gpt-3.5-turbo-0613
+llm: none
 random_seed: 69847 # Affects pseudo absence generation and random sampling of queries
 
 raw_dir: /home/mielliott/biodiversity-llms/tdwg2023/raw
