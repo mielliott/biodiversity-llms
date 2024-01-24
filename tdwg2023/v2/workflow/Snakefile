@@ -30,7 +30,8 @@ rule analyze_results:
     output:
         temp("all.done")
     params:
-        num_phrasings=len(config["qa_base_queries"])
+        phrasings=config["qa_base_queries"]
+        query_fields=config["qa_fields"]
     log:
         notebook="logs/notebooks/processed_notebook.ipynb"
     conda:
