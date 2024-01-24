@@ -1,10 +1,12 @@
+# gpt-3.5-turbo-0613
+# gpt-4-1106-preview
 llm: gpt-3.5-turbo-0613
-random_seed: 69847
+random_seed: 69847 # Affects pseudo absence generation and random sampling of queries
 
 raw_dir: /home/mielliott/biodiversity-llms/tdwg2023/raw
 
 qa_random_sample: true # Whether to submit queries sequentially or shuffled
-qa_limit: 3 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
+qa_limit: 10000 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
 qa_batch_size: 100
 qa_command: python3 ~/biodiversity-llms/scripts/nlp/qa.py
 qa_args:
@@ -12,7 +14,6 @@ qa_args:
   - --timeout 10
   - --num-responses 10
   - --combine_responses
-  - --model gpt-3.5-turbo-0613
 qa_fields:
   - kingdom
   - phylum

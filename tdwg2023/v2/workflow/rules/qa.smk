@@ -21,7 +21,7 @@ rule qa_presence_batch:
         BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
     params:
         qa_command=config["qa_command"],
-        qa_args=" ".join(config["qa_args"]),
+        qa_args=" ".join(config["qa_args"] + [f"--model {config['llm']}"]),
         qa_questions=lambda wildcards: " ".join([f'"{q} {config["qa_query_suffix"]}"' for q in config["qa_base_queries"]]),
     log:
         "logs/" + BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
