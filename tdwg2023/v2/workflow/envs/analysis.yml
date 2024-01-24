@@ -4,6 +4,8 @@ dependencies:
   - python ~=3.10
   - jupyter ~=1.0
   - jupyterlab_code_formatter >=1.4
+  - numpy
   - pandas
   - matplotlib
   - graphviz
+  - scikit-learn
