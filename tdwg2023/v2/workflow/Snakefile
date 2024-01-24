@@ -16,6 +16,7 @@ ALL_OUT = f"results/{LLM}/all.tsv"
 ALL_OUT_SHUFFLED = f"results/{LLM}/all-shuffled.tsv"
 NOTEBOOK_OUT = f"results/{LLM}/results.py.ipynb"
 
+include: "rules/get-records.smk"
 include: "rules/make-presence-tsv.smk"
 include: "rules/make-absence-tsv.smk"
 include: "rules/combine-tsv.smk"

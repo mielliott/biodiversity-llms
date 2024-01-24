@@ -1,17 +1,30 @@
 from glob import glob
 
-rule clean_raws:
+# Can't just use `unzip -c` because it extracts files in different order than
+# `unzip [in] -d [dir] & cat [dir]/*` which was used before automating things.
+# If we end up submit all queries for the gpt4 job, then order won't matter and
+# we can simplify this
+rule extract_records:
     input:
-        glob(config["raw_dir"] + "/*.jsonl")
+        "resources/records.zip"
     output:
-        PRESENCE_IN_UNFILTERED
+        temp(directory("resources/records"))
+    shell:
+        "unzip {input} -d {output}"
+
+rule clean_records:
+    input:
+        folder="resources/records",
+        files=glob(config["raw_dir"] + "/*.jsonl")
+    output:
+        temp(PRESENCE_IN_UNFILTERED)
     params:
         fields=",".join([f'"{field}' for field in config["qa_fields"]])
     log:
         "logs/clean_raws.log"
     shell:
         """
-        cat {input:q}\
+        cat {input.files:q}\
         | jq .indexTerms\
         | mlr --ijson --otsv template -f {params.fields} --fill-with MISSING\
         | grep -v MISSING\
