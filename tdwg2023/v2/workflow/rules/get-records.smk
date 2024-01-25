@@ -19,5 +19,5 @@ rule get_records:
     shell:
         """
         {params.preston} get {params.records_zip} --remotes {params.remotes} --no-cache\
-        > {output}
-        """
+        > {output}; rm -r tmp
+        """ # The tmp file is left by preston
