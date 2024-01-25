@@ -6,24 +6,31 @@
 # Plug in field values using the field name, e.g. "Who is {name}?"
 # e.g. echo -e "species\tlocation\nAcer saccharum\tArkansas" | python qa.py "Does {species} naturally occur in {location}? Yes or no"
 
-import argparse
+import os
 import sys
+import argparse
 
 from models.openai import GPT
+from models.llama2 import Llama2
 import util
+
+HUGGING_FACE_TOKEN = os.getenv("ME_HUGGINGFACE_ACCESS")
 
 MODELS = {
     "gpt-3.5-turbo-0613": lambda args: GPT("gpt-3.5-turbo-0613", args.timeout, args.top_p),
     "gpt-4-1106-preview": lambda args: GPT("gpt-4-1106-preview", args.timeout, args.top_p),
+    "llama2-7b-chat": lambda args: Llama2("meta-llama/Llama-2-7b-chat-hf", args.top_k, args.api_access_key or HUGGING_FACE_TOKEN)
 }
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Submit questions to GPT 3.5 turbo")
     parser.add_argument("patterns", nargs="+")
     parser.add_argument("--model", "-m", default="gpt-3.5-turbo-0613", type=str, choices=MODELS)
+    parser.add_argument("--api-access-key", "-a", default=None, type=str)
     parser.add_argument("--num-responses", "-r", default=10, type=int)
     parser.add_argument("--max-tokens", "-t", default=1, type=int)
     parser.add_argument("--top-p", "-p", default=0.8, type=float)
+    parser.add_argument("--top-k", "-k", default=5, type=int)
     parser.add_argument("--filter-keyword", "-f", default="MISSING", type=str)
     parser.add_argument("--combine_responses", "-c", action="store_true")
     parser.add_argument("--timeout", default=10, type=int)
