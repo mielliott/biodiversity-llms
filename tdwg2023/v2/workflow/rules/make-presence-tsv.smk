@@ -15,7 +15,7 @@ rule extract_records:
 rule clean_records:
     input:
         folder="resources/records",
-        files=glob(config["raw_dir"] + "/*.jsonl")
+        files=glob("resources/records/*.jsonl")
     output:
         temp(PRESENCE_IN_UNFILTERED)
     params:

@@ -3,7 +3,7 @@
 llm: none
 random_seed: 69847 # Affects pseudo absence generation and random sampling of queries
 
-raw_dir: /home/mielliott/biodiversity-llms/tdwg2023/raw
+recordset: hash://md5/8f0594be7f88e4fc7b30c0854e7ca029
 
 qa_random_sample: true # Whether to submit queries sequentially or shuffled
 qa_limit: 10000 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
@@ -32,3 +32,8 @@ qa_base_queries:
   - Is species {genus} {specificepithet} present in {county}, {stateprovince}, {country}?
   - Can one observe species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
 qa_query_suffix: Only respond yes or no.
+
+preston:
+  remotes:
+    - https://zenodo.org
+    - https://linker.bio

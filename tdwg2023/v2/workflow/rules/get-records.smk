@@ -13,9 +13,9 @@ rule get_records:
     output:
         "resources/records.zip"
     params:
-        records_zip="hash://md5/8f0594be7f88e4fc7b30c0854e7ca029",
+        records_zip=config["recordset"],
         preston="java -jar resources/preston.jar",
-        remotes="https://zenodo.org,https://linker.bio"
+        remotes=",".join(config["preston"]["remotes"])
     shell:
         """
         {params.preston} get {params.records_zip} --remotes {params.remotes} --no-cache\
