@@ -34,7 +34,9 @@ if __name__ == '__main__':
 
     sys.stdin.reconfigure(encoding='utf-8')
     lines = (line for line in sys.stdin)
+
     header = next(lines).rstrip() # Get header of input data
+
     questions = util.get_questions(
         args.patterns, header,
         (l for l in lines),
@@ -47,7 +49,7 @@ if __name__ == '__main__':
             print(q[1])
     else:
         model = MODELS[args.model](args)
-        model.run(
+        qa = model.run(
             questions=questions,
             header=header,
             num_responses=args.num_responses,
@@ -55,3 +57,13 @@ if __name__ == '__main__':
             combine_responses=args.combine_responses,
             escape=args.escape_responses
         )
+
+        write = lambda *args: print(*args, sep="\t")
+
+        for i, (input, output) in enumerate(qa):
+            # Print header on the first line
+            if i == 0:
+                write(header, *output.keys())
+
+            # Print inputs and outputs
+            write(input, *output.values())
