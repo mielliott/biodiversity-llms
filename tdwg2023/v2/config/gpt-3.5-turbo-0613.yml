@@ -3,3 +3,4 @@ random_seed: 69847
 qa:
   shuffle: false
   query_limit: 0
+  batch_size: 100

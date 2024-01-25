@@ -6,7 +6,6 @@ def get_batches(wildcards):
     batch_size = config["qa"]["batch_size"]
     num_lines = sum(1 for line in open(checkpoints.filter_raws_to_presence_tsv.get(**wildcards).output[0])) - 1 # Don't count the header line
     limit = num_lines if config["qa"]["query_limit"] <= 0 else min(num_lines, config["qa"]["query_limit"])
-
     return [get_batch_path(wildcards, batch, batch_size, limit) for batch in range(ceil(limit / batch_size))]
 
 def get_batch_path(wildcards, batch, batch_size, limit):
