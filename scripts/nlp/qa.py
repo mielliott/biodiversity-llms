@@ -7,39 +7,10 @@
 # e.g. echo -e "species\tlocation\nAcer saccharum\tArkansas" | python qa.py "Does {species} naturally occur in {location}? Yes or no"
 
 import argparse
-import os
 import sys
-import time
-from openai import OpenAI
-from openai.types.chat import ChatCompletion
 
-from models.llm import LLM
 from models.openai import GPT
-
-def unescape(string):
-    if '"' == string[0] == string[-1] or "'" == string[0] == string[-1]:
-        return eval(string)
-    else:
-        return string
-
-def get_questions(patterns, header, lines, do_unescape, filter=lambda x: True):
-    fields = header.split("\t")
-
-    for line in lines:
-        line = line.strip()
-        values = line.split("\t")
-        
-        if do_unescape:
-            values = [v for v in map(unescape, values)]
-        
-        for pattern in patterns:
-            if filter(line):
-                field_values = dict(zip(fields, values))
-                yield (line, pattern.format(**field_values))
-
-def batched(iterable, n):
-    args = [iter(iterable)] * n
-    return zip(*args)
+import util
 
 MODELS = {
     "gpt-3.5-turbo-0613": lambda args: GPT("gpt-3.5-turbo-0613", args.timeout, args.top_p),
@@ -64,7 +35,7 @@ if __name__ == '__main__':
     sys.stdin.reconfigure(encoding='utf-8')
     lines = (line for line in sys.stdin)
     header = next(lines).rstrip() # Get header of input data
-    questions = get_questions(
+    questions = util.get_questions(
         args.patterns, header,
         (l for l in lines),
         args.unescape_input,
