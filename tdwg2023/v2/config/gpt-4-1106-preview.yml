@@ -1,4 +1,5 @@
 llm: gpt-4-1106-preview
 random_seed: 69847
-qa_random_sample: true
-qa_limit: 10000
+qa:
+  shuffle: true
+  query_limit: 10000

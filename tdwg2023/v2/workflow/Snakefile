@@ -28,12 +28,12 @@ rule all:
 
 rule analyze_results:
     input:
-        responses=ALL_OUT_SHUFFLED if config["qa_random_sample"] else ALL_OUT
+        responses=ALL_OUT_SHUFFLED if config["qa"]["shuffle"] else ALL_OUT
     output:
         NOTEBOOK_OUT
     params:
-        phrasings=lambda wildcards: config["qa_base_queries"],
-        query_fields=config["qa_fields"]
+        phrasings=lambda wildcards: config["qa"]["query_templates"],
+        query_fields=config["qa"]["query_fields"]
     log:
         notebook=NOTEBOOK_OUT
     conda:

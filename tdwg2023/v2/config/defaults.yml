@@ -1,38 +1,36 @@
 # gpt-3.5-turbo-0613
 # gpt-4-1106-preview
 llm: none
-random_seed: 69847 # Affects pseudo absence generation and random sampling of queries
-
+random_seed: 69847
 recordset: hash://md5/8f0594be7f88e4fc7b30c0854e7ca029
-
-qa_random_sample: true # Whether to submit queries sequentially or shuffled
-qa_limit: 10000 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
-qa_batch_size: 100
-qa_command: python3 ~/biodiversity-llms/scripts/nlp/qa.py
-qa_args:
-  - --max-tokens 1
-  - --timeout 10
-  - --num-responses 10
-  - --combine_responses
-qa_fields:
-  - kingdom
-  - phylum
-  - family
-  - genus
-  - specificepithet
-  - country
-  - stateprovince
-  - county
-qa_base_queries:
-  - Does {genus} {specificepithet} naturally occur in {county}, {stateprovince}, {country}?
-  - Can species {genus} {specificepithet} be found in {county}, {stateprovince}, {country}?
-  - Is it possible to encounter species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
-  - Is there a presence of species {genus} {specificepithet} within {county}, {stateprovince}, {country}?
-  - Does {county}, {stateprovince}, {country} harbor species {genus} {specificepithet}?
-  - Is species {genus} {specificepithet} present in {county}, {stateprovince}, {country}?
-  - Can one observe species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
-qa_query_suffix: Only respond yes or no.
-
+qa:
+  command: python3 ~/biodiversity-llms/scripts/nlp/qa.py
+  args:
+    - --max-tokens 1
+    - --timeout 10
+    - --num-responses 10
+    - --combine_responses
+  shuffle: true # Whether to submit queries sequentially or shuffled
+  batch_size: 100
+  query_limit: 10000 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
+  query_fields:
+    - kingdom
+    - phylum
+    - family
+    - genus
+    - specificepithet
+    - country
+    - stateprovince
+    - county
+  query_templates:
+    - Does {genus} {specificepithet} naturally occur in {county}, {stateprovince}, {country}?
+    - Can species {genus} {specificepithet} be found in {county}, {stateprovince}, {country}?
+    - Is it possible to encounter species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
+    - Is there a presence of species {genus} {specificepithet} within {county}, {stateprovince}, {country}?
+    - Does {county}, {stateprovince}, {country} harbor species {genus} {specificepithet}?
+    - Is species {genus} {specificepithet} present in {county}, {stateprovince}, {country}?
+    - Can one observe species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
+  query_suffix: Only respond yes or no.
 preston:
   remotes:
     - https://zenodo.org

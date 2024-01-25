@@ -1,11 +1,11 @@
-QA_BATCH_SIZE = config["qa_batch_size"]
+QA_BATCH_SIZE = config["qa"]["batch_size"]
 BATCH_RESULTS_DIR = f"results/{LLM}/{str(QA_BATCH_SIZE)}"
 
 def get_batches(wildcards):
     from math import ceil
-    batch_size = config["qa_batch_size"]
+    batch_size = config["qa"]["batch_size"]
     num_lines = sum(1 for line in open(checkpoints.filter_raws_to_presence_tsv.get(**wildcards).output[0])) - 1 # Don't count the header line
-    limit = num_lines if config["qa_limit"] <= 0 else min(num_lines, config["qa_limit"])
+    limit = num_lines if config["qa"]["query_limit"] <= 0 else min(num_lines, config["qa"]["query_limit"])
 
     return [get_batch_path(wildcards, batch, batch_size, limit) for batch in range(ceil(limit / batch_size))]
 
@@ -20,9 +20,9 @@ rule qa_presence_batch:
     output:
         BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
     params:
-        qa_command=config["qa_command"],
-        qa_args=" ".join(config["qa_args"] + [f"--model {config['llm']}"]),
-        qa_questions=lambda wildcards: " ".join([f'"{q} {config["qa_query_suffix"]}"' for q in config["qa_base_queries"]]),
+        qa_command=config["qa"]["command"],
+        qa_args=" ".join(config["qa"]["args"] + [f"--model {config['llm']}"]),
+        qa_questions=lambda wildcards: " ".join([f'"{q} {config["qa"]["query_suffix"]}"' for q in config["qa"]["query_templates"]]),
     log:
         "logs/" + BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
     conda:

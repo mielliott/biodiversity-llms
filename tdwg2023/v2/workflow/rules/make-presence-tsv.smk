@@ -19,7 +19,7 @@ rule clean_records:
     output:
         temp(PRESENCE_IN_UNFILTERED)
     params:
-        fields=",".join([f'"{field}' for field in config["qa_fields"]])
+        fields=",".join([f'"{field}' for field in config["qa"]["query_fields"]])
     log:
         "logs/clean_raws.log"
     shell:

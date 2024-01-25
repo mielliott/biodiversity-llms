@@ -12,6 +12,6 @@ rule get_taxonomy:
     output:
         "preston/data/"
     params:
-        remotes=",".join([make_url(remote) for remote in config["preston_remotes"]])
+        remotes=",".join([make_url(remote) for remote in config["preston"]["remotes"]])
     shell:
         "preston verify --remote {params.remotes} --anchor "
