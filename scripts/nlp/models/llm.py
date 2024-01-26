@@ -1,3 +1,5 @@
+from typing import Iterable
+
 class LLM():
-    def run(self, header, max_tokens, num_responses, top_p, combine_responses, timeout: int, escape):
+    def run(self, queries: Iterable[tuple[str,str]], num_responses: int, combine_responses: bool, escape: bool):
         pass

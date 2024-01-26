@@ -4,7 +4,7 @@ def unescape(string):
     else:
         return string
 
-def get_questions(patterns, header, lines, do_unescape, filter=lambda x: True):
+def get_queries(patterns, header, lines, do_unescape, filter=lambda x: True):
     fields = header.split("\t")
 
     for line in lines:

@@ -17,8 +17,8 @@ import util
 HUGGING_FACE_TOKEN = os.getenv("ME_HUGGINGFACE_ACCESS")
 
 MODELS = {
-    "gpt-3.5-turbo-0613": lambda args: GPT("gpt-3.5-turbo-0613", args.timeout, args.top_p),
-    "gpt-4-1106-preview": lambda args: GPT("gpt-4-1106-preview", args.timeout, args.top_p),
+    "gpt-3.5-turbo-0613": lambda args: GPT("gpt-3.5-turbo-0613", args.max_tokens, args.timeout, args.top_p),
+    "gpt-4-1106-preview": lambda args: GPT("gpt-4-1106-preview", args.max_tokens, args.timeout, args.top_p),
     "llama2-7b-chat": lambda args: Llama2("meta-llama/Llama-2-7b-chat-hf", args.top_k, args.api_access_key or HUGGING_FACE_TOKEN)
 }
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     header = next(lines).rstrip() # Get header of input data
 
-    questions = util.get_questions(
+    queries = util.get_queries(
         args.patterns, header,
         (l for l in lines),
         args.unescape_input,
@@ -52,15 +52,13 @@ if __name__ == '__main__':
     )
 
     if args.test:
-        for q in questions:
+        for q in queries:
             print(q[1])
     else:
         model = MODELS[args.model](args)
         qa = model.run(
-            questions=questions,
-            header=header,
+            queries=queries,
             num_responses=args.num_responses,
-            max_tokens=args.max_tokens,
             combine_responses=args.combine_responses,
             escape=args.escape_responses
         )
