@@ -24,3 +24,13 @@ snakemake --cores 1 --configfile config/[CONFIG] --sdm conda
 ```
 
 Where `[CONFIG]` is one of the YAML job descriptions located in the `config/` directory
+
+Quick start:
+
+This GPT3.5 workflow takes 1+ hours and costs ~$2.50 USD
+
+```sh
+mamba env create -n snakemake -f environment.yml
+mamba activate snakemake
+snakemake --cores 1 --configfile config/gpt-3.5-turbo-0613 --sdm conda
+```
