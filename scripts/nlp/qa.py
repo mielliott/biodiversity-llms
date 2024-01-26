@@ -1,10 +1,12 @@
-# Submit questions to GPT 3.5.
+# Submit questions to an LLM.
 #
 # Usage:
-#  echo [TSV lines] | python qa.py [question]
+#  echo [TSV lines] | python qa.py [question] [parameters]
 #
 # Plug in field values using the field name, e.g. "Who is {name}?"
 # e.g. echo -e "species\tlocation\nAcer saccharum\tArkansas" | python qa.py "Does {species} naturally occur in {location}? Yes or no"
+#
+# See parameters below
 
 import os
 import sys
