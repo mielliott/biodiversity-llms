@@ -8,7 +8,7 @@ rule extract_records:
     input:
         "resources/records.zip"
     output:
-        temp(directory("resources/records"))
+        directory("resources/records")
     shell:
         "unzip {input} -d {output}"
 
@@ -17,7 +17,7 @@ rule clean_records:
         folder="resources/records",
         files=glob("resources/records/*.jsonl")
     output:
-        temp(PRESENCE_IN_UNFILTERED)
+        PRESENCE_IN_UNFILTERED
     params:
         fields=",".join([f'"{field}' for field in config["qa"]["query_fields"]])
     log:

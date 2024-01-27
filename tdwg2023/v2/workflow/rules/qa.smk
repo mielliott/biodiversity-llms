@@ -17,7 +17,7 @@ rule qa_presence_batch:
     input:
         "results/input/{group}.tsv"
     output:
-        BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
+        protected(BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv")
     params:
         qa_command=config["qa"]["command"],
         qa_args=" ".join(config["qa"]["args"] + [f"--model {config['llm']}"]),
@@ -35,7 +35,7 @@ rule qa_presence_batch:
 
 rule qa:
     input:
-        get_batches
+        ancient(get_batches)
     output:
         "results/" + LLM + "/{group,[^/]+}.tsv"
     shell:
