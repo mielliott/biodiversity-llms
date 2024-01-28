@@ -1,4 +1,4 @@
-rule combine_presence_and_absence:
+checkpoint combine_presence_and_absence:
     input:
         presence=PRESENCE_IN,
         absence=ABSENCE_IN,

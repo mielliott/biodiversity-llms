@@ -33,7 +33,7 @@ rule clean_records:
         1> {output} 2> {log}
         """
 
-checkpoint filter_raws_to_presence_tsv:
+rule filter_raws_to_presence_tsv:
     input:
         PRESENCE_IN_UNFILTERED
     output:
