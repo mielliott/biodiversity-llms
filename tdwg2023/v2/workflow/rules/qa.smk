@@ -4,7 +4,7 @@ BATCH_RESULTS_DIR = f"results/{LLM}/{str(QA_BATCH_SIZE)}"
 def get_batches(wildcards):
     from math import ceil
     batch_size = config["qa"]["batch_size"]
-    num_lines = sum(1 for line in open(checkpoints.filter_raws_to_presence_tsv.get(**wildcards).output[0])) - 1 # Don't count the header line
+    num_lines = sum(1 for line in open(checkpoints.combine_presence_and_absence.get(**wildcards).output[0])) - 1 # Don't count the header line
     limit = num_lines if config["qa"]["query_limit"] <= 0 else min(num_lines, config["qa"]["query_limit"])
     return [get_batch_path(wildcards, batch, batch_size, limit) for batch in range(ceil(limit / batch_size))]
 
@@ -13,7 +13,7 @@ def get_batch_path(wildcards, batch, batch_size, limit):
     last = min(limit - 1, (batch + 1) * batch_size - 1)
     return f"{BATCH_RESULTS_DIR}/{wildcards.group}/{first}-{last}.tsv"
 
-rule qa_presence_batch:
+rule qa_batch:
     input:
         "results/input/{group}.tsv"
     output:
