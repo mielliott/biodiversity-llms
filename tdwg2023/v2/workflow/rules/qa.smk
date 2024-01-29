@@ -22,6 +22,7 @@ rule qa_batch:
         qa_command=config["qa"]["command"],
         qa_args=" ".join(config["qa"]["args"] + [f"--model {config['llm']}"]),
         qa_questions=lambda wildcards: " ".join([f'"{q} {config["qa"]["query_suffix"]}"' for q in config["qa"]["query_templates"]]),
+        input_filter="| mlr --tsvlite filter '$kingdom != \"fungi\"'"
     log:
         "logs/" + BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
     conda:
@@ -29,6 +30,7 @@ rule qa_batch:
     shell:
         """
         workflow/scripts/cat-range {input} {wildcards.first} {wildcards.last}\
+        {params.input_filter}\
         | {params.qa_command} {params.qa_args} {params.qa_questions}\
         1> {output} 2> {log}
         """
