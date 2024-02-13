@@ -17,7 +17,7 @@ rule qa_batch:
     input:
         "results/input/{group}.tsv"
     output:
-        protected(BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv")
+        BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
     params:
         qa_command=config["qa"]["command"],
         qa_args=" ".join(config["qa"]["args"] + [f"--model {config['llm']}"]),
