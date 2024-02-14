@@ -11,6 +11,10 @@ df[snakemake.params.query_fields + ["target"]].drop_duplicates()
 # Drop fungi
 df = df[~(df["kingdom"] == "fungi")]
 
+# Drop records with unexpected genus names
+weird_genera = res["genus"].apply(lambda s: s.isalnum()) == False
+df = df[~weird_genera]
+
 shuffled_taxons = df[split_rank].unique()
 rng = np.random.default_rng(snakemake.params.seed)
 rng.shuffle(shuffled_taxons)
