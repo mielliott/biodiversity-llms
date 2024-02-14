@@ -33,7 +33,9 @@ rule analyze_results:
         NOTEBOOK_OUT
     params:
         phrasings=lambda wildcards: config["qa"]["query_templates"],
-        query_fields=config["qa"]["query_fields"]
+        query_fields=config["qa"]["query_fields"],
+        seed=config["results"]["random_seed"],
+        validate_absences=config["results"]["validate_absences"]
     log:
         notebook=NOTEBOOK_OUT
     conda:

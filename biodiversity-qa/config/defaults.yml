@@ -31,6 +31,9 @@ qa:
     - Is species {genus} {specificepithet} present in {county}, {stateprovince}, {country}?
     - Can one observe species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
   query_suffix: Only respond yes or no.
+results:
+  random_seed: 69847
+  validate_absences: true
 preston:
   remotes:
     - https://zenodo.org
