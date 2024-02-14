@@ -7,6 +7,7 @@ PRESENCE_IN = "results/input/presence.tsv"
 ABSENCE_IN = "results/input/absence.tsv"
 ALL_IN = "results/input/all.tsv"
 ALL_IN_SHUFFLED = "results/input/all-shuffled.tsv"
+TRAIN_TEST_SPLIT = "results/input/train_test_split.tsv"
 
 ABSENCE_VALID = "results/input/absence-valid.tsv"
 
@@ -21,24 +22,8 @@ include: "rules/make-presence-tsv.smk"
 include: "rules/make-absence-tsv.smk"
 include: "rules/combine-tsv.smk"
 include: "rules/qa.smk"
+include: "rules/qa-analysis.smk"
 
 rule all:
     input:
         NOTEBOOK_OUT
-
-rule analyze_results:
-    input:
-        responses=ALL_OUT_SHUFFLED if config["qa"]["shuffle"] else ALL_OUT
-    output:
-        NOTEBOOK_OUT
-    params:
-        phrasings=lambda wildcards: config["qa"]["query_templates"],
-        query_fields=config["qa"]["query_fields"],
-        seed=config["results"]["random_seed"],
-        validate_absences=config["results"]["validate_absences"]
-    log:
-        notebook=NOTEBOOK_OUT
-    conda:
-        "envs/analysis.yml"
-    notebook:
-        "notebooks/results.py.ipynb"

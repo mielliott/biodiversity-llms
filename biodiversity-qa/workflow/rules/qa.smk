@@ -15,7 +15,8 @@ def get_batch_path(wildcards, batch, batch_size, limit):
 
 rule qa_batch:
     input:
-        "results/input/{group}.tsv"
+        "results/input/{group}.tsv",
+        TRAIN_TEST_SPLIT
     output:
         BATCH_RESULTS_DIR + "/{group}/{first}-{last}.tsv"
     params:

@@ -34,6 +34,8 @@ qa:
 results:
   random_seed: 69847
   validate_absences: true
+  train_test_split_rank: family
+  split_test_fraction: 0.5
 preston:
   remotes:
     - https://zenodo.org
