@@ -12,7 +12,7 @@ df[snakemake.params.query_fields + ["target"]].drop_duplicates()
 df = df[~(df["kingdom"] == "fungi")]
 
 # Drop records with unexpected genus names
-weird_genera = res["genus"].apply(lambda s: s.isalnum()) == False
+weird_genera = df["genus"].apply(lambda s: s.isalnum()) == False
 df = df[~weird_genera]
 
 shuffled_taxons = df[split_rank].unique()
@@ -24,4 +24,5 @@ test_taxons = set(shuffled_taxons) - train_taxons
 
 df["train"] = df[split_rank].isin(train_taxons)
 
-df.to_csv(open(snakemake.output[0], "w"), sep="\t")
+df.drop(columns=["present"])\
+    .to_csv(open(snakemake.output[0], "w"), sep="\t")
