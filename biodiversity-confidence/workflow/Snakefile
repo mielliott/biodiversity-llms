@@ -26,8 +26,7 @@ def make_qa_config(job):
 
 config["qa"]["test"] = make_qa_config("test")
 config["qa"]["occurrence"] = make_qa_config("occurrence")
-
-print(config["qa"]["occurrence"])
+config["qa"]["taxonomy"] = make_qa_config("taxonomy")
 
 include: "rules/get-records.smk"
 include: "rules/make-presence-tsv.smk"
@@ -45,6 +44,11 @@ module occ_qa_workflow:
     snakefile: "modules/qa.smk"
     config: config["qa"]["occurrence"]
 use rule * from occ_qa_workflow as occ_qa_*
+
+module tax_qa_workflow:
+    snakefile: "modules/qa.smk"
+    config: config["qa"]["taxonomy"]
+use rule * from tax_qa_workflow as tax_qa_*
 
 rule all:
     input:

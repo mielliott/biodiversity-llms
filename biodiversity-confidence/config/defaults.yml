@@ -8,8 +8,8 @@ qa:
   defaults:
     command: python3 ~/biodiversity-llms/scripts/nlp/qa.py
     shuffle: true # Whether to submit queries sequentially or shuffled
-    query_limit: 200 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
-    batch_size: 100
+    query_limit: 1 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
+    batch_size: 1
   occurrence:
     input: "results/input/all.tsv"
     args:
@@ -35,6 +35,21 @@ qa:
       - Is species {genus} {specificepithet} present in {county}, {stateprovince}, {country}?
       - Can one observe species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
     query_suffix: Only respond yes or no.
+  taxonomy:
+    input: "results/input/all.tsv"
+    args:
+      - --max-tokens 10
+      - --timeout 10
+      - --num-responses 10
+      - --combine_responses
+    query_fields:
+      - question number
+      - query rank
+      - subject rank
+      - taxon
+    query_templates:
+      - What taxonomic {query rank} does {subject rank} "{taxon}" belong to?
+    query_suffix: Only say its scientific name.
   test:
     input: resources/test-data.tsv
     llm: llama2-7b-chat
@@ -42,8 +57,6 @@ qa:
       - --max-tokens 100
       - --timeout 10
       - --num-responses 2
-    batch_size: 1
-    query_limit: 1
     query_fields:
       - species
     query_templates:
