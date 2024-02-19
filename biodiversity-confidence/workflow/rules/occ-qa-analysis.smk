@@ -27,4 +27,4 @@ rule analyze_results:
     conda:
         "../envs/analysis.yml"
     notebook:
-        "../notebooks/results.py.ipynb"
+        "../notebooks/" + config["results"]["notebook"]

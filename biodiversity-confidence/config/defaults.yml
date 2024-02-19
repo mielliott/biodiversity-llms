@@ -62,6 +62,7 @@ qa:
       - How do {species} know?
     query_suffix: Explain it to me like I'm 5.
 results:
+  notebook: results-gpt.py.ipynb
   random_seed: 69847
   validate_absences: true
   train_test_split_rank: family

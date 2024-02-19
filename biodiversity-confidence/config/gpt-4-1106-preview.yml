@@ -5,3 +5,5 @@ qa:
     shuffle: true
     query_limit: 20000
     batch_size: 100
+results:
+  notebook: results-gpt.py.ipynb
