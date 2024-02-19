@@ -33,7 +33,8 @@ include: "rules/make-presence-tsv.smk"
 include: "rules/make-absence-tsv.smk"
 include: "rules/combine-tsv.smk"
 include: "rules/make-taxonomy-questions.smk"
-include: "rules/qa-analysis.smk"
+include: "rules/occ-qa-analysis.smk"
+include: "rules/tax-qa-analysis.smk"
 
 module test_qa_workflow:
     snakefile: "modules/qa.smk"
