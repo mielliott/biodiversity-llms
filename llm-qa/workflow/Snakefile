@@ -1,0 +1,18 @@
+configfile: "config.yaml"
+
+QA_BATCH_SIZE = config["batch_size"]
+
+OUTPUTS_DIR = config["output_dir"].rstrip("/")
+BATCH_OUTPUTS_DIR = f"{OUTPUTS_DIR}/{str(QA_BATCH_SIZE)}"
+
+print("out:", OUTPUTS_DIR + "/responses.tsv")
+
+include: "rules/qa.smk"
+
+rule all:
+    input:
+        OUTPUTS_DIR + "/responses.tsv"
+    output:
+        "all-done"
+    shell:
+        "touch {output}"

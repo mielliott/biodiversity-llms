@@ -17,13 +17,34 @@ ALL_OUT = f"results/{LLM}/all.tsv"
 ALL_OUT_SHUFFLED = f"results/{LLM}/all-shuffled.tsv"
 NOTEBOOK_OUT = f"results/{LLM}/results.py.ipynb"
 
+def make_qa_config(job):
+    c = {"llm": config["llm"]}
+    c |= config["qa"]["defaults"]
+    c |= config["qa"][job]
+    if "output_dir" not in c: c |= {"output_dir": f"results/{c['llm']}/{job}"}
+    return c
+
+config["qa"]["test"] = make_qa_config("test")
+config["qa"]["occurrence"] = make_qa_config("occurrence")
+
+print(config["qa"]["occurrence"])
+
 include: "rules/get-records.smk"
 include: "rules/make-presence-tsv.smk"
 include: "rules/make-absence-tsv.smk"
 include: "rules/combine-tsv.smk"
 include: "rules/make-taxonomy-questions.smk"
-include: "rules/qa.smk"
 include: "rules/qa-analysis.smk"
+
+module test_qa_workflow:
+    snakefile: "modules/qa.smk"
+    config: config["qa"]["test"]
+use rule * from test_qa_workflow as test_qa_*
+
+module occ_qa_workflow:
+    snakefile: "modules/qa.smk"
+    config: config["qa"]["occurrence"]
+use rule * from occ_qa_workflow as occ_qa_*
 
 rule all:
     input:

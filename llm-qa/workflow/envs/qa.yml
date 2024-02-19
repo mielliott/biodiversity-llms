@@ -1,0 +1,10 @@
+channels:
+  - conda-forge
+dependencies:
+  - python ~=3.10
+  - openai =1.9
+  - transformers =4.37
+  - sentencepiece =0.1
+  - protobuf =4.24
+  - pytorch =2.1
+  - accelerate =0.26

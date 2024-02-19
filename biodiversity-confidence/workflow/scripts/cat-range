@@ -1,3 +1,4 @@
+#!/bin/bash
 IN=$1         # TSV with header
 FIRST_LINE=$2 # Arguments id lines starting from 0
 LAST_LINE=$3  # Inclusive

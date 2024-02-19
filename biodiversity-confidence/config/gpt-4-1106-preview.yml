@@ -1,0 +1,7 @@
+llm: gpt-4-1106-preview
+random_seed: 69847
+qa:
+  occurrence:
+    shuffle: true
+    query_limit: 20000
+    batch_size: 100

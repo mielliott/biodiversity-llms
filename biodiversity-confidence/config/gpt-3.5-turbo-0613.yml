@@ -1,0 +1,7 @@
+llm: gpt-3.5-turbo-0613
+random_seed: 69847
+qa:
+  occurrence:
+    shuffle: false
+    query_limit: 0
+    batch_size: 100
