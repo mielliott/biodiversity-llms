@@ -4,7 +4,8 @@ import torch
 from typing import Iterable
 
 class Llama2(LLM):
-    def __init__(self, model: str, top_k: int, api_access_key: str, **kwargs):
+    def __init__(self, model: str, max_tokens: int, top_k: int, api_access_key: str, **kwargs):
+        self.max_tokens = max_tokens
         self.top_k = top_k
         self.input_query_buffer = list()
         self.query_suffix = "\n\nAnswer: "
@@ -44,9 +45,7 @@ class Llama2(LLM):
             yield compile_output(*result)
     
     def query_llama2(self, flush=False, **kwargs):
-        MAX_NUM_RESPONSE_TOKENS = 5
-        TARGET_INPUT_SIZE = 35 * 100
-        m = torch.nn.Softmax(dim=0)
+        TARGET_INPUT_SIZE = 35 * 100 # By trial-and-error
 
         if (len(self.input_query_buffer) > 0):
             queries = [q + self.query_suffix for i, q in self.input_query_buffer]
@@ -54,7 +53,7 @@ class Llama2(LLM):
 
             if (flush or input_ids.numel() >= TARGET_INPUT_SIZE):
                 input_length = input_ids.shape[1]
-                max_completion_length = input_length + MAX_NUM_RESPONSE_TOKENS
+                max_completion_length = input_length + self.max_tokens
                 outputs = self.model.generate(input_ids, max_length=max_completion_length, return_dict_in_generate=True, output_scores=True, low_memory=True)
 
                 for sequence_index, (input, query) in enumerate(self.input_query_buffer):

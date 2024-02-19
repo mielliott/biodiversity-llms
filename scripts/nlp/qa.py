@@ -21,7 +21,7 @@ HUGGING_FACE_TOKEN = os.getenv("ME_HUGGINGFACE_ACCESS")
 MODELS = {
     "gpt-3.5-turbo-0613": lambda args: GPT("gpt-3.5-turbo-0613", args.max_tokens, args.timeout, args.top_p),
     "gpt-4-1106-preview": lambda args: GPT("gpt-4-1106-preview", args.max_tokens, args.timeout, args.top_p),
-    "llama2-7b-chat": lambda args: Llama2("meta-llama/Llama-2-7b-chat-hf", args.top_k, args.api_access_key or HUGGING_FACE_TOKEN)
+    "llama2-7b-chat": lambda args: Llama2("meta-llama/Llama-2-7b-chat-hf", args.max_tokens, args.top_k, args.api_access_key or HUGGING_FACE_TOKEN)
 }
 
 if __name__ == '__main__':
