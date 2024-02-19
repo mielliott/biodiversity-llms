@@ -43,12 +43,11 @@ qa:
       - --num-responses 10
       - --combine_responses
     query_fields:
-      - question number
-      - query rank
-      - subject rank
+      - subject_rank
+      - object_rank
       - taxon
     query_templates:
-      - What taxonomic {query rank} does {subject rank} "{taxon}" belong to?
+      - What taxonomic {object_rank} does {subject_rank} \"{taxon}\" belong to?
     query_suffix: Only say its scientific name.
   test:
     input: resources/test-data.tsv
