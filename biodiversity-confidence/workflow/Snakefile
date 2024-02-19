@@ -14,10 +14,10 @@ TRAIN_TEST_SPLIT = "results/input/train_test_split.tsv"
 
 ABSENCE_VALID = "results/input/absence-valid.tsv"
 
-PRESENCE_OUT = f"results/{LLM}/presence.tsv"
-ABSENCE_OUT = f"results/{LLM}/absence.tsv"
-ALL_OUT = f"results/{LLM}/all.tsv"
-ALL_OUT_SHUFFLED = f"results/{LLM}/all-shuffled.tsv"
+PRESENCE_OUT = f"results/{LLM}/occurrence/presence.tsv"
+ABSENCE_OUT = f"results/{LLM}/occurrence/absence.tsv"
+ALL_OUT = f"results/{LLM}/occurrence/responses.tsv"
+ALL_OUT_SHUFFLED = f"results/{LLM}/occurrence/responses.tsv"
 NOTEBOOK_OUT = f"results/{LLM}/" + config["results"]["notebook"]
 
 print(NOTEBOOK_OUT)
