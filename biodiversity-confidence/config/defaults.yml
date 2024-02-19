@@ -1,73 +1,74 @@
 # gpt-3.5-turbo-0613
 # gpt-4-1106-preview
 # llama2-7b-chat
-llm: llama2-7b-chat
-random_seed: 69847
-recordset: hash://md5/8f0594be7f88e4fc7b30c0854e7ca029
-qa:
-  defaults:
-    command: python3 ~/biodiversity-llms/scripts/nlp/qa.py
-    shuffle: true # Whether to submit queries sequentially or shuffled
-    query_limit: 1 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
-    batch_size: 1
-  occurrence:
-    input: results/input/all.tsv
-    args:
-      - --max-tokens 1
-      - --timeout 10
-      - --num-responses 10
-      - --combine_responses
-    query_fields:
-      - kingdom
-      - phylum
-      - family
-      - genus
-      - specificepithet
-      - country
-      - stateprovince
-      - county
-    query_templates:
-      - Does {genus} {specificepithet} naturally occur in {county}, {stateprovince}, {country}?
-      - Can species {genus} {specificepithet} be found in {county}, {stateprovince}, {country}?
-      - Is it possible to encounter species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
-      - Is there a presence of species {genus} {specificepithet} within {county}, {stateprovince}, {country}?
-      - Does {county}, {stateprovince}, {country} harbor species {genus} {specificepithet}?
-      - Is species {genus} {specificepithet} present in {county}, {stateprovince}, {country}?
-      - Can one observe species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
-    query_suffix: Only respond yes or no.
-  taxonomy:
-    input: results/input/taxonomy-qa.tsv
-    args:
-      - --max-tokens 10
-      - --timeout 10
-      - --num-responses 10
-      - --combine_responses
-    query_fields:
-      - subject_rank
-      - object_rank
-      - taxon
-    query_templates:
-      - What taxonomic {object_rank} does {subject_rank} \"{taxon}\" belong to?
-    query_suffix: Only say its scientific name.
-  test:
-    input: resources/test-data.tsv
-    llm: llama2-7b-chat
-    args:
-      - --max-tokens 100
-      - --timeout 10
-      - --num-responses 2
-    query_fields:
-      - species
-    query_templates:
-      - How do {species} know?
-    query_suffix: Explain it to me like I'm 5.
-results:
-  notebook: results-gpt.py.ipynb
+defaults:
+  llm: llama2-7b-chat
   random_seed: 69847
-  validate_absences: true
-  train_test_split_rank: family
-  split_test_fraction: 0.5
-preston:
-  remotes:
-    - https://zenodo.org
-    - https://linker.bio
+  recordset: hash://md5/8f0594be7f88e4fc7b30c0854e7ca029
+  qa:
+    defaults:
+      command: python3 ~/biodiversity-llms/scripts/nlp/qa.py
+      shuffle: true # Whether to submit queries sequentially or shuffled
+      query_limit: 1 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
+      batch_size: 1
+    occurrence:
+      input: results/input/all.tsv
+      args:
+        - --max-tokens 1
+        - --timeout 10
+        - --num-responses 10
+        - --combine_responses
+      query_fields:
+        - kingdom
+        - phylum
+        - family
+        - genus
+        - specificepithet
+        - country
+        - stateprovince
+        - county
+      query_templates:
+        - Does {genus} {specificepithet} naturally occur in {county}, {stateprovince}, {country}?
+        - Can species {genus} {specificepithet} be found in {county}, {stateprovince}, {country}?
+        - Is it possible to encounter species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
+        - Is there a presence of species {genus} {specificepithet} within {county}, {stateprovince}, {country}?
+        - Does {county}, {stateprovince}, {country} harbor species {genus} {specificepithet}?
+        - Is species {genus} {specificepithet} present in {county}, {stateprovince}, {country}?
+        - Can one observe species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
+      query_suffix: Only respond yes or no.
+    taxonomy:
+      input: results/input/taxonomy-qa.tsv
+      args:
+        - --max-tokens 10
+        - --timeout 10
+        - --num-responses 10
+        - --combine_responses
+      query_fields:
+        - subject_rank
+        - object_rank
+        - taxon
+      query_templates:
+        - What taxonomic {object_rank} does {subject_rank} \"{taxon}\" belong to?
+      query_suffix: Only say its scientific name.
+    test:
+      input: resources/test-data.tsv
+      llm: llama2-7b-chat
+      args:
+        - --max-tokens 100
+        - --timeout 10
+        - --num-responses 2
+      query_fields:
+        - species
+      query_templates:
+        - How do {species} know?
+      query_suffix: Explain it to me like I'm 5.
+  results:
+    notebook: results-gpt.py.ipynb
+    random_seed: 69847
+    validate_absences: true
+    train_test_split_rank: family
+    split_test_fraction: 0.5
+  preston:
+    remotes:
+      - https://zenodo.org
+      - https://linker.bio

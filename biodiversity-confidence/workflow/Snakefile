@@ -1,5 +1,8 @@
 configfile: "config/defaults.yml"
 
+from deepmerge import Merger
+config = Merger([(dict, ["merge"])], ["override"], ["override"]).merge(config["defaults"], config)
+
 LLM = config["llm"]
 
 PRESENCE_IN_UNFILTERED = "results/input/presence-unfiltered.tsv"
@@ -15,8 +18,9 @@ PRESENCE_OUT = f"results/{LLM}/presence.tsv"
 ABSENCE_OUT = f"results/{LLM}/absence.tsv"
 ALL_OUT = f"results/{LLM}/all.tsv"
 ALL_OUT_SHUFFLED = f"results/{LLM}/all-shuffled.tsv"
-NOTEBOOK_OUT = f"results/{LLM}/results.py.ipynb"
+NOTEBOOK_OUT = f"results/{LLM}/" + config["results"]["notebook"]
 
+print(NOTEBOOK_OUT)
 def make_qa_config(job):
     c = {"llm": config["llm"]}
     c |= config["qa"]["defaults"]
