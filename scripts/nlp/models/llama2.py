@@ -8,7 +8,6 @@ class Llama2(LLM):
         self.max_tokens = max_tokens
         self.top_k = top_k
         self.input_query_buffer = list()
-        self.query_suffix = "\n\nAnswer: "
 
         self.tokenizer = LlamaTokenizer.from_pretrained(model, token=api_access_key)
         self.tokenizer.pad_token = "[PAD]"
@@ -19,7 +18,7 @@ class Llama2(LLM):
 
     def run(self, queries: Iterable[tuple[str,str]], num_responses: int, combine_responses: bool, escape: bool):
         question_number = 0
-        compile_output = lambda input, response, token_scores, token_strings: (
+        compile_output = lambda input, query, response, token_scores, token_strings: (
             input,
             {
                 "query": repr(query),
@@ -48,7 +47,7 @@ class Llama2(LLM):
         TARGET_INPUT_SIZE = 35 * 100 # By trial-and-error
 
         if (len(self.input_query_buffer) > 0):
-            queries = [q + self.query_suffix for i, q in self.input_query_buffer]
+            queries = [q for i, q in self.input_query_buffer]
             input_ids = self.tokenizer(queries, return_tensors="pt", padding=True).input_ids.to("cuda")
 
             if (flush or input_ids.numel() >= TARGET_INPUT_SIZE):
@@ -68,6 +67,7 @@ class Llama2(LLM):
 
                     yield (
                         input,
+                        query,
                         response_string,
                         top_k_token_scores,
                         top_k_token_strings
