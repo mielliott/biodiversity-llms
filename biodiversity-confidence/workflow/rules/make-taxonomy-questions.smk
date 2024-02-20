@@ -12,17 +12,30 @@ rule gather_binomials: # Not used, it's a lot of questions and genus is present 
         > {output}
         """
 
+RANKS = [
+    "kingdom",
+    "phylum",
+    "class",
+    "order",
+    "family",
+    "genus"
+]
+
 rule gather_taxa_for_upper_ranks:
     input:
         "resources/records.zip"
     output:
         "results/input/taxa-{rank}.tsv"
+    params:
+        fields=",".join(RANKS + ["taxon"]),
+        higher_ranks=lambda wildcards: ",".join(RANKS[:RANKS.index(wildcards.rank)])
     shell:
         """
         unzip -p {input}\
         | jq .indexTerms\
-        | jq "{{taxon: .{wildcards.rank}}}"\
+        | jq "{{{params.higher_ranks}, taxon: .{wildcards.rank}}}"\
         | mlr --ijson --otsv uniq -a\
+        | mlr --tsvlite template -f {params.fields} --fill-with ""\
         | grep -vE "^null$"\
         > {output}
         """
@@ -36,5 +49,7 @@ checkpoint make_taxonomy_questions:
         genus="results/input/taxa-genus.tsv",
     output:
         "results/input/taxonomy-qa.tsv"
+    params:
+        ranks=RANKS
     script:
         "../scripts/make-taxonomy-qa-table.py"

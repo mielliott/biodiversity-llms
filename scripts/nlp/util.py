@@ -8,7 +8,7 @@ def get_queries(patterns, header, lines, do_unescape, filter=lambda x: True):
     fields = header.split("\t")
 
     for line in lines:
-        line = line.strip()
+        line = line[:-1]
         values = line.split("\t")
         
         if do_unescape:

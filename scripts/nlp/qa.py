@@ -44,7 +44,7 @@ if __name__ == '__main__':
     sys.stdin.reconfigure(encoding='utf-8')
     lines = (line for line in sys.stdin)
 
-    header = next(lines).rstrip() # Get header of input data
+    header = next(lines)[:-1] # Get header of input data
 
     queries = util.get_queries(
         args.patterns, header,

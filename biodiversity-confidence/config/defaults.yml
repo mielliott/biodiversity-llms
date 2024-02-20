@@ -47,6 +47,12 @@ defaults:
         - subject_rank
         - object_rank
         - taxon
+        - kingdom
+        - phylum
+        - class
+        - order
+        - family
+        - genus
       query_templates:
         - What taxonomic {object_rank} does {subject_rank} \"{taxon}\" belong to?
       query_suffix: Only say its scientific name.
@@ -63,7 +69,7 @@ defaults:
         - How do {species} know?
       query_suffix: Explain it to me like I'm 5.
   results:
-    notebook: results-gpt.py.ipynb
+    notebook: process-occ-gpt.py.ipynb
     random_seed: 69847
     validate_absences: true
     train_test_split_rank: family
