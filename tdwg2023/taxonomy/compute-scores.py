@@ -52,4 +52,4 @@ def score_with_progress(x, n):
 
 n = len(rank_predictions)
 scores = rank_predictions.apply(lambda x: score_with_progress(x, n), axis=1)
-scores.to_csv(open("scores.tsv", "w"), sep="\t")
+scores.to_csv("scores.tsv", sep="\t")
