@@ -21,7 +21,7 @@ HUGGING_FACE_TOKEN = os.getenv("ME_HUGGINGFACE_ACCESS")
 MODELS = {
     "gpt-3.5-turbo-0613": lambda args: GPT("gpt-3.5-turbo-0613", args.max_tokens, args.timeout, args.top_p),
     "gpt-4-1106-preview": lambda args: GPT("gpt-4-1106-preview", args.max_tokens, args.timeout, args.top_p),
-    "llama2-7b-chat": lambda args: Llama2("meta-llama/Llama-2-7b-chat-hf", args.max_tokens, args.top_k, args.api_access_key or HUGGING_FACE_TOKEN)
+    "llama2-7b": lambda args: Llama2("meta-llama/Llama-2-7b-hf", args.max_tokens, args.num_responses, args.top_p, args.top_k, args.api_access_key or HUGGING_FACE_TOKEN)
 }
 
 if __name__ == '__main__':
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     parser.add_argument("--top-p", "-p", default=0.8, type=float)
     parser.add_argument("--top-k", "-k", default=5, type=int)
     parser.add_argument("--filter-keyword", "-f", default="MISSING", type=str)
-    parser.add_argument("--combine_responses", "-c", action="store_true")
+    parser.add_argument("--combine-responses", "-c", action="store_true")
     parser.add_argument("--timeout", default=10, type=int)
     parser.add_argument("--unescape-input", action="store_true")
     parser.add_argument("--escape-responses", action="store_true")
