@@ -1,8 +1,9 @@
 import requests as rq
 import pandas as pd
+smk = snakemake # type: ignore
 
-file_in = snakemake.input[0]
-file_out = snakemake.output[0]
+file_in = smk.input[0]
+file_out = smk.output[0]
 
 def make_species_location_query(record):
     return {

@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
 from functools import reduce
+smk = snakemake # type: ignore
 
-backbone_path = snakemake.input.backbone
-predictions_path = snakemake.input.predictions
-scores_path = snakemake.output[0]
+backbone_path = smk.input.backbone
+predictions_path = smk.input.predictions
+scores_path = smk.output[0]
 
 taxonomy = (
     pd.read_csv(backbone_path, sep="\t", dtype=str)

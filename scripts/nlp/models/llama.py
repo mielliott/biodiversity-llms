@@ -29,4 +29,4 @@
 #                 " ".join(["{:.3f}".format(score.tolist()) for score in log_scores]),
 #                 " ".join(["{:.3f}".format(score.tolist()) for score in softmax_scores]),
 #                 sep="\t",
-=#                 flush=True)
+#                 flush=True)

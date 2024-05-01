@@ -6,9 +6,10 @@
 # e.g. if ID1 is a synonym of ID2, rank RANK, both should have the same RANK_key that indicates which one is considered "accepted"
 
 import pandas as pd
+smk = snakemake # type: ignore
 
-raw_backbone = snakemake.input[0]
-dereferenced_backbone = snakemake.output[0]
+raw_backbone = smk.input[0]
+dereferenced_backbone = smk.output[0]
 
 RANKS = [
     "kingdom",
@@ -20,6 +21,7 @@ RANKS = [
     "species"
 ]
 
+full_backbone = "uh oh!!!"
 raw = pd.read_csv(open(full_backbone, "r"), sep="\t", dtype=str, names=[
     "id",
     "status",
