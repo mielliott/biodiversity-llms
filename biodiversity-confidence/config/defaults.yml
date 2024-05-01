@@ -2,7 +2,7 @@
 # gpt-4-1106-preview
 # llama2-7b
 defaults:
-  llm: llama2-7b-chat
+  llm: llama2-7b
   random_seed: 69847
   recordset: hash://md5/8f0594be7f88e4fc7b30c0854e7ca029
   qa:
@@ -58,7 +58,7 @@ defaults:
       query_suffix: Only say its scientific name.
     test:
       input: resources/test-data.tsv
-      llm: llama2-7b-chat
+      llm: llama2-7b
       args:
         - --max-tokens 100
         - --timeout 10

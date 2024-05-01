@@ -1,0 +1,15 @@
+llm: llama2-7b
+random_seed: 69847
+qa:
+  occurrence:
+    shuffle: true
+    query_limit: 0
+    batch_size: 100
+    query_suffix: "Only respond yes or no.\n\nThe answer is"
+  taxonomy:
+    shuffle: false
+    query_limit: 0
+    batch_size: 100
+    query_suffix: "Only say its scientific name.\n\n{taxon} belongs to the {object_rank} called"
+results:
+  notebook: results-llama2.py.ipynb

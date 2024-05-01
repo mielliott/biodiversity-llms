@@ -16,14 +16,16 @@ queries = ["How do cows know?", "What is the answer to the riddle?"]
 queries = ["How do cows know?"]
 
 # We can run inference on about 100 of these queries at a time
-queries = ["Is it possible to encounter species Halichondria bowerbanki in French Frigate Shoals, Hawaii, United States? Only respond yes or no."]
+# queries = ["Is it possible to encounter species Halichondria bowerbanki in French Frigate Shoals, Hawaii, United States? Only respond yes or no."]
 
 input_ids = tokenizer(queries, return_tensors="pt", padding=True).input_ids.to("cuda")
 input_length = input_ids.shape[1]
 NUM_WHITESPACE_TOKENS = 2
 max_completion_length = input_length + NUM_WHITESPACE_TOKENS + 1
 
-outputs = model.generate(input_ids, max_length=max_completion_length, return_dict_in_generate=True, output_scores=True, low_memory=True)
+# outputs = model.generate(input_ids, max_length=max_completion_length, return_dict_in_generate=True, output_scores=True, low_memory=True)
+
+outputs = model.generate(input_ids, max_length=max_completion_length, return_dict_in_generate=True, output_scores=True, low_memory=True, do_sample=True, top_p=.95, top_k=10)
 
 print(tokenizer.decode(outputs.sequences[0], skip_special_tokens=True))
 
