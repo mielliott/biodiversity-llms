@@ -1,6 +1,6 @@
 # gpt-3.5-turbo-0613
 # gpt-4-1106-preview
-# llama2-7b-chat
+# llama2-7b
 defaults:
   llm: llama2-7b-chat
   random_seed: 69847
@@ -17,7 +17,7 @@ defaults:
         - --max-tokens 1
         - --timeout 10
         - --num-responses 10
-        - --combine_responses
+        - --combine-responses
       query_fields:
         - kingdom
         - phylum
@@ -42,7 +42,7 @@ defaults:
         - --max-tokens 10
         - --timeout 10
         - --num-responses 10
-        - --combine_responses
+        - --combine-responses
       query_fields:
         - subject_rank
         - object_rank

@@ -34,7 +34,7 @@ if __name__ == '__main__':
     parser.add_argument("--top-p", "-p", default=0.8, type=float)
     parser.add_argument("--top-k", "-k", default=5, type=int)
     parser.add_argument("--filter-keyword", "-f", default="MISSING", type=str)
-    parser.add_argument("--combine_responses", "-c", action="store_true")
+    parser.add_argument("--combine-responses", "-c", action="store_true")
     parser.add_argument("--timeout", default=10, type=int)
     parser.add_argument("--unescape-input", action="store_true")
     parser.add_argument("--escape-responses", action="store_true")
