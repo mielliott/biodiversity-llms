@@ -28,7 +28,7 @@ paste <(cat processed/$T1_1.tsv | mlr --tsv cut -x -f "country","stateprovince",
 Submit questions to ChatGPT
 
 ```bash
-QA_ARGS="--max-tokens 1 --timeout 10 --num-responses 10 --combine_responses"
+QA_ARGS="--max-tokens 1 --timeout 10 --num-responses 10 --combine-responses"
 
 cat processed/$T1_1.tsv \
 | python3 ~/biodiversity-llms/scripts/nlp/qa.py $QA_ARGS "Does {3} {4} naturally occur in {7}, {6}, {5}? Yes or no." \
@@ -66,7 +66,7 @@ Submit rephrased questions
 # ./batch.sh processed/$IN.tsv $T1_CHUNK $T1_CHUNK_SIZE \
 
 IN=$T1_2
-QA_ARGS="--max-tokens 1 --timeout 10 --num-responses 10 --combine_responses"
+QA_ARGS="--max-tokens 1 --timeout 10 --num-responses 10 --combine-responses"
 
 QEND=" Only respond yes or no."
 Q1="Can species {3} {4} be found in {7}, {6}, {5}?$QEND"
@@ -123,7 +123,7 @@ Second prompt: *Does {3} {4} occur in {7}, {6}, {5}? Yes or no.*
 PROMPT_THINKING="Describe the species {3} {4} and the location {7}, {6}, {5}. Then discuss whether {3} {4} naturally occurs in the environment of {7}, {6}, {5}"
 IN=$T1_3
 RES_PREFIX_THINKING="$IN-$T1_CHUNK-$T1_CHUNK_SIZE-thinking"
-QA_ARGS="--max-tokens 600 --timeout 60 --num-responses 1 --escape-responses --combine_responses"
+QA_ARGS="--max-tokens 600 --timeout 60 --num-responses 1 --escape-responses --combine-responses"
 
 ./batch.sh processed/$IN.tsv $T1_CHUNK $T1_CHUNK_SIZE \
 | python3 ~/biodiversity-llms/scripts/nlp/qa.py "$PROMPT_THINKING" $QA_ARGS > results/$RES_PREFIX_THINKING.tsv
@@ -132,7 +132,7 @@ QA_ARGS="--max-tokens 600 --timeout 60 --num-responses 1 --escape-responses --co
 ```bash
 PROMPT_ANSWER=$(printf "{8}\n\nDoes {3} {4} naturally occur in {7}, {6}, {5}? Only respond yes or no.")
 RES_PREFIX_ANSWER="$IN-$T1_CHUNK-$T1_CHUNK_SIZE-answer"
-QA_ARGS="--max-tokens 1 --timeout 10 --num-responses 10 --unescape-input --combine_responses"
+QA_ARGS="--max-tokens 1 --timeout 10 --num-responses 10 --unescape-input --combine-responses"
 
 ./batch.sh results/$RES_PREFIX_THINKING.tsv $T1_CHUNK $T1_CHUNK_SIZE \
 | mlr --tsvlite cut -f kingdom,phylum,family,genus,specificepithet,country,stateprovince,county,responses \
@@ -161,7 +161,7 @@ QA_ARGS="--max-tokens 600 --timeout 60 --num-responses 1 --escape-responses"
 # PROMPT_ANSWER=$(printf "{8}\n\nDoes {3} {4} naturally occur in {7}, {6}, {5}? Only respond yes or no.")
 PROMPT_ANSWER=$(printf "{8}\n\nCan {3} {4} be found in {7}, {6}, {5}? Only respond yes or no.")
 RES_PREFIX_ANSWER="$IN-$T1_CHUNK-$T1_CHUNK_SIZE-answer"
-QA_ARGS="--max-tokens 1 --timeout 10 --num-responses 10 --unescape-input --combine_responses"
+QA_ARGS="--max-tokens 1 --timeout 10 --num-responses 10 --unescape-input --combine-responses"
 
 cat results/$RES_PREFIX_THINKING.tsv \
 | mlr --tsvlite cut -f kingdom,phylum,family,genus,specificepithet,country,stateprovince,county,responses \

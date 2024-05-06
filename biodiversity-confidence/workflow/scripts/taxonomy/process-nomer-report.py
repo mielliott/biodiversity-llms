@@ -48,4 +48,4 @@ df["name"] = aliases.keys()
 df["aliases"] = df["name"].map(lambda x: aliases[x])
 df["classification"] = df["name"].map(lambda x: all_paths[x])
 
-df.to_csv(alignments_tsv, sep="\t")
+df.to_csv(alignments_tsv, sep="\t", index=False)
