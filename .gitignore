@@ -3,6 +3,11 @@ __pycache__/
 .conda/
 raw/
 processed/
-results/
+**/results/*/*
+!**/results/**/*.ipynb
+**/results/**.tsv
+**/results/**.old.*
+**/results/**test*
+
 resources/
 logs/

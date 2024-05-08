@@ -1,4 +1,4 @@
-rule make_training_and_test_sets:
+rule occqa_make_training_and_test_sets:
     input:
         ALL_IN
     output:
@@ -11,7 +11,7 @@ rule make_training_and_test_sets:
     script:
         "../scripts/split-training-test-sets.py"
 
-rule analyze_results:
+rule occqa_analyze_results:
     input:
         responses=ALL_OUT_SHUFFLED if config["qa"]["occurrence"]["shuffle"] else ALL_OUT,
         train_test_split=TRAIN_TEST_SPLIT

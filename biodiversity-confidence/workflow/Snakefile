@@ -19,8 +19,10 @@ ABSENCE_OUT = f"results/{LLM}/occurrence/absence.tsv"
 ALL_OUT = f"results/{LLM}/occurrence/responses.tsv"
 ALL_OUT_SHUFFLED = f"results/{LLM}/occurrence/responses.tsv"
 NOTEBOOK_OUT = f"results/{LLM}/" + config["results"]["notebook"]
+TAXQA_NOTEBOOK_OUT = f"results/{LLM}/taxqa-results.py.ipynb"
 
 print(NOTEBOOK_OUT)
+print(TAXQA_NOTEBOOK_OUT)
 def make_qa_config(job):
     c = {"llm": config["llm"]}
     c |= config["qa"]["defaults"]
