@@ -4,6 +4,7 @@ smk = snakemake # type: ignore
 
 report_tsv = smk.input[0]
 alignments_tsv = smk.output[0]
+bad_names_tsv = smk.output[1]
 
 def clean_name(name):
     if type(name) == str:
@@ -20,6 +21,12 @@ def clean_path(path):
     
 raw = pd.read_csv(report_tsv, sep="\t", dtype=str)\
     [["providedName", "alignedName", "alignedRank", "alignedCommonNames", "alignedPath", "alignedPathNames"]]
+
+# Find names with no matches by nomer
+bads = raw.groupby("providedName")["alignedPath"].count() == 0
+bads = bads[bads].reset_index()["providedName"]
+bads.to_csv(bad_names_tsv, sep="\t", index=False)
+
 raw = raw.iloc[raw["alignedPathNames"].dropna().index]
 
 data = pd.DataFrame(index=raw.index)

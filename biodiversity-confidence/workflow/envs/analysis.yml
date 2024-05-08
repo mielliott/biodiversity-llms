@@ -10,3 +10,4 @@ dependencies:
   - graphviz
   - scikit-learn
   - python-igraph
+  - textdistance =4.5

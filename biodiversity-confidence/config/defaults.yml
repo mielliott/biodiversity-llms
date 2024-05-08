@@ -43,6 +43,7 @@ defaults:
         - --timeout 10
         - --num-responses 10
         - --combine-responses
+        - --escape-responses
       query_fields:
         - subject_rank
         - object_rank

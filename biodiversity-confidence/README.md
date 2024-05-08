@@ -17,3 +17,15 @@ snakemake "results/gpt-3.5-turbo-0613/taxonomy/responses.tsv" --sdm "conda" -c 8
 * Improve taxonomy QA
     * Questions should probably specify the kingdom, as names can be reused across kingdoms
     * Fungi sets are currently unusable for various reasons
+    * Names that nomer failed to align:
+        * Athrostichtus
+        * Bombus pyrobombus
+        * Bombus subterraneobombus
+        * Eucera xenoglossa
+        * Indet
+        * Melissodes eumelissodes
+        * Ophiocrosota
+        * Phyllocaenia
+        * Towndsendia
+        * X serapicamptis
+        * scientificName

@@ -19,14 +19,21 @@ class GPT(LLM):
             # See https://platform.openai.com/docs/api-reference/chat/create
             response = self.query_openai(question, n=num_responses, top_p=self.top_p, max_tokens=self.max_tokens, timeout=self.timeout)
             answers = [str(choice.message.content) if choice.message.content != None else "" for choice in response.choices]
-            if combine_responses:
+
+            if escape:
+                if combine_responses:
+                    answers = [repr(answers)]
+                else:
+                    answers = [repr(answer) for answer in answers]
+            elif combine_responses:
                 answers = [" ".join(answers)]
+
             for answer in answers:
                 yield (
                     input,
                     {
                         "query": repr(question),
-                        "responses": repr(answer) if escape else answer,
+                        "responses": answer,
                         "input token count": response.usage.prompt_tokens,
                         "output token count": response.usage.completion_tokens,
                         "question number": i
