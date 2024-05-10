@@ -17,18 +17,18 @@ rule create_pseudo_absence_dataset:
 
 rule validate_absences:
     input:
-        ancient(ABSENCE_IN_UNVALIDATED)
+        ABSENCE_IN_UNVALIDATED
     output:
         protected(ABSENCE_VALID)
     conda:
-        "../envs/analysis.yml"
+        "../../envs/analysis.yml"
     script:
-        "../scripts/validate-absences.py"
+        "../../scripts/validate-absences.py"
 
 rule filter_absences:
     input:
         unvalidated=ABSENCE_IN_UNVALIDATED,
-        validation=ABSENCE_VALID
+        validation=ancient(ABSENCE_VALID)
     output:
         ABSENCE_IN
     shell:

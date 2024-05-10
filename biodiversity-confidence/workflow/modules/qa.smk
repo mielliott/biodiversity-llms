@@ -1,6 +1,8 @@
-QA_BATCH_SIZE = config["batch_size"]
-OUTPUTS_DIR = config["output_dir"].rstrip("/")
-BATCH_OUTPUTS_DIR = f"{OUTPUTS_DIR}/{str(QA_BATCH_SIZE)}"
+print(config)
+if "shuffle" in config and config["shuffle"]:
+    BATCH_OUTPUTS_DIR = f"{config['output_dir']}/{config['batch_size']}-shuffled-{config['random_seed']}"
+else:
+    BATCH_OUTPUTS_DIR = f"{config['output_dir']}/{config['batch_size']}"
 
 def get_batches(wildcards):
     from math import ceil
@@ -20,7 +22,7 @@ rule template_qa:
     input:
         ancient(get_batches)
     output:
-        OUTPUTS_DIR + "/responses.tsv"
+        config['output_dir'] + "/responses.tsv"
     shell:
         "mlr --tsvlite cat {input} > {output}"
 

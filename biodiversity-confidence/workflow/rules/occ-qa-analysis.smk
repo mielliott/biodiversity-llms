@@ -1,6 +1,6 @@
 rule occqa_make_training_and_test_sets:
     input:
-        ALL_IN
+        ALL_IN_SHUFFLED if config["qa"]["occurrence"]["shuffle"] else ALL_IN_UNSHUFFLED
     output:
         TRAIN_TEST_SPLIT
     params:
@@ -13,7 +13,7 @@ rule occqa_make_training_and_test_sets:
 
 rule occqa_analyze_results:
     input:
-        responses=ALL_OUT_SHUFFLED if config["qa"]["occurrence"]["shuffle"] else ALL_OUT,
+        responses=f"results/{LLM}/occurrence/responses.tsv",
         train_test_split=TRAIN_TEST_SPLIT
     output:
         NOTEBOOK_OUT
