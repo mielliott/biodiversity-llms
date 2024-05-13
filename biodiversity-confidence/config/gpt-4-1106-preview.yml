@@ -2,8 +2,9 @@ llm: gpt-4-1106-preview
 random_seed: 69847
 qa:
   occurrence:
+    input: results/input/all-shuffled-69847.tsv
     shuffle: true
-    query_limit: 20000
+    query_limit: 40000
     batch_size: 100
   taxonomy:
     shuffle: false

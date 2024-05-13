@@ -2,8 +2,9 @@ llm: gpt-3.5-turbo-0613
 random_seed: 69847
 qa:
   occurrence:
-    shuffle: false
-    query_limit: 0
+    input: results/input/all-shuffled-69847.tsv
+    shuffle: true
+    query_limit: 40000
     batch_size: 100
   taxonomy:
     shuffle: false

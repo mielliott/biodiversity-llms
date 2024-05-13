@@ -32,6 +32,7 @@ rule template_qa_batch:
     output:
         BATCH_OUTPUTS_DIR + "/{first}-{last}.tsv"
     params:
+        prep_command=config["prep_command"],
         qa_command=config["command"],
         qa_args=" ".join(config["args"] + [f"--model {config['llm']}"]),
         qa_questions=lambda wildcards: " ".join([f'"{q} {config["query_suffix"]}"' for q in config["query_templates"]])
@@ -42,6 +43,7 @@ rule template_qa_batch:
     shell:
         """
         workflow/scripts/cat-range {input} {wildcards.first} {wildcards.last}\
+        | {params.prep_command} \
         | {params.qa_command} {params.qa_args} {params.qa_questions}\
         1> {output} 2> {log}
     """
