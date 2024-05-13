@@ -1,9 +1,11 @@
 llm: llama2-7b
 random_seed: 69847
+job_name: idigbio-sample
 qa:
   occurrence:
+    input: results/idigbio-sample/input/all-shuffled-69847.tsv
     shuffle: true
-    query_limit: 0
+    query_limit: 40000
     batch_size: 100
     query_suffix: "Only respond yes or no.\n\nThe answer is"
   taxonomy:

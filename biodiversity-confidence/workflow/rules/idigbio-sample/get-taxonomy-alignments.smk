@@ -1,7 +1,7 @@
 # TODO: use preston
 rule get_nomer_report:
     output:
-        "resources/names-aligned.tsv"
+        f"resources/{JOB}/names-aligned.tsv"
     params:
         records_zip=config["recordset"],
         preston="java -jar resources/preston.jar",
@@ -14,9 +14,9 @@ rule get_nomer_report:
 
 rule process_report:
     input:
-        "resources/names-aligned.tsv"
+        f"resources/{JOB}/names-aligned.tsv"
     output:
-        "results/input/alignments.tsv",
-        "results/input/bad-names.tsv"
+        f"results/{JOB}/input/alignments.tsv",
+        f"results/{JOB}/input/bad-names.tsv"
     script:
         "../scripts/taxonomy/process-nomer-report.py"

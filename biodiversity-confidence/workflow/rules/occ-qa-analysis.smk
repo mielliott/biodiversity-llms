@@ -13,7 +13,7 @@ rule occqa_make_training_and_test_sets:
 
 rule occqa_analyze_results:
     input:
-        responses=f"results/{LLM}/occurrence/responses.tsv",
+        responses=f"results/{JOB}/{LLM}/occurrence/responses.tsv",
         train_test_split=TRAIN_TEST_SPLIT
     output:
         NOTEBOOK_OUT

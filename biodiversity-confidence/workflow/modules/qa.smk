@@ -1,4 +1,5 @@
-print(config)
+print("QA config:", config, "\n")
+
 if "shuffle" in config and config["shuffle"]:
     BATCH_OUTPUTS_DIR = f"{config['output_dir']}/{config['batch_size']}-shuffled-{config['random_seed']}"
 else:

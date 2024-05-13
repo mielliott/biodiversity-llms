@@ -3,41 +3,42 @@ configfile: "config/defaults.yml"
 from deepmerge import Merger
 config = Merger([(dict, ["merge"])], ["override"], ["override"]).merge(config["defaults"], config)
 
+JOB = config["job_name"]
 LLM = config["llm"]
 
-PRESENCE_IN_UNFILTERED = "results/input/presence-unfiltered.tsv"
-PRESENCE_IN = "results/input/presence.tsv"
-ABSENCE_IN = "results/input/absence.tsv"
-ALL_IN_UNSHUFFLED = "results/input/all.tsv"
-ALL_IN_SHUFFLED = f"results/input/all-shuffled-{config['random_seed']}.tsv"
-TRAIN_TEST_SPLIT = "results/input/train_test_split.tsv"
+PRESENCE_IN_UNFILTERED = f"results/{JOB}/input/presence-unfiltered.tsv"
+PRESENCE_IN = f"results/{JOB}/input/presence.tsv"
+ABSENCE_IN = f"results/{JOB}/input/absence.tsv"
+ALL_IN_UNSHUFFLED = f"results/{JOB}/input/all.tsv"
+ALL_IN_SHUFFLED = f"results/{JOB}/input/all-shuffled-{config['random_seed']}.tsv"
+TRAIN_TEST_SPLIT = f"results/{JOB}/input/train_test_split.tsv"
 
-ABSENCE_VALID = "results/input/absence-valid.tsv"
+ABSENCE_VALID = f"results/{JOB}/input/absence-valid.tsv"
 
-NOTEBOOK_OUT = f"results/{LLM}/" + config["results"]["notebook"]
-TAXQA_NOTEBOOK_OUT = f"results/{LLM}/taxqa-results.py.ipynb"
+NOTEBOOK_OUT = f"results/{JOB}/{LLM}/" + config["results"]["notebook"]
+TAXQA_NOTEBOOK_OUT = f"results/{JOB}/{LLM}/taxqa-results.py.ipynb"
 
 print(NOTEBOOK_OUT)
 print(TAXQA_NOTEBOOK_OUT)
-def make_qa_config(job):
+def make_qa_config(template):
     c = {"llm": config["llm"]}
     c |= config["qa"]["defaults"]
-    c |= config["qa"][job]
-    if "random_seed" not in c: c|= {"random_seed": config["random_seed"]}
-    if "output_dir" not in c: c |= {"output_dir": f"results/{c['llm']}/{job}"}
+    c |= config["qa"][template]
+    if "random_seed" not in c: c |= {"random_seed": config["random_seed"]}
+    if "output_dir" not in c: c |= {"output_dir": f"results/{JOB}/{c['llm']}/{template}"}
     return c
 
 config["qa"]["test"] = make_qa_config("test")
 config["qa"]["occurrence"] = make_qa_config("occurrence")
 config["qa"]["taxonomy"] = make_qa_config("taxonomy")
 
-include: "rules/occurrence/get-records.smk"
-include: "rules/occurrence/make-presence-tsv.smk"
-include: "rules/occurrence/make-absence-tsv.smk"
-include: "rules/occurrence/combine-tsv.smk"
-
-include: "rules/taxonomy/get-taxonomy-alignments.smk"
-include: "rules/taxonomy/make-taxonomy-questions.smk"
+if JOB == "idigbio-sample":
+    include: "rules/idigbio-sample/get-records.smk"
+    include: "rules/idigbio-sample/make-presence-tsv.smk"
+    include: "rules/idigbio-sample/make-absence-tsv.smk"
+    include: "rules/idigbio-sample/combine-tsv.smk"
+    include: "rules/idigbio-sample/get-taxonomy-alignments.smk"
+    include: "rules/idigbio-sample/make-taxonomy-questions.smk"
 
 include: "rules/tsv.smk"
 include: "rules/occ-qa-analysis.smk"

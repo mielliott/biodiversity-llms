@@ -1,8 +1,9 @@
 llm: gpt-3.5-turbo-0613
 random_seed: 69847
+job_name: idigbio-sample
 qa:
   occurrence:
-    input: results/input/all-shuffled-69847.tsv
+    input: results/idigbio-sample/input/all-shuffled-69847.tsv
     shuffle: true
     query_limit: 40000
     batch_size: 100

@@ -6,16 +6,16 @@ from glob import glob
 # and we can simplify this
 rule extract_records:
     input:
-        "resources/records.zip"
+        f"resources/{JOB}/records.zip"
     output:
-        directory("resources/records")
+        directory(f"resources/{JOB}/records")
     shell:
         "unzip {input} -d {output}"
 
 rule clean_records:
     input:
-        folder="resources/records",
-        files=glob("resources/records/*.jsonl")
+        folder=f"resources/{JOB}/records",
+        files=glob(f"resources/{JOB}/records/*.jsonl")
     output:
         PRESENCE_IN_UNFILTERED
     params:

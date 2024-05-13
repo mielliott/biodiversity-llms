@@ -1,8 +1,8 @@
 rule gather_binomials: # Not used, it's a lot of questions and genus is present in binomial, so might as well only test on genus
     input:
-        "resources/records.zip"
+        f"resources/{JOB}/records.zip"
     output:
-        "results/input/taxa-species.tsv"
+        f"results/{JOB}/input/taxa-species.tsv"
     shell:
         # unzip -p {input} | split -n r/1/5 | jq .indexTerms\
         """
@@ -23,9 +23,9 @@ RANKS = [
 
 rule gather_taxa_for_upper_ranks:
     input:
-        "resources/records.zip"
+        f"resources/{JOB}/records.zip"
     output:
-        "results/input/taxa-{rank}.tsv"
+        f"results/{JOB}/input/taxa-{{rank}}.tsv"
     params:
         fields=",".join(RANKS + ["taxon"]),
         higher_ranks=lambda wildcards: ",".join(RANKS[:RANKS.index(wildcards.rank)])
@@ -43,13 +43,13 @@ rule gather_taxa_for_upper_ranks:
 
 checkpoint make_taxonomy_questions:
     input:
-        phylum="results/input/taxa-phylum.tsv",
-        class_="results/input/taxa-class.tsv",
-        order="results/input/taxa-order.tsv",
-        family="results/input/taxa-family.tsv",
-        genus="results/input/taxa-genus.tsv",
+        phylum=f"results/{JOB}/input/taxa-phylum.tsv",
+        class_=f"results/{JOB}/input/taxa-class.tsv",
+        order=f"results/{JOB}/input/taxa-order.tsv",
+        family=f"results/{JOB}/input/taxa-family.tsv",
+        genus=f"results/{JOB}/input/taxa-genus.tsv",
     output:
-        "results/input/taxonomy-qa.tsv"
+        f"results/{JOB}/input/taxonomy-qa.tsv"
     params:
         ranks=RANKS
     script:
