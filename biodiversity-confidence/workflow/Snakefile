@@ -1,5 +1,6 @@
 configfile: "config/defaults.yml"
 
+import os
 from deepmerge import Merger
 config = Merger([(dict, ["merge"])], ["override"], ["override"]).merge(config["defaults"], config)
 
@@ -18,8 +19,6 @@ ABSENCE_VALID = f"results/{JOB}/input/absence-valid.tsv"
 NOTEBOOK_OUT = f"results/{JOB}/{LLM}/" + config["results"]["notebook"]
 TAXQA_NOTEBOOK_OUT = f"results/{JOB}/{LLM}/taxqa-results.py.ipynb"
 
-print(NOTEBOOK_OUT)
-print(TAXQA_NOTEBOOK_OUT)
 def make_qa_config(template):
     c = {"llm": config["llm"]}
     c |= config["qa"]["defaults"]
@@ -32,17 +31,12 @@ config["qa"]["test"] = make_qa_config("test")
 config["qa"]["occurrence"] = make_qa_config("occurrence")
 config["qa"]["taxonomy"] = make_qa_config("taxonomy")
 
-if JOB == "idigbio-sample":
-    include: "rules/idigbio-sample/get-records.smk"
-    include: "rules/idigbio-sample/make-presence-tsv.smk"
-    include: "rules/idigbio-sample/make-absence-tsv.smk"
-    include: "rules/idigbio-sample/combine-tsv.smk"
-    include: "rules/idigbio-sample/get-taxonomy-alignments.smk"
-    include: "rules/idigbio-sample/make-taxonomy-questions.smk"
-
 include: "rules/tsv.smk"
 include: "rules/occ-qa-analysis.smk"
 include: "rules/tax-qa-analysis.smk"
+
+if os.path.exists(f"rules/{JOB}/Snakefile"):
+    include: f"rules/{JOB}/Snakefile"
 
 module test_qa_workflow:
     snakefile: "modules/qa.smk"
