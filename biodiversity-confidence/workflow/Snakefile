@@ -19,6 +19,7 @@ ABSENCE_VALID = f"results/{JOB}/input/absence-valid.tsv"
 NOTEBOOK_OUT = f"results/{JOB}/{LLM}/" + config["results"]["notebook"]
 TAXQA_NOTEBOOK_OUT = f"results/{JOB}/{LLM}/taxqa-results.py.ipynb"
 
+print(NOTEBOOK_OUT)
 def make_qa_config(template):
     c = {"llm": config["llm"]}
     c |= config["qa"]["defaults"]
@@ -34,6 +35,7 @@ config["qa"]["taxonomy"] = make_qa_config("taxonomy")
 include: "rules/tsv.smk"
 include: "rules/occ-qa-analysis.smk"
 include: "rules/tax-qa-analysis.smk"
+include: "rules/get-taxonomy-alignments.smk"
 
 if os.path.exists(f"rules/{JOB}/Snakefile"):
     include: f"rules/{JOB}/Snakefile"

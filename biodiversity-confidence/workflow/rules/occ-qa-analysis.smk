@@ -14,7 +14,10 @@ rule occqa_make_training_and_test_sets:
 rule occqa_analyze_results:
     input:
         responses=f"results/{JOB}/{LLM}/occurrence/responses.tsv",
-        train_test_split=TRAIN_TEST_SPLIT
+        taxonomy_scores=f"results/{JOB}/{LLM}/taxonomy/summary.tsv",
+        taxonomy=f"results/{JOB}/input/taxa-genus.tsv",
+        taxon_counts="resources/idigbio-sample/taxon-counts.tsv",
+        train_test_split=TRAIN_TEST_SPLIT,
     output:
         NOTEBOOK_OUT
     params:

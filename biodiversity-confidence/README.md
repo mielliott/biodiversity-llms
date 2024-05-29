@@ -9,7 +9,13 @@ mamba activate snakemake
 * Run taxonomy QA for GPT-3.5:
 
 ```bash
-snakemake "results/idigbio-sample/gpt-3.5-turbo-0613/taxonomy/responses.tsv" --sdm "conda" -c 8 --configfile "config/gpt-3.5-turbo-0613.yml"
+snakemake "results/idigbio-sample/gpt-3.5-turbo-0613/taxonomy/responses.tsv" --sdm "conda" -c 8 --configfile "config/idigbio-sample/gpt-3.5-turbo-0613.yml"
+```
+
+* Run US counties occurrence questions for GPT-4
+
+```bash
+snakemake "results/us-maps/gpt-4-1106-preview/occurrence/responses.tsv" --sdm "conda" -c 8 --configfile "config/us-maps/gpt-4-1106-preview.yml"
 ```
 
 ## Future work

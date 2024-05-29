@@ -1,0 +1,17 @@
+llm: gpt-4-1106-preview
+random_seed: 69847
+job_name: us-maps
+nomer_alignment_report_url: https://raw.githubusercontent.com/mielliott/us-maps-alignment/main/alignment-report/names-aligned.tsv
+qa:
+  occurrence:
+    input: results/us-maps/input/all.tsv
+    batch_size: 100
+    query_limit: 15000
+    shuffle: false
+  taxonomy:
+    input: results/us-maps/input/taxonomy-qa.tsv
+    shuffle: false
+    query_limit: 0
+    batch_size: 100
+results:
+  notebook: COMING-SOON.py.ipynb

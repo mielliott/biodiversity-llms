@@ -5,10 +5,11 @@ rule get_nomer_report:
     params:
         records_zip=config["recordset"],
         preston="java -jar resources/preston.jar",
-        remotes=",".join(config["preston"]["remotes"])
+        remotes=",".join(config["preston"]["remotes"]),
+        report_url=config["nomer_alignment_report_url"]
     shell:
         """
-        curl -L https://raw.githubusercontent.com/mielliott/idigbio-sample-alignment/main/alignment-report/names-aligned.tsv\
+        curl -L {params.report_url}\
          > {output}
         """
 

@@ -5,6 +5,7 @@ defaults:
   llm: llama2-7b
   random_seed: 69847
   recordset: hash://md5/8f0594be7f88e4fc7b30c0854e7ca029
+  nomer_alignment_report_url: https://raw.githubusercontent.com/mielliott/idigbio-sample-alignment/main/alignment-report/names-aligned.tsv
   qa:
     defaults:
       prep_command: cat
@@ -14,7 +15,7 @@ defaults:
       batch_size: 1
     occurrence:
       prep_command: grep -v fungi
-      input: results/input/all.tsv
+      input: results/idigbio-sample/input/all.tsv
       args:
         - --max-tokens 1
         - --timeout 10
