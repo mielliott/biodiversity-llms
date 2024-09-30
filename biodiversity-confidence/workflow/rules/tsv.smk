@@ -2,7 +2,7 @@ checkpoint shuffle_tsv:
     input:
         "{file}.tsv"
     output:
-        "{file}.tsv.shuffled"
+        f"{{file}}-shuffled-{config['random_seed']}.tsv"
     params:
         seed=config["random_seed"]
     shell:
