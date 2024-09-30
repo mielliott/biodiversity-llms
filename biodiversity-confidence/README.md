@@ -35,6 +35,19 @@ snakemake "results/idigbio-sample/gpt-3.5-turbo-0613/taxonomy/responses.tsv" \
 | dot -Tpdf > docs/processes/idigbio-sample-taxqa.pdf
 ```
 
+```bash
+snakemake "results/idigbio-sample/gpt-3.5-turbo-0613/process-occ-gpt.py.ipynb" \
+--sdm "conda" --configfile "config/idigbio-sample/gpt-test.yml" \
+--forceall --dag \
+| dot -Tpdf > docs/processes/idigbio-sample-results.pdf
+```
+
+The generated PDFs are [here](docs/idigbio-sample/).
+
+Here's the full process DAG:
+
+![Full process DAG](docs/idigbio-sample/idigbio-sample-results.png)
+
 ## Future work
 
 * Improve taxonomy QA
