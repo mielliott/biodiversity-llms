@@ -33,7 +33,7 @@ include: "rules/occ-qa-analysis.smk"
 include: "rules/tax-qa-analysis.smk"
 include: "rules/get-taxonomy-alignments.smk"
 
-if os.path.exists(f"rules/{JOB}/Snakefile"):
+if os.path.exists(f"workflow/rules/{JOB}/Snakefile"):
     include: f"rules/{JOB}/Snakefile"
 
 module test_qa_workflow:
