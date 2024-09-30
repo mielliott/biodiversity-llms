@@ -1,21 +1,8 @@
 from glob import glob
 
-# Can't just use `unzip -p` because it extracts files in different order than
-# `unzip [in] -d [dir] & cat [dir]/*` which was used before automating things.
-# If we end up submitting all queries for the gpt4 job, then order won't matter
-# and we can simplify this
-rule extract_records:
-    input:
-        f"resources/{JOB}/records.zip"
-    output:
-        directory(f"resources/{JOB}/records")
-    shell:
-        "unzip {input} -d {output}"
-
 rule clean_records:
     input:
-        folder=f"resources/{JOB}/records",
-        files=glob(f"resources/{JOB}/records/*.jsonl")
+        f"resources/{JOB}/records.zip"
     output:
         f"results/{JOB}/input/presence-unfiltered.tsv"
     params:
@@ -24,7 +11,7 @@ rule clean_records:
         "logs/clean_raws.log"
     shell:
         """
-        cat {input.files:q}\
+        unzip -p {input}\
         | jq .indexTerms\
         | mlr --ijson --otsv template -f {params.fields} --fill-with MISSING\
         | grep -v MISSING\
