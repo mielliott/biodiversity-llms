@@ -1,4 +1,4 @@
-print("QA config:", config, "\n")
+# print(f"Config for QA job \"{config['output_dir']}\":\n", config, "\n")
 
 if "shuffle" in config and config["shuffle"]:
     BATCH_OUTPUTS_DIR = f"{config['output_dir']}/{config['batch_size']}-shuffled-{config['random_seed']}"
@@ -19,7 +19,7 @@ def get_batch_path(batch, batch_size, limit):
     path = f"{BATCH_OUTPUTS_DIR}/{first}-{last}.tsv"
     return path
 
-rule template_qa:
+rule answer_questions:
     input:
         ancient(get_batches)
     output:
@@ -27,7 +27,7 @@ rule template_qa:
     shell:
         "mlr --tsvlite cat {input} > {output}"
 
-rule template_qa_batch:
+rule answer_questions_batch:
     input:
         config["input"]
     output:

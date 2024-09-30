@@ -3,11 +3,11 @@ def get_batches(wildcards):
     batch_size = config["batch_size"]
     num_lines = sum(1 for line in open(config["input"])) - 1 # Don't count the header line
     
-    print("INPUT IS ", config["input"])
-    print("NUM LINES IS", num_lines)
-    print("OUTPUTS_DIR IS ", OUTPUTS_DIR)
+    # print("INPUT IS ", config["input"])
+    # print("NUM LINES IS", num_lines)
+    # print("OUTPUTS_DIR IS ", OUTPUTS_DIR)
     limit = num_lines if config["query_limit"] <= 0 else min(num_lines, config["query_limit"])
-    print("Batches: ", [get_batch_path(batch, batch_size, limit) for batch in range(ceil(limit / batch_size))])
+    # print("Batches: ", [get_batch_path(batch, batch_size, limit) for batch in range(ceil(limit / batch_size))])
     return [get_batch_path(batch, batch_size, limit) for batch in range(ceil(limit / batch_size))]
 
 def get_batch_path(batch, batch_size, limit):

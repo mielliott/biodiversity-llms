@@ -19,6 +19,22 @@ snakemake "results/idigbio-sample/gpt-3.5-turbo-0613/taxonomy/responses.tsv" --s
 snakemake "results/us-maps/gpt-4-1106-preview/occurrence/responses.tsv" --sdm "conda" -c 8 --configfile "config/us-maps/gpt-4-1106-preview.yml"
 ```
 
+## Create process figures
+
+```bash
+snakemake "results/idigbio-sample/gpt-3.5-turbo-0613/occurrence/responses.tsv" \
+--sdm "conda" --configfile "config/idigbio-sample/gpt-test.yml" \
+--forceall --dag \
+| dot -Tpdf > docs/processes/idigbio-sample-occqa.pdf
+```
+
+```bash
+snakemake "results/idigbio-sample/gpt-3.5-turbo-0613/taxonomy/responses.tsv" \
+--sdm "conda" --configfile "config/idigbio-sample/gpt-test.yml" \
+--forceall --dag \
+| dot -Tpdf > docs/processes/idigbio-sample-taxqa.pdf
+```
+
 ## Future work
 
 * Improve taxonomy QA
