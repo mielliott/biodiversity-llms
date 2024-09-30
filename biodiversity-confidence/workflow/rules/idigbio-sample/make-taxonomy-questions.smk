@@ -36,7 +36,6 @@ rule gather_taxa_for_upper_ranks:
         | jq "{{{params.higher_ranks}, taxon: .{wildcards.rank}}}"\
         | mlr --ijson --otsv uniq -a\
         | mlr --tsvlite template -f {params.fields} --fill-with ""\
-        | mlr --tsvlite filter '$kingdom != "fungi"'\
         | grep -vE "^null$"\
         > {output}
         """
