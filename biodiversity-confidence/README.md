@@ -1,6 +1,8 @@
 ## Workflow execution examples
 
-First activate a snakemake environment:
+Install [mamba](https://github.com/conda-forge/miniforge#install) or similar.
+
+Activate a [snakemake](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html) environment:
 
 ```bash
 mamba create -n snakemake --file environment.yml
