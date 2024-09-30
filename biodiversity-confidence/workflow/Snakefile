@@ -7,19 +7,15 @@ config = Merger([(dict, ["merge"])], ["override"], ["override"]).merge(config["d
 JOB = config["job_name"]
 LLM = config["llm"]
 
-PRESENCE_IN_UNFILTERED = f"results/{JOB}/input/presence-unfiltered.tsv"
 PRESENCE_IN = f"results/{JOB}/input/presence.tsv"
 ABSENCE_IN = f"results/{JOB}/input/absence.tsv"
 ALL_IN_UNSHUFFLED = f"results/{JOB}/input/all.tsv"
-ALL_IN_SHUFFLED = f"results/{JOB}/input/all-shuffled-{config['random_seed']}.tsv"
-TRAIN_TEST_SPLIT = f"results/{JOB}/input/train_test_split.tsv"
 
 ABSENCE_VALID = f"results/{JOB}/input/absence-valid.tsv"
 
 NOTEBOOK_OUT = f"results/{JOB}/{LLM}/" + config["results"]["notebook"]
 TAXQA_NOTEBOOK_OUT = f"results/{JOB}/{LLM}/taxqa-results.py.ipynb"
 
-print(NOTEBOOK_OUT)
 def make_qa_config(template):
     c = {"llm": config["llm"]}
     c |= config["qa"]["defaults"]

@@ -17,7 +17,7 @@ rule clean_records:
         folder=f"resources/{JOB}/records",
         files=glob(f"resources/{JOB}/records/*.jsonl")
     output:
-        PRESENCE_IN_UNFILTERED
+        f"results/{JOB}/input/presence-unfiltered.tsv"
     params:
         fields=",".join([f'"{field}' for field in config["qa"]["occurrence"]["query_fields"]])
     log:
@@ -35,7 +35,7 @@ rule clean_records:
 
 rule filter_raws_to_presence_tsv:
     input:
-        PRESENCE_IN_UNFILTERED
+        f"results/{JOB}/input/presence-unfiltered.tsv"
     output:
         PRESENCE_IN
     script:

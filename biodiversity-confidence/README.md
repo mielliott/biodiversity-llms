@@ -1,8 +1,9 @@
 ## Workflow execution examples
 
-First activate the conda environment:
+First activate a snakemake environment:
 
 ```bash
+mamba create -n snakemake --file environment.yml
 mamba activate snakemake
 ```
 
