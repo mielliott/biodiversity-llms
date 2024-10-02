@@ -32,5 +32,5 @@ This GPT3.5 workflow takes 1+ hours and costs ~$2.50 USD
 ```sh
 mamba env create -n snakemake -f environment.yml
 mamba activate snakemake
-snakemake --cores 1 --configfile config/gpt-3.5-turbo-0613 --sdm conda
+snakemake --cores 1 --configfile config/gpt-3.5-turbo-0125 --sdm conda
 ```

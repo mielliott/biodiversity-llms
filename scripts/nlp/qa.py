@@ -19,7 +19,7 @@ import util
 HUGGING_FACE_TOKEN = os.getenv("ME_HUGGINGFACE_ACCESS")
 
 MODELS = {
-    "gpt-3.5-turbo-0613": lambda args: GPT("gpt-3.5-turbo-0613", args.max_tokens, args.timeout, args.top_p),
+    "gpt-3.5-turbo-0125": lambda args: GPT("gpt-3.5-turbo-0125", args.max_tokens, args.timeout, args.top_p),
     "gpt-4-1106-preview": lambda args: GPT("gpt-4-1106-preview", args.max_tokens, args.timeout, args.top_p),
     "llama2-7b": lambda args: Llama2("meta-llama/Llama-2-7b-hf", args.max_tokens, args.num_responses, args.top_p, args.top_k, args.api_access_key or HUGGING_FACE_TOKEN)
 }
@@ -27,7 +27,7 @@ MODELS = {
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Submit questions to GPT 3.5 turbo")
     parser.add_argument("patterns", nargs="+")
-    parser.add_argument("--model", "-m", default="gpt-3.5-turbo-0613", type=str, choices=MODELS)
+    parser.add_argument("--model", "-m", default="gpt-3.5-turbo-0125", type=str, choices=MODELS)
     parser.add_argument("--api-access-key", "-a", default=None, type=str)
     parser.add_argument("--num-responses", "-r", default=10, type=int)
     parser.add_argument("--max-tokens", "-t", default=1, type=int)

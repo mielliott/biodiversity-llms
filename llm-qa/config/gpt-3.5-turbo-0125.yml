@@ -1,4 +1,4 @@
-llm: gpt-3.5-turbo-0613
+llm: gpt-3.5-turbo-0125
 random_seed: 69847
 qa:
   shuffle: false
