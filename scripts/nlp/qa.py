@@ -15,6 +15,9 @@ import argparse
 from models.openai import GPT
 from models.llama2 import Llama2
 import util
+from dotenv import load_dotenv
+
+load_dotenv()
 
 HUGGING_FACE_TOKEN = os.getenv("ME_HUGGINGFACE_ACCESS")
 
