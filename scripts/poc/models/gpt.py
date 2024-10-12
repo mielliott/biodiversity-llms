@@ -4,7 +4,7 @@ import time
 from dotenv import load_dotenv
 from openai import OpenAI
 from typing import Any, Dict, Iterable
-from .registery import ModelRegistry
+from .registry import ModelRegistry
 from .model import Model
 
 @ModelRegistry.register("gpt-3.5-turbo-0125")
@@ -28,8 +28,13 @@ class GPT(Model):
     def run(self, queries: Iterable[tuple[str,str]]):
 
         for idx, (input, query) in enumerate(queries):
-            response = self.generate(query, n=self.params.get('num_responses', 1), top_p=self.params.get('top_p'), max_tokens=self.params.get('max_tokens'), timeout=self.params.get('timeout'))
-
+            response = self.generate(
+                query, 
+                n=self.params.get('num_responses', 1), 
+                top_p=self.params.get('top_p'), 
+                max_tokens=self.params.get('max_tokens'),
+                timeout=self.params.get('timeout')
+            )
             return self.process_results(idx, input, query, response)
     
     def generate(self, query, **kwargs):
