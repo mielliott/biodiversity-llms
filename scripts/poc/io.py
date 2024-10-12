@@ -1,6 +1,6 @@
 import sys
 
-class IOHandling:
+class IOHandler:
     def __init__(self):
         # parameters
         self.output = []
@@ -26,11 +26,12 @@ class IOHandling:
             
             if do_unescape:
                 values = [v for v in map(self.unescape, values)]
-            
+            queries = []
             for pattern in patterns:
                 if filter(line):
                     field_values = dict(zip(fields, values))
-                    yield (line, pattern.format(**field_values))
+                    queries.append((line, pattern.format(**field_values)))
+            return queries
 
     def record_input(self):
         pass
@@ -41,16 +42,34 @@ class IOHandling:
         # convert data to tsv 
         pass
 
-    def show(self, results): 
-        # Process Result
+    def show(self, results):
         write = lambda *args: print(*args, sep="\t")
-        for i, (input, output) in enumerate(results):
-            # Print header on the first line
-            if i == 0:
-                write(self.header, *output.keys())
-            # Print inputs and outputs
-            write(input, *output.values())
-        pass
+        # Group results by input and query
+        grouped_results = {}
+        for result in results:
+            key = (result['input'], result['query'])
+            if key not in grouped_results:
+                grouped_results[key] = []
+            grouped_results[key].append(result)
+        
+        header = ["Input", "Query", "Response Number", "Response", "Question Number", 
+                "Top Tokens", "Top Tokens Logprobs", "Input Token Count", "Output Token Count"]
+        write(*header)
+        
+        for (input, query), group in grouped_results.items():
+            for i, result in enumerate(group, 1):
+                write(
+                    input,
+                    query,
+                    i,
+                    result['responses'],
+                    result['question number'],
+                    result['top tokens'],
+                    result['top tokens logprobs'],
+                    result['input token count'],
+                    result['output token count']
+                )
+            print()
 
     def save_output(self):
         pass
