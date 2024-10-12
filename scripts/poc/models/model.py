@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Dict, Any, Iterable
 
 class Model(ABC):
     @abstractmethod
@@ -8,6 +8,10 @@ class Model(ABC):
     
     @abstractmethod
     def set_parameters(self, params: Dict[str, Any]):
+        pass
+    
+    @abstractmethod
+    def run(self, queries: Iterable[tuple[str,str]]):
         pass
     
     @abstractmethod
