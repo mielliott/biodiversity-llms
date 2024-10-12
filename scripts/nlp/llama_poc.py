@@ -1,9 +1,8 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
-# base_model = "/home/nitingoyal/storage/hf-models/meta-llama3.2-3B-instruct"
-# get it from online
-# base_model = "meta-llama/Llama-3.2-1B-Instruct"
+# Get the model from online
+base_model = "meta-llama/Llama-3.2-1B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(base_model)
 
 model = AutoModelForCausalLM.from_pretrained(
@@ -20,19 +19,27 @@ if tokenizer.pad_token_id is None:
 if model.config.pad_token_id is None:
     model.config.pad_token_id = model.config.eos_token_id
 
-pipe = pipeline(
-    "text-generation",
-    model=model,
-    tokenizer=tokenizer,
-    torch_dtype=torch.float16,
-    device_map="auto",
+# Your question as a string
+prompt = "Does Acer saccharum naturally occur in Arkansas? Yes or no"
+
+# Tokenize the input
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+
+# Generate a response with additional parameters
+outputs = model.generate(
+    **inputs,
+    max_new_tokens=1,
+    do_sample=True,
+    temperature=0.7,
+    top_k=50,
+    top_p=0.95,
+    repetition_penalty=1.2,
+    length_penalty=1.0,
+    no_repeat_ngram_size=3,
+    num_return_sequences=1,
+    early_stopping=True
 )
 
-# Your question as a string
-prompt = "Who is Vincent van Gogh?"
-
-# Generate a response
-outputs = pipe(prompt, max_new_tokens=200, do_sample=True)
-
-# Output generated text
-print(outputs[0]["generated_text"])
+# Decode and print the generated text
+generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+print(f'generated_text: {generated_text}')
