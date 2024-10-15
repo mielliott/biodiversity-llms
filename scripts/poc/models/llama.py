@@ -15,10 +15,7 @@ class Llama(Model):
         load_dotenv()
         self.params: Dict[str, Any] = {}
         self.model = None
-        # torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model_name = "meta-llama/Llama-3.2-1B-Instruct"
-        self.MAX_TOKENS = 35*1000
-        self.batch_input_length = 0
+        self.model_name = "meta-llama/Llama-3.2-3B"
 
     def get_model_info(self) -> dict:
         return {
@@ -80,8 +77,6 @@ class Llama(Model):
                 inputs = [inputs]
             else: 
                 inputs, queries = zip(*batch)
-            print(f"Inputs: {inputs}")
-            print(f"Queries: {queries}")
             responses = self.generate(
                 queries,
             )
@@ -93,12 +88,9 @@ class Llama(Model):
         input_ids, attention_mask = self.tokenize(
             queries
         )
-        self.batch_input_length = input_ids.shape[1]
-        max_completion_length = self.batch_input_length + self.params.get('max_tokens', 512)
-        print(f"Input.numel(): {input_ids.numel()}")
-        for input_id in input_ids:
-            print(f"detokenized input ids: ", self.tokenizer.decode(input_id, skip_special_tokens=True))
-
+        batch_input_length = input_ids.shape[1]
+        max_completion_length = batch_input_length + self.params.get('max_tokens', 512)
+        print(f'Batch: {queries}')
         with torch.no_grad():
             try:
                 outputs = self.model.generate(
@@ -112,7 +104,7 @@ class Llama(Model):
                     output_scores=True,
                     low_memory=True,
                     return_dict_in_generate=True,
-                    max_new_tokens=50,
+                    max_new_tokens=10,
                     **kwargs
                 )
                 return outputs
@@ -127,12 +119,8 @@ class Llama(Model):
         results = []
         generated_sequences = outputs.sequences
         scores = outputs.scores
-        for sequence in outputs.sequences:
-            print("Detokenized Output: ", self.tokenizer.decode(sequence, skip_special_tokens=True))
 
         for i, (input, query) in enumerate(zip(inputs, queries)):
-            # handle responses for batch
-            print(f'Input Response: {input} Query: {query}')
             start_idx = i * self.params.get('num_responses', 1)
             end_idx = (i + 1) * self.params.get('num_responses', 1)
             
@@ -145,7 +133,6 @@ class Llama(Model):
             for _, (seq, seq_scores) in enumerate(zip(batch_sequences, zip(*batch_scores))):
                 response_text = self.tokenizer.decode(seq, skip_special_tokens=True)
                 response_text = response_text[len(query):].strip() 
-                print(f'Response: {response_text}')
 
                 output_tokens = self.tokenizer.encode(response_text)
                 output_token_count = len(output_tokens)
@@ -171,12 +158,6 @@ class Llama(Model):
                 })
 
         return results
-  
-    def index_of_first_non_whitespace_token(self, sequence: torch.Tensor):
-        for i, token in enumerate(sequence):
-            token_string = self.tokenizer.decode(sequence[i].unsqueeze(0))
-            if not token_string.isspace():
-                return i
 
     def tokenize(self, queries):
         inputs = self.tokenizer(
