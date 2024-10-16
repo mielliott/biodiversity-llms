@@ -48,10 +48,24 @@ def main():
     )
     
     # TODO: Fix hijacked input later
-    # queries.append(('Bangale Tiger\tIndia', 'Does Bangale Tiger naturally occur in India? Yes or no'))
+    # queries.append(('Bengal Tiger\tIndia', 'Does Bengal Tiger naturally occur in India? Yes or no?'))
+    # queries.append(('Acer saccharum\tArkansas', 'Does Acer saccharum naturally occur in Arkansas? Yes or no'))
+    # queries.append(('Acer saccharum\tArkansas', 'Does Acer saccharum naturally occur in Arkansas? Yes or no'))
+    # queries.append(('Acer saccharum\tArkansas', 'Does Acer saccharum naturally occur in Arkansas? Yes or no'))
+    # queries.append(('Acer saccharum\tArkansas', 'Does Acer saccharum naturally occur in Arkansas? Yes or no'))
+    # queries.append(('Acer saccharum\tArkansas', 'Does Acer saccharum naturally occur in Arkansas? Yes or no'))
+    # queries.append(('Acer saccharum\tArkansas', 'Does Acer saccharum naturally occur in Arkansas? Yes or no'))
     # queries.append(('Acer saccharum\tArkansas', 'Does Acer saccharum naturally occur in Arkansas? Yes or no'))
     # queries.append(('Bear\tUnited States', 'Does Bear naturally occur in United State? Yes or no'))
+    queries.append(('Bear\tUnited States', 'Does Bear naturally occur in United State? Yes or no'))
+    # queries.append(('Bear\tUnited States', 'Does Bear naturally occur in United State? Yes or no'))
+    # queries.append(('Bear\tUnited States', 'Does Bear naturally occur in United State? Yes or no'))
+    # queries.append(('Acer saccharum\tArkansas', 'Does Acer saccharum naturally occur in Arkansas? Yes or no'))
+    queries.append(('Parrot\tBrazil', 'Does Parrot naturally occur in Brazil? Yes or no'))
     # queries.append(('Parrot\tBrazil', 'Does Parrot naturally occur in Brazil? Yes or no'))
+    # queries.append(('Parrot\tBrazil', 'Does Parrot naturally occur in Brazil? Yes or no'))
+    # queries.append(('Parrot\tBrazil', 'Does Parrot naturally occur in Brazil? Yes or no'))
+    # queries.append(('Acer saccharum\tArkansas', 'Does Acer saccharum naturally occur in Arkansas? Yes or no'))
 
     runner.run_experiment(queries)
 

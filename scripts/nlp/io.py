@@ -17,6 +17,11 @@ class IOHandler:
             return eval(string)
         else:
             return string
+    
+    def batched(iterable, n):
+        args = [iter(iterable)] * n
+        return zip(*args)
+
         
     def generate_query(self, patterns, lines, do_unescape, filter=lambda x: True):
         fields = self.header.split("\t")
