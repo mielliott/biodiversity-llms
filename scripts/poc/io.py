@@ -1,4 +1,5 @@
 import sys
+from collections import defaultdict
 
 class IOHandler:
     def __init__(self):
@@ -44,32 +45,32 @@ class IOHandler:
 
     def show(self, results):
         write = lambda *args: print(*args, sep="\t")
-        # Group results by input and query
-        grouped_results = {}
-        for result in results:
-            key = (result['input'], result['query'])
-            if key not in grouped_results:
-                grouped_results[key] = []
-            grouped_results[key].append(result)
-        header = self.header.split("\t")
-        header.extend(["query", "response number", "response", "question number", 
-                "top tokens", "top tokens logprobs", "input token count", "output token count"])
+        header = self.header.split("\t") + [
+            "query", "response", "question number", 
+            "top tokens", "top tokens logprobs", 
+            "input token count", "output token count"
+        ]
         write(*header)
         
+        # Group results by (input, query)
+        grouped_results = defaultdict(list)
+        for result in results:
+            key = (result['input'], result['query'])
+            grouped_results[key].append(result)
+        
         for (input, query), group in grouped_results.items():
-            for i, result in enumerate(group, 1):
-                write(
+            for result in group:
+                row = [
                     input,
                     query,
-                    i,
                     result['responses'],
                     result['question number'],
                     result['top tokens'],
                     result['top tokens logprobs'],
                     result['input token count'],
                     result['output token count']
-                )
-            print()
+                ]
+                write(*row)
 
     def save_output(self):
         pass

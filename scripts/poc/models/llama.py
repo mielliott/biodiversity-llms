@@ -9,18 +9,20 @@ from .query import Queries
 from torch.utils.data import Dataset, DataLoader
 import tqdm
 
-@ModelRegistry.register("meta-llama/Llama-3.2-1B-Instruct")
+@ModelRegistry.register("meta-llama")
 class Llama(Model):
     def __init__(self):
         load_dotenv()
         self.params: Dict[str, Any] = {}
         self.model = None
-        self.model_name = "meta-llama/Llama-3.2-3B"
+        # default
+        self.model_name = "meta-llama/Llama-3.1-8B"
 
     def get_model_info(self) -> dict:
         return {
-            "name": "Llama",
+            "family": "Meta-Llama",
             "version": "3.2-1b-Instruct",
+            "name": self.model_name,
             "provider": "Hugging Face",
             "device": self.model.device,
             "precision": self.params.get("precision", "float32"),
@@ -52,10 +54,10 @@ class Llama(Model):
             low_cpu_mem_usage=True
         )
 
-        # self.model.tie_weights()
-        
     def set_parameters(self, params):
         self.params.update(params)
+        # set default model from the category
+        self.model_name = "meta-llama/"+self.params.get("model_name", "Llama-3.1-8B")
 
     def run(self, queries: List[Tuple[str, str]]):
         dataset = Queries(queries)
@@ -90,7 +92,6 @@ class Llama(Model):
         )
         batch_input_length = input_ids.shape[1]
         max_completion_length = batch_input_length + self.params.get('max_tokens', 512)
-        print(f'Batch: {queries}')
         with torch.no_grad():
             try:
                 outputs = self.model.generate(
