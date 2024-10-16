@@ -4,12 +4,13 @@ __pycache__/
 .micromamba/
 raw/
 processed/
-**/results/*/*
+results/
+logs/
+
 !**/results/**/*.ipynb
 **/results/**.tsv
 **/results/**.old.*
 **/results/**test*
 
-resources/
-logs/
+biodiversity-confidence/resources/
 *.env

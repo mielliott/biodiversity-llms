@@ -1,9 +1,6 @@
 configfile: "config.yaml"
 
-QA_BATCH_SIZE = config["batch_size"]
-
 OUTPUTS_DIR = config["output_dir"].rstrip("/")
-BATCH_OUTPUTS_DIR = f"{OUTPUTS_DIR}/{str(QA_BATCH_SIZE)}"
 
 print(f"out: {OUTPUTS_DIR}/responses.tsv")
 
