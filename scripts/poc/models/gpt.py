@@ -10,8 +10,8 @@ from .registry import ModelRegistry
 from .model import Model
 from .query import Queries
 
-@ModelRegistry.register("gpt-batch-3.5-turbo-0125")
-class GPTBatched(Model):
+@ModelRegistry.register("open-ai")
+class GPT(Model):
     def __init__(self):
         load_dotenv()
         self.params: Dict[str, Any] = {}
