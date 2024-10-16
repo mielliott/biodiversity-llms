@@ -1,0 +1,25 @@
+llm: gpt-3.5-turbo-0125
+prep_command: cat
+command: python3 ~/biodiversity-llms/scripts/nlp/qa.py
+input: resources/occurrence-qa.tsv
+output_dir: results/occurrence-qa-short
+args: # The arguments to `command`
+  - --max-tokens 1
+  - --num-responses 1
+  - --timeout 10
+shuffle: false
+batch_size: 5
+query_limit: 10 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
+query_fields:
+  - kingdom
+  - phylum
+  - family
+  - genus
+  - specificepithet
+  - country
+  - stateprovince
+  - county
+query_templates:
+  - Does {genus} {specificepithet} naturally occur in {county}, {stateprovince}, {country}?
+  - Can species {genus} {specificepithet} be found in {county}, {stateprovince}, {country}?
+query_suffix: Only respond yes or no.

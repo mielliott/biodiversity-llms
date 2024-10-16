@@ -1,6 +1,0 @@
-llm: llama2-7b
-random_seed: 69847
-qa:
-  shuffle: true
-  query_limit: 0
-  batch_size: 100

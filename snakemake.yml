@@ -2,6 +2,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - python ~=3.12.1
+  - python =3.12
   - snakemake >=8.20
   - deepmerge =1.1
+  - conda >=24.9
