@@ -51,9 +51,9 @@ class IOHandler:
             if key not in grouped_results:
                 grouped_results[key] = []
             grouped_results[key].append(result)
-        
-        header = ["Input", "Query", "Response Number", "Response", "Question Number", 
-                "Top Tokens", "Top Tokens Logprobs", "Input Token Count", "Output Token Count"]
+        header = self.header.split("\t")
+        header.extend(["query", "response number", "response", "question number", 
+                "top tokens", "top tokens logprobs", "input token count", "output token count"])
         write(*header)
         
         for (input, query), group in grouped_results.items():
