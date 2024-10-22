@@ -1,7 +1,7 @@
 
 from typing import Dict, Any
-from .models.registry import ModelRegistry
-from .io import IOHandler
+from models.registry import ModelRegistry
+from llm_io import IOHandler
 
 class ExperimentRunner:
     def __init__(self, model_category: str, params: Dict[str, Any]):

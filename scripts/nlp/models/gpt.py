@@ -16,7 +16,7 @@ class GPT(Model):
         load_dotenv()
         self.params: Dict[str, Any] = {}
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        self.model: str = "gpt-3.5-turbo-0125"
+        self.model_name: str = "gpt-3.5-turbo-0125"
 
     def load_model(self):
         # OpenAI models are accessible through API
@@ -27,8 +27,9 @@ class GPT(Model):
     
     def set_parameters(self, params: Dict[str, Any]):
         self.params = params
+        self.model_name = self.params.get("model_name", "gpt-3.5-turbo-0125")
         
-    def run(self, queries: List[Tuple[str, str]]):
+    def run(self, queries):
         dataset = Queries(queries)
         def custom_collate_fn(batch):
             return batch
@@ -57,21 +58,22 @@ class GPT(Model):
                     n=self.params.get('num_responses', 1), 
                     top_p=self.params.get('top_p'), 
                     max_tokens=self.params.get('max_tokens'),
-                    timeout=self.params.get('timeout')
+                    timeout=self.params.get('timeout'),
+                    temperature=float(self.params.get('temperature', 0.0))
                 )
                 batch_results.extend(self.process_results(questionNumber,[input], [query], response))
                 questionNumber += 1
 
         return batch_results
     
-    def generate(self, message: List[str], **kwargs):
+    def generate(self, message, **kwargs):
         max_retries = 3
         retry_delay = 5
 
         for attempt in range(max_retries):
             try:
                 response = self.client.chat.completions.create(
-                    model=self.model,
+                    model=self.model_name,
                     messages=message,
                     logprobs=True,
                     top_logprobs=2,
@@ -107,11 +109,11 @@ class GPT(Model):
             results.append({
                 "input": inputs[0],
                 "query": repr(queries[0]),
-                "responses": answer,
+                "responses": answer.replace('\n', ' ').replace('\t', ' '),
                 "question number": idx,
                 "top tokens": list(top_token_probs.keys()),
                 "top tokens logprobs": list(top_token_probs.values()),
                 "input token count": responses.usage.prompt_tokens,
-                "output token count": responses.usage.completion_tokens
+                "output token count": responses.usage.completion_tokens,
             })
         return results

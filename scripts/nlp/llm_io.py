@@ -25,6 +25,7 @@ class IOHandler:
         
     def generate_query(self, patterns, lines, do_unescape, filter=lambda x: True):
         fields = self.header.split("\t")
+        
         lines = (l for l in self.lines)
         for line in lines:
             line = line[:-1]

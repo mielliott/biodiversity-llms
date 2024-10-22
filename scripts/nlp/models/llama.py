@@ -133,7 +133,7 @@ class Llama(Model):
 
             for _, (seq, seq_scores) in enumerate(zip(batch_sequences, zip(*batch_scores))):
                 response_text = self.tokenizer.decode(seq, skip_special_tokens=True)
-                response_text = response_text[len(query):].strip() 
+                response_text = response_text[len(query):].strip().replace('\n', ' ').replace('\t', ' ')
 
                 output_tokens = self.tokenizer.encode(response_text)
                 output_token_count = len(output_tokens)

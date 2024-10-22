@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Iterable
+from typing import Dict, Any, List
 
 class Model(ABC):
     @abstractmethod
@@ -11,7 +11,7 @@ class Model(ABC):
         pass
     
     @abstractmethod
-    def run(self, queries: Iterable[tuple[str,str]]):
+    def run(self, queries: List[tuple[str,str]]):
         pass
     
     @abstractmethod
@@ -23,5 +23,5 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def process_results(self, results: list[dict]) -> dict:
+    def process_results(self, results: List[Dict]) -> dict:
         pass
