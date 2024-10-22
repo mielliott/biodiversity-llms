@@ -33,7 +33,7 @@ rule answer_questions_batch:
     params:
         prep_command=config["prep_command"],
         qa_command=config["command"],
-        qa_args=" ".join(config["args"] + [f"--model {config['llm']}"]),
+        qa_args=" ".join(config["args"]),
         qa_questions=lambda wildcards: " ".join([f'"{q} {config["query_suffix"]}"' for q in config["query_templates"]])
     log:
         "logs/" + BATCH_OUTPUTS_DIR + "/{first}-{last}.tsv"

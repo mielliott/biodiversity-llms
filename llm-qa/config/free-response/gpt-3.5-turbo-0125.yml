@@ -1,12 +1,14 @@
-llm: gpt-3.5-turbo-0125
+llm: Llama-3.1-8B
 prep_command: cat
-command: python3 ~/biodiversity-llms/scripts/nlp/qa.py
+command: python3 ~/asic/biodiversity-llms/scripts/nlp/main.py
 input: resources/free-response.tsv
 output_dir: results/free-response
 args: # The arguments to `command`
   - --max-tokens 100
   - --timeout 10
   - --num-responses 2
+  - --model-category "meta-llama"
+  - --model-name "Llama-3.1-8B"
 shuffle: false
 batch_size: 1
 query_limit: 0 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
