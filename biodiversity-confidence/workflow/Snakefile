@@ -1,8 +1,13 @@
-configfile: "config/defaults.yml"
-
 import os
 from deepmerge import Merger
-config = Merger([(dict, ["merge"])], ["override"], ["override"]).merge(config["defaults"], config)
+
+
+configfile: "config/defaults.yml"
+
+
+config = Merger([(dict, ["merge"])], ["override"], ["override"]).merge(
+    config["defaults"], config
+)
 
 JOB = config["job_name"]
 LLM = config["llm"]
@@ -16,41 +21,64 @@ ABSENCE_VALID = f"results/{JOB}/input/absence-valid.tsv"
 NOTEBOOK_OUT = f"results/{JOB}/{LLM}/" + config["results"]["notebook"]
 TAXQA_NOTEBOOK_OUT = f"results/{JOB}/{LLM}/taxqa-results.py.ipynb"
 
+
 def make_qa_config(template):
     c = {"llm": config["llm"]}
     c |= config["qa"]["defaults"]
     c |= config["qa"][template]
-    if "random_seed" not in c: c |= {"random_seed": config["random_seed"]}
-    if "output_dir" not in c: c |= {"output_dir": f"results/{JOB}/{c['llm']}/{template}"}
+    if "random_seed" not in c:
+        c |= {"random_seed": config["random_seed"]}
+    if "output_dir" not in c:
+        c |= {"output_dir": f"results/{JOB}/{c['llm']}/{template}"}
     return c
+
 
 config["qa"]["test"] = make_qa_config("test")
 config["qa"]["occurrence"] = make_qa_config("occurrence")
 config["qa"]["taxonomy"] = make_qa_config("taxonomy")
+
 
 include: "rules/tsv.smk"
 include: "rules/occ-qa-analysis.smk"
 include: "rules/tax-qa-analysis.smk"
 include: "rules/get-taxonomy-alignments.smk"
 
+
 if os.path.exists(f"workflow/rules/{JOB}/Snakefile"):
+
     include: f"rules/{JOB}/Snakefile"
 
+
 module test_qa_workflow:
-    snakefile: "modules/qa.smk"
-    config: config["qa"]["test"]
+    snakefile:
+        "modules/qa.smk"
+    config:
+        config["qa"]["test"]
+
+
 use rule * from test_qa_workflow as test_qa_*
 
+
 module occ_qa_workflow:
-    snakefile: "modules/qa.smk"
-    config: config["qa"]["occurrence"]
+    snakefile:
+        "modules/qa.smk"
+    config:
+        config["qa"]["occurrence"]
+
+
 use rule * from occ_qa_workflow as occ_qa_*
 
+
 module tax_qa_workflow:
-    snakefile: "modules/qa.smk"
-    config: config["qa"]["taxonomy"]
+    snakefile:
+        "modules/qa.smk"
+    config:
+        config["qa"]["taxonomy"]
+
+
 use rule * from tax_qa_workflow as tax_qa_*
+
 
 rule all:
     input:
-        NOTEBOOK_OUT
+        NOTEBOOK_OUT,

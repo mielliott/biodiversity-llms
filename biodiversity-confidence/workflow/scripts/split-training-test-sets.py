@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-smk = snakemake # type: ignore
+
+smk = snakemake  # type: ignore
 
 # TODO: cv instead
 # split_rank = smk.params.split_rank
@@ -27,5 +28,4 @@ df = df[~weird_genera]
 
 # df["train"] = df[split_rank].isin(train_taxons)
 
-df.drop(columns=["present"])\
-    .to_csv(open(smk.output[0], "w"), sep="\t")
+df.drop(columns=["present"]).to_csv(open(smk.output[0], "w"), sep="\t")

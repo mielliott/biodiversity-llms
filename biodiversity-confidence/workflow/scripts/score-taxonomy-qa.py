@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 from functools import reduce
-smk = snakemake # type: ignore
+
+smk = snakemake  # type: ignore
 
 backbone_path = smk.input.backbone
 predictions_path = smk.input.predictions
@@ -58,10 +59,14 @@ def score(rank_prediction) -> pd.Series:
 
     return pd.Series(
         {
-            "num_correct": np.nan
-            if s_taxon_id == None
-            else count(
-                filter(lambda x: x == taxonomy.loc[s_taxon_id][query_rank] == x, ids)
+            "num_correct": (
+                np.nan
+                if s_taxon_id == None
+                else count(
+                    filter(
+                        lambda x: x == taxonomy.loc[s_taxon_id][query_rank] == x, ids
+                    )
+                )
             ),
             "num_response": len(ids),
         }
@@ -75,11 +80,14 @@ def dereference(id: str) -> str:
 def dereference_all(id_df: pd.Series):
     return id_df.apply(dereference)
 
+
 i = 0
+
+
 def score_with_progress(x, n):
     global i
     i += 1
-    print(f"{i}/{n}\t{i / n:.0%}", end="\r", flush=True)
+    print(f"{i}/{n}\t{i/ n:.0%}", end="\r", flush=True)
     return score(x)
 
 

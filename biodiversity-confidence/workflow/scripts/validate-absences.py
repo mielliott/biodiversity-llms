@@ -1,9 +1,11 @@
 import requests as rq
 import pandas as pd
-smk = snakemake # type: ignore
+
+smk = snakemake  # type: ignore
 
 file_in = smk.input[0]
 file_out = smk.output[0]
+
 
 def make_species_location_query(record):
     return {
@@ -13,11 +15,12 @@ def make_species_location_query(record):
             "specificepithet": str(record.specificepithet),
             "country": str(record.country),
             "stateprovince": str(record.stateprovince),
-            "county": str(record.county)
-            },
+            "county": str(record.county),
+        },
         "limit": 1,
-        "offset": 0
+        "offset": 0,
     }
+
 
 absences = pd.read_csv(open(file_in), sep="\t")
 
@@ -31,7 +34,7 @@ for record in absences.itertuples():
 
 absence_matches = pd.Series(responses)
 m = sum(absence_matches == 0)
-print(f"Records missing location: {m}/{n} ({100*m/n:2.2f}%)")
+print(f"Records missing location: {m}/{n} ({100* m/ n:2.2f}%)")
 
 absences["valid"] = absence_matches == 0
 absences["valid"].to_csv(open(file_out, "w"), sep="\t")

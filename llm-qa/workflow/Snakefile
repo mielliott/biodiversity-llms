@@ -1,15 +1,18 @@
 configfile: "config.yaml"
 
+
 OUTPUTS_DIR = config["output_dir"].rstrip("/")
 
 print(f"out: {OUTPUTS_DIR}/responses.tsv")
 
+
 include: "rules/qa.smk"
+
 
 rule all:
     input:
-        f"{OUTPUTS_DIR}/responses.tsv"
+        f"{OUTPUTS_DIR}/responses.tsv",
     output:
-        f"{OUTPUTS_DIR}/all-done"
+        f"{OUTPUTS_DIR}/all-done",
     shell:
         "touch {output}"

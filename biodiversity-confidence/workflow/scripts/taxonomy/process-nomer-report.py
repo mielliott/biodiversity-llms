@@ -1,10 +1,12 @@
 import pandas as pd
 import numpy as np
-smk = snakemake # type: ignore
+
+smk = snakemake  # type: ignore
 
 report_tsv = smk.input[0]
 alignments_tsv = smk.output[0]
 bad_names_tsv = smk.output[1]
+
 
 def clean_name(name):
     if type(name) == str:
@@ -13,14 +15,24 @@ def clean_name(name):
     else:
         return np.nan
 
+
 def clean_path(path):
     if type(path) == str:
         return "|".join([clean_name(x) for x in path.split("|")])
     else:
         return np.nan
-    
-raw = pd.read_csv(report_tsv, sep="\t", dtype=str)\
-    [["providedName", "alignedName", "alignedRank", "alignedCommonNames", "alignedPath", "alignedPathNames"]]
+
+
+raw = pd.read_csv(report_tsv, sep="\t", dtype=str)[
+    [
+        "providedName",
+        "alignedName",
+        "alignedRank",
+        "alignedCommonNames",
+        "alignedPath",
+        "alignedPathNames",
+    ]
+]
 
 # Find names with no matches by nomer
 bads = raw.groupby("providedName")["alignedPath"].count() == 0
@@ -46,9 +58,16 @@ for name, name_aliases in aliases.items():
             name_aliases.update(aliases[alias])
             aliases[alias] = name_aliases
 
-all_paths = data.groupby("providedName")[["alignedPath", "alignedPathNames"]]\
-    .aggregate(lambda x: "|".join(x))\
-    .apply(axis=1, func=lambda r: set(zip(r["alignedPathNames"].split("|"), r["alignedPath"].split("|"))))
+all_paths = (
+    data.groupby("providedName")[["alignedPath", "alignedPathNames"]]
+    .aggregate(lambda x: "|".join(x))
+    .apply(
+        axis=1,
+        func=lambda r: set(
+            zip(r["alignedPathNames"].split("|"), r["alignedPath"].split("|"))
+        ),
+    )
+)
 
 df = pd.DataFrame()
 df["name"] = aliases.keys()

@@ -1,10 +1,10 @@
 checkpoint shuffle_tsv:
     input:
-        "{file}.tsv"
+        "{file}.tsv",
     output:
-        f"{{file}}-shuffled-{config['random_seed']}.tsv"
+        f"{{file}}-shuffled-{config['random_seed']}.tsv",
     params:
-        seed=config["random_seed"]
+        seed=config["random_seed"],
     shell:
         """
         mlr --tsvlite --seed {params.seed} shuffle {input} > {output}
