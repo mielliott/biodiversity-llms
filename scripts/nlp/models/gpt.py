@@ -3,14 +3,14 @@ import sys
 import time
 from dotenv import load_dotenv
 from openai import OpenAI
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 import tqdm
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from .registry import ModelRegistry
 from .model import Model
 from .query import Queries
 
-@ModelRegistry.register("open-ai")
+@ModelRegistry.register("openai")
 class GPT(Model):
     def __init__(self):
         load_dotenv()
