@@ -28,6 +28,7 @@ def main():
     parser.add_argument("--top-k", "-k", default=2, type=int)
     parser.add_argument("--combine-responses", "-c", action="store_true")
     parser.add_argument("--timeout", default=10, type=int)
+    parser.add_argument("--unescape-input", action="store_true")
     parser.add_argument("--test", "-x", action="store_true")
     parser.add_argument("--batch-size", "-bs", default=10, action="store_true")
     parser.add_argument("--temperature", "-temp", default=0.1)
