@@ -3,12 +3,13 @@ import sys
 import time
 from dotenv import load_dotenv
 from openai import OpenAI
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List
 import tqdm
 from torch.utils.data import DataLoader
 from .registry import ModelRegistry
 from .model import Model
-from .query import Queries
+from .query import QueryDataset
+
 
 @ModelRegistry.register("openai")
 class GPT(Model):
@@ -24,48 +25,47 @@ class GPT(Model):
 
     def get_model_info(self) -> dict:
         return {"name": "GPT-3.5 Turbo", "version": "0125"}
-    
+
     def set_parameters(self, params: Dict[str, Any]):
         self.params = params
         self.model_name = self.params.get("model_name", "gpt-3.5-turbo-0125")
-        
-    def run(self, queries):
-        dataset = Queries(queries)
+
+    def run(self, queries: Iterable[tuple[str, str]]):
+        dataset = QueryDataset(queries)
+
         def custom_collate_fn(batch):
             return batch
 
         dataloader = DataLoader(
-            dataset, 
-            batch_size=self.params.get('batch_size', self.params.get('batch_size', 10)), 
+            dataset,
+            batch_size=self.params.get("batch_size", self.params.get("batch_size", 10)),
             shuffle=False,
-            collate_fn=custom_collate_fn
+            collate_fn=custom_collate_fn,
         )
 
-        questionNumber = 0
-        batch_results = []
+        question_number = 0
         for batch in tqdm.tqdm(dataloader, desc="Processing batches"):
             if len(batch) < 2:
-                inputs, queries = batch[0]
-                queries = [queries]
+                inputs, batch_queries = batch[0]
+                batch_queries = [batch_queries]
                 inputs = [inputs]
-            else: 
-                inputs, queries = zip(*batch)
+            else:
+                inputs, batch_queries = zip(*batch)
 
-            for input, query in zip(inputs,queries):
+            for input, query in zip(inputs, batch_queries):
                 message = [{"role": "user", "content": query}]
                 response = self.generate(
-                    message, 
-                    n=self.params.get('num_responses', 1), 
-                    top_p=self.params.get('top_p'), 
-                    max_tokens=self.params.get('max_tokens'),
-                    timeout=self.params.get('timeout'),
-                    temperature=float(self.params.get('temperature', 0.0))
+                    message,
+                    n=self.params.get("num_responses", 1),
+                    top_p=self.params.get("top_p"),
+                    max_tokens=self.params.get("max_tokens"),
+                    timeout=self.params.get("timeout"),
+                    temperature=float(self.params.get("temperature", 0.0)),
                 )
-                batch_results.extend(self.process_results(questionNumber,[input], [query], response))
-                questionNumber += 1
+                
+                yield from self.process_results(question_number, [input], [query], response)
+                question_number += 1
 
-        return batch_results
-    
     def generate(self, message, **kwargs):
         max_retries = 3
         retry_delay = 5
@@ -77,20 +77,26 @@ class GPT(Model):
                     messages=message,
                     logprobs=True,
                     top_logprobs=2,
-                    **kwargs
+                    **kwargs,
                 )
                 return response
             except Exception as e:
-                print(f"Request failed (attempt {attempt + 1}/{max_retries}):", e, file=sys.stderr)
+                print(
+                    f"Request failed (attempt {attempt+1}/{max_retries}):",
+                    e,
+                    file=sys.stderr,
+                )
                 if attempt < max_retries - 1:
                     time.sleep(retry_delay)
                 else:
                     raise e
-        
-    def process_results(self, idx: int, inputs: List[str], queries: List[str], responses):
+
+    def process_results(
+        self, idx: int, inputs: List[str], queries: List[str], responses
+    ):
         results = []
         answers = []
-        all_top_token_probs = []        
+        all_top_token_probs = []
         for response in responses.choices:
             answers.append(str(response.message.content or ""))
             top_token_probs = {
@@ -100,20 +106,26 @@ class GPT(Model):
             }
             all_top_token_probs.append(top_token_probs)
 
-        if self.params.get('escape_responses', False):
-            answers = [repr(answers)] if self.params.get('combine_responses', False) else [repr(answer) for answer in answers]
-        elif self.params.get('combine_responses', False):
+        if self.params.get("escape_responses", False):
+            answers = (
+                [repr(answers)]
+                if self.params.get("combine_responses", False)
+                else [repr(answer) for answer in answers]
+            )
+        elif self.params.get("combine_responses", False):
             answers = [" ".join(answers)]
 
         for answer, top_token_probs in zip(answers, all_top_token_probs):
-            results.append({
-                "input": inputs[0],
-                "query": repr(queries[0]),
-                "responses": answer.replace('\n', ' ').replace('\t', ' '),
-                "question number": idx,
-                "top tokens": list(top_token_probs.keys()),
-                "top tokens logprobs": list(top_token_probs.values()),
-                "input token count": responses.usage.prompt_tokens,
-                "output token count": responses.usage.completion_tokens,
-            })
+            results.append(
+                {
+                    "input": inputs[0],
+                    "query": repr(queries[0]),
+                    "responses": answer.replace("\n", " ").replace("\t", " "),
+                    "question number": idx,
+                    "top tokens": list(top_token_probs.keys()),
+                    "top tokens logprobs": list(top_token_probs.values()),
+                    "input token count": responses.usage.prompt_tokens,
+                    "output token count": responses.usage.completion_tokens,
+                }
+            )
         return results

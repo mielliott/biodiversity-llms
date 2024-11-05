@@ -1,13 +1,9 @@
-from torch.utils.data import Dataset
+from torch.utils.data import IterableDataset
 from typing import List
 
-class Queries(Dataset):
+class QueryDataset(IterableDataset):
     def __init__(self, queries):
         self.queries = queries
-        
-    def __len__(self):
-        return len(self.queries)
     
-    def __getitem__(self, idx):
-        return self.queries[idx]
-    
+    def __iter__(self):
+        return self.queries

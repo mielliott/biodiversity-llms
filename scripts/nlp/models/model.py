@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
+from typing import Dict, Any, Iterator
 
 class Model(ABC):
     @abstractmethod
@@ -11,17 +11,9 @@ class Model(ABC):
         pass
     
     @abstractmethod
-    def run(self, queries: List[tuple[str,str]]):
-        pass
-    
-    @abstractmethod
-    def generate(self, query: str, **kwargs) -> list[str]:
+    def run(self, queries: Iterator[tuple[str, str]]):
         pass
 
     @abstractmethod
     def get_model_info(self) -> dict:
-        pass
-
-    @abstractmethod
-    def process_results(self, results: List[Dict]) -> dict:
         pass

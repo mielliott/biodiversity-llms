@@ -1,4 +1,14 @@
 {
     "python.analysis.typeCheckingMode": "basic",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": false,
+    "python.testing.pytestArgs": [
+        "scripts"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "pylint.args": [
+        "--disable=C0115", // Class docstrings
+        "--disable=C0116", // Function doctstrings
+        "--disable=C0301", // Line length
+    ]
 }

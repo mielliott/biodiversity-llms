@@ -1,7 +1,7 @@
 import os
 import sys
 import torch
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, Iterator, List, Tuple
 from dotenv import load_dotenv
 from transformers import (
     AutoTokenizer,
@@ -12,7 +12,7 @@ from transformers import (
 )
 from .registry import ModelRegistry
 from .model import Model
-from .query import Queries
+from .query import QueryDataset
 from torch.utils.data import DataLoader
 import tqdm
 
@@ -79,8 +79,8 @@ class Llama(Model):
                 file=sys.stderr,
             )
 
-    def run(self, queries: List[Tuple[str, str]]):
-        dataset = Queries(queries)
+    def run(self, queries: Iterator[Tuple[str, str]]):
+        dataset = QueryDataset(queries)
 
         def custom_collate_fn(batch):
             return batch
@@ -93,24 +93,20 @@ class Llama(Model):
             collate_fn=custom_collate_fn,
         )
 
-        all_results = []
         for batch_idx, batch in enumerate(
             tqdm.tqdm(dataloader, desc="Processing batches")
         ):
             if len(batch) < 2:
-                inputs, queries = batch[0]
-                queries = [queries]
+                inputs, batch_queries = batch[0]
+                batch_queries = [batch_queries]
                 inputs = [inputs]
             else:
-                inputs, queries = zip(*batch)
+                inputs, batch_queries = zip(*batch)
             responses = self.generate(
-                queries,
-            )
-            all_results.extend(
-                self.process_results(inputs, queries, responses, batch_idx)
+                batch_queries,
             )
 
-        return all_results
+            yield from self.process_results(inputs, batch_queries, responses, batch_idx)
 
     def generate(self, queries, **kwargs):
         input_ids, attention_mask = self.tokenize(queries)

@@ -10,11 +10,16 @@ e.g.
 
 Run it as a python module by checking out the parent directory.
 
+Models:
+    -mc openai -m gpt-3.5-turbo-0125
+    -mc meta-llama -m llama-3.1-8b
 """
 
 import argparse
 from models.registry import ModelRegistry
 from runner import ExperimentRunner
+from llm_io import IOHandler
+
 
 def main():
     parser = argparse.ArgumentParser(description="Submit your questions to LLM of your choice")
@@ -30,21 +35,22 @@ def main():
     parser.add_argument("--timeout", default=10, type=int)
     parser.add_argument("--unescape-input", action="store_true")
     parser.add_argument("--test", "-x", action="store_true")
-    parser.add_argument("--batch-size", "-bs", default=10, action="store_true")
+    parser.add_argument("--batch-size", "-bs", default=10)
     parser.add_argument("--temperature", "-temp", default=0.1)
-    
+
     # Convert args to dict for easier handling
     args = parser.parse_args()
     params = vars(args)
+
     # Call LLM
-    runner = ExperimentRunner(args.model_category, params)
-    queries = runner.ioHandler.generate_query(
+    io_handler = IOHandler(
         args.patterns,
         args.unescape_input,
-        lambda query: args.filter_keyword not in query
+        lambda query: True
     )
 
-    runner.run_experiment(queries)
+    runner = ExperimentRunner(args.model_category, params, io_handler)
+    runner.run_experiment()
 
 
 if __name__ == "__main__":

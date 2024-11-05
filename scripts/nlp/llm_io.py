@@ -1,15 +1,17 @@
 import sys
 from collections import defaultdict
+from typing import Callable, Iterator
 
 class IOHandler:
-    def __init__(self):
-        # parameters
-        self.output = []
-        self.input = []
-
-        # Get header of input data
+    def __init__(self, patterns: list[str], unescape_input: bool, line_filter: Callable[[str], bool]):
+        self.patterns = patterns
+        self.unescape_input = unescape_input
+        self.line_filter = line_filter
+        
         sys.stdin.reconfigure(encoding='utf-8')
         self.lines = (line for line in sys.stdin)
+
+        # Get header of input data
         self.header = next(self.lines)[:-1]
 
     def unescape(self, string):
@@ -17,36 +19,37 @@ class IOHandler:
             return eval(string)
         else:
             return string
-    
-    def batched(iterable, n):
+
+    def batched(self, iterable, n):
         args = [iter(iterable)] * n
         return zip(*args)
 
-        
-    def generate_query(self, patterns, lines, do_unescape, filter=lambda x: True):
+    def make_query_generator(self) -> Iterator[tuple[str, str]]:
         fields = self.header.split("\t")
         
-        lines = (l for l in self.lines)
-        for line in lines:
+        for line in self.lines:
             line = line[:-1]
             values = line.split("\t")
             
-            if do_unescape:
-                values = [v for v in map(self.unescape, values)]
-            queries = []
-            for pattern in patterns:
-                if filter(line):
+            if self.unescape_input:
+                values = list(map(self.unescape, values))
+
+            pattern_queries = []
+            for pattern in self.patterns:
+                if self.line_filter(line):
                     field_values = dict(zip(fields, values))
-                    queries.append((line, pattern.format(**field_values)))
-            return queries
+                    pattern_queries.append((line, pattern.format(**field_values)))
+
+            yield from pattern_queries
 
     def record_input(self):
         pass
+
     def record_output(self):
         pass
 
     def to_tsv(self):
-        # convert data to tsv 
+        # convert data to tsv
         pass
 
     def show(self, results):
@@ -64,10 +67,10 @@ class IOHandler:
             key = (result['input'], result['query'])
             grouped_results[key].append(result)
         
-        for (input, query), group in grouped_results.items():
+        for (input_line, query), group in grouped_results.items():
             for result in group:
                 row = [
-                    input,
+                    input_line,
                     query,
                     result['responses'],
                     result['question number'],
