@@ -3,7 +3,13 @@ import sys
 import torch
 from typing import Dict, Any, List, Tuple
 from dotenv import load_dotenv
-from transformers import AutoTokenizer, AutoConfig, LlamaForCausalLM, PreTrainedModel
+from transformers import (
+    AutoTokenizer,
+    AutoConfig,
+    LlamaForCausalLM,
+    PreTrainedModel,
+    PreTrainedTokenizerBase,
+)
 from .registry import ModelRegistry
 from .model import Model
 from .query import Queries
@@ -13,23 +19,20 @@ import tqdm
 
 @ModelRegistry.register("meta-llama")
 class Llama(Model):
+    model_name: str
     model: PreTrainedModel
+    tokenizer: PreTrainedTokenizerBase
+    config: Any
 
     def __init__(self):
         load_dotenv(override=True, verbose=True)
         self.params: Dict[str, Any] = {}
-        # default
-        self.model_name = "meta-llama/Llama-3.1-8B"
-        self.token = os.getenv("HF_TOKEN", "")
-        self.model_cache_dir = os.getenv("HF_HOME", "/storage/hf-models/cache/")
 
-        assert (
-            self.token
+        assert os.getenv(
+            "HF_TOKEN"
         ), "Environment variable HF_TOKEN not defined. Generate a token at https://huggingface.co/settings/tokens."
 
-        print(
-            "Using HuggingFace cache directory", self.model_cache_dir, file=sys.stderr
-        )
+        print("Using HuggingFace cache directory", os.getenv("HF_HOME"))
 
     def get_model_info(self) -> dict:
         return {
@@ -42,9 +45,7 @@ class Llama(Model):
         }
 
     def load_model(self):
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            self.model_name, token=self.token
-        )
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.tokenizer.pad_token = self.tokenizer.eos_token
         self.tokenizer.padding_side = "right"
         self.config = AutoConfig.from_pretrained(self.model_name)
@@ -60,8 +61,6 @@ class Llama(Model):
 
         self.model = LlamaForCausalLM.from_pretrained(
             self.model_name,
-            cache_dir=self.model_cache_dir,
-            token=self.token,
             device_map="auto",
             torch_dtype=torch_dtype,
             low_cpu_mem_usage=True,
@@ -70,7 +69,15 @@ class Llama(Model):
     def set_parameters(self, params):
         self.params.update(params)
         # set default model from the category
-        self.model_name = "meta-llama/" + self.params.get("model_name", "Llama-3.1-8B")
+        if "model_name" in self.params:
+            self.model_name = "meta-llama/" + self.params.get("model_name", "")
+        else:
+            self.model_name = "meta-llama/llama-3.1-8b"
+            print(
+                "--model_name not specified; using default model",
+                self.model_name,
+                file=sys.stderr,
+            )
 
     def run(self, queries: List[Tuple[str, str]]):
         dataset = Queries(queries)
@@ -116,8 +123,8 @@ class Llama(Model):
                     attention_mask=attention_mask.to(self.model.device),
                     max_length=max_completion_length,
                     num_return_sequences=self.params.get("num_responses", 1),
-                    top_p=self.params.get("top_p", 0.95),
-                    top_k=2,
+                    top_p=self.params.get("top_p"),
+                    top_k=self.params.get("top_k"),
                     do_sample=True,
                     output_scores=True,
                     low_memory=True,
