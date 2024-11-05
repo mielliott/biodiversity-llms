@@ -1,7 +1,9 @@
-configfile: "config.yaml"
+import os
+from dotenv import load_dotenv, find_dotenv
 
+load_dotenv()
 
-OUTPUTS_DIR = config["output_dir"].rstrip("/")
+OUTPUTS_DIR = os.path.join(config["output_dir"], config["llm"])
 
 print(f"out: {OUTPUTS_DIR}/responses.tsv")
 

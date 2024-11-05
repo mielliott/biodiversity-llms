@@ -1,7 +1,11 @@
+import os
+
 if "shuffle" in config and config["shuffle"]:
-    BATCH_OUTPUTS_DIR = f"{config['output_dir']}/{config['batch_size']}-shuffled-{config['random_seed']}"
+    BATCH_OUTPUTS_DIR = (
+        f"{OUTPUTS_DIR}/{config['batch_size']}-shuffled-{config['random_seed']}"
+    )
 else:
-    BATCH_OUTPUTS_DIR = f"{config['output_dir']}/{config['batch_size']}"
+    BATCH_OUTPUTS_DIR = f"{OUTPUTS_DIR}/{config['batch_size']}"
 
 
 def get_batches(wildcards):
@@ -34,7 +38,7 @@ rule answer_questions:
     input:
         ancient(get_batches),
     output:
-        config["output_dir"] + "/responses.tsv",
+        OUTPUTS_DIR + "/responses.tsv",
     shell:
         "mlr --tsvlite cat {input} > {output}"
 
@@ -54,11 +58,11 @@ rule answer_questions_batch:
     log:
         "logs/" + BATCH_OUTPUTS_DIR + "/{first}-{last}.tsv",
     conda:
-        "../envs/qa.yml"
+        os.path.expandvars(config["command_env"])
     shell:
         """
         workflow/scripts/cat-range {input} {wildcards.first} {wildcards.last}\
         | {params.prep_command} \
         | {params.qa_command} {params.qa_args} {params.qa_questions}\
         1> {output} 2> {log}
-    """
+        """
