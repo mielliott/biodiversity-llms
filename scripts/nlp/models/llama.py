@@ -1,8 +1,9 @@
 import os
+import sys
 import torch
 from typing import Dict, Any, List, Tuple
 from dotenv import load_dotenv
-from transformers import AutoTokenizer, AutoConfig, LlamaForCausalLM
+from transformers import AutoTokenizer, AutoConfig, LlamaForCausalLM, PreTrainedModel
 from .registry import ModelRegistry
 from .model import Model
 from .query import Queries
@@ -12,20 +13,23 @@ import tqdm
 
 @ModelRegistry.register("meta-llama")
 class Llama(Model):
+    model: PreTrainedModel
+
     def __init__(self):
         load_dotenv(override=True, verbose=True)
         self.params: Dict[str, Any] = {}
-        self.model = None
         # default
         self.model_name = "meta-llama/Llama-3.1-8B"
-        self.token = os.getenv("HF_TOKEN")
+        self.token = os.getenv("HF_TOKEN", "")
         self.model_cache_dir = os.getenv("HF_HOME", "/storage/hf-models/cache/")
 
         assert (
             self.token
         ), "Environment variable HF_TOKEN not defined. Generate a token at https://huggingface.co/settings/tokens."
 
-        print("Using HuggingFace cache directory", self.model_cache_dir)
+        print(
+            "Using HuggingFace cache directory", self.model_cache_dir, file=sys.stderr
+        )
 
     def get_model_info(self) -> dict:
         return {

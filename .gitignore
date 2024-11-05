@@ -1,16 +1,19 @@
-__pycache__/
-.snakemake/
-.conda/
-.micromamba/
-raw/
-processed/
-results/
-logs/
+__pycache__
+.snakemake
+.conda
+.micromamba
+raw
+processed
+results
+logs
+.env
+.locks
+
+*.pyc
 
 !**/results/**/*.ipynb
 **/results/**.tsv
 **/results/**.old.*
 **/results/**test*
 
-biodiversity-confidence/resources/
-*.env
+biodiversity-confidence/resources
