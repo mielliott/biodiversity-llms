@@ -48,7 +48,7 @@ class IOHandler:
         args = [iter(iterable)] * n
         return zip(*args)
 
-    def make_query_generator(self, lines: TextIO) -> Iterator[tuple[str, str]]:
+    def make_query_reader(self, lines: TextIO) -> Iterator[tuple[str, str]]:
         self.reader = TSVReader(lines)
 
         for field_values in self.reader:
@@ -65,11 +65,11 @@ class IOHandler:
         # convert data to tsv
         pass
 
-    def show(self, out_stream: TextIO, results):
+    def write_queries(self, out_stream: TextIO, results):
         writer = TSVWriter(out_stream)
 
         for result in results:
-            missing_fields = {field for field in result if field not in self.required_output_fields}
+            missing_fields = {field for field in self.required_output_fields if field not in result}
             if missing_fields:
                 raise RuntimeError("Missing output field(s): " + ", ".join(missing_fields))
 

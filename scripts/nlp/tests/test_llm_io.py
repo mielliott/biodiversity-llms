@@ -1,9 +1,6 @@
 import io
 from llm_io import IOHandler, TSVReader, TSVWriter
-
-
-def make_io(*args: str):
-    return io.StringIO("\n".join(args) + "\n")
+from tests import test_util
 
 
 def test_tsv_reader():
@@ -47,9 +44,8 @@ def test_tsv_writer():
 def test_query_generator():
     handler = IOHandler(["just {x}", "{x} and {y}"], False, [])
 
-    query_gen = handler.make_query_generator(
-        make_io("x\ty", "apple\torange", "horse\tcarriage"),
-    )
+    tsv = test_util.make_tsv_stream([{"x": "apple", "y": "orange"}, {"x": "horse", "y": "carriage"}])
+    query_gen = handler.make_query_reader(tsv)
 
     queries = list(query_gen)
 

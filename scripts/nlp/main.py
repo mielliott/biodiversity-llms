@@ -52,9 +52,9 @@ def main():
     )
 
     runner = ExperimentRunner(args.model_category, params, io_handler)
-    
+
     sys.stdin.reconfigure(encoding='utf-8')
-    runner.run_experiment(sys.stdin)
+    runner.run_experiment(sys.stdin, sys.stdout)
 
 
 if __name__ == "__main__":
