@@ -11,7 +11,7 @@ class Model(ABC):
         pass
     
     @abstractmethod
-    def run(self, queries: Iterator[tuple[str, str]]):
+    def run(self, queries: Iterator[dict[str, str]]) -> Iterator[dict[str, Any]]:
         pass
 
     @abstractmethod

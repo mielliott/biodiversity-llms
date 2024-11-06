@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterator
 from dotenv import load_dotenv
 from openai import OpenAI
 import tqdm
@@ -28,9 +28,13 @@ class GPT(Model):
 
     def set_parameters(self, params: Dict[str, Any]):
         self.params = params
-        self.model_name = self.params.get("model_name", "gpt-3.5-turbo-0125")
 
-    def run(self, queries: Iterable[dict[str, str]]):
+        if "model_name" not in self.params:
+            raise RuntimeError("Parameter --model_name not set")
+
+        self.model_name = self.params["model_name"]
+
+    def run(self, queries: Iterator[dict[str, str]]) -> Iterator[dict[str, Any]]:
         dataset = QueryDataset(queries)
 
         def custom_collate_fn(batch):

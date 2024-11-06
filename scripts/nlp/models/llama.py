@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Any, Iterator, Tuple
+from typing import Dict, Any, Iterator
 from dotenv import load_dotenv
 import torch
 from transformers import (
@@ -67,12 +67,13 @@ class Llama(Model):
     def set_parameters(self, params):
         self.params.update(params)
         # set default model from the category
+
         if "model_name" not in self.params:
             raise RuntimeError("Parameter --model_name not set")
 
         self.model_name = "meta-llama/" + self.params["model_name"]
 
-    def run(self, queries: Iterator[Tuple[str, str]]):
+    def run(self, queries: Iterator[dict[str, str]]) -> Iterator[dict[str, Any]]:
         dataset = QueryDataset(queries)
 
         def custom_collate_fn(batch):
