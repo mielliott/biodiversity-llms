@@ -1,8 +1,7 @@
 import os
-import sys
-import torch
 from typing import Dict, Any, Iterator, Tuple
 from dotenv import load_dotenv
+import torch
 from transformers import (
     AutoTokenizer,
     AutoConfig,
@@ -17,7 +16,7 @@ from torch.utils.data import DataLoader
 import tqdm
 
 
-@ModelRegistry.register("meta-llama")
+@ModelRegistry.register("llama")
 class Llama(Model):
     model_name: str
     model: PreTrainedModel
@@ -35,7 +34,7 @@ class Llama(Model):
 
     def get_model_info(self) -> dict:
         return {
-            "family": "Meta-Llama",
+            "family": "llama",
             "version": "3.2-1b-Instruct",
             "name": self.model_name,
             "provider": "Hugging Face",
@@ -68,15 +67,10 @@ class Llama(Model):
     def set_parameters(self, params):
         self.params.update(params)
         # set default model from the category
-        if "model_name" in self.params:
-            self.model_name = "meta-llama/" + self.params.get("model_name", "")
-        else:
-            self.model_name = "meta-llama/llama-3.1-8b"
-            print(
-                "--model_name not specified; using default model",
-                self.model_name,
-                file=sys.stderr,
-            )
+        if "model_name" not in self.params:
+            raise RuntimeError("Parameter --model_name not set")
+
+        self.model_name = "meta-llama/" + self.params["model_name"]
 
     def run(self, queries: Iterator[Tuple[str, str]]):
         dataset = QueryDataset(queries)
@@ -85,7 +79,7 @@ class Llama(Model):
             return batch
 
         # TODO: check how to batch on the number of tokens here
-        dataloader = DataLoader(
+        data_loader = DataLoader(
             dataset,
             batch_size=self.params.get("batch_size", 10),
             shuffle=False,
@@ -93,7 +87,7 @@ class Llama(Model):
         )
 
         for batch_idx, batch in enumerate(
-            tqdm.tqdm(dataloader, desc="Processing batches")
+            tqdm.tqdm(data_loader, desc="Processing batches")
         ):
             if len(batch) < 2:
                 inputs, batch_queries = batch[0]

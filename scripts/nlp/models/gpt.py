@@ -11,7 +11,7 @@ from .model import Model
 from .query import QueryDataset
 
 
-@ModelRegistry.register("openai")
+@ModelRegistry.register("gpt")
 class GPT(Model):
     def __init__(self):
         load_dotenv()

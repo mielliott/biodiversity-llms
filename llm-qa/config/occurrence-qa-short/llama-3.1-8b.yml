@@ -8,7 +8,7 @@ args: # The arguments to `command`
   - --max-tokens 1
   - --num-responses 1
   - --timeout 10
-  - --model-category "meta-llama"
+  - --model-category "llama"
   - --model-name "llama-3.1-8b"
 shuffle: false
 batch_size: 5
