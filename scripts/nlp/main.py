@@ -40,8 +40,12 @@ def main():
     parser.add_argument("--temperature", "-temp", default=0.1)
     parser.add_argument("--required-output-fields", "-f", type=",".split, default=[])
 
-    # Convert args to dict for easier handling
     args = parser.parse_args()
+
+    if args.test:
+        args.model_category = "test"
+
+    # Convert args to dict for easier handling
     params = vars(args)
 
     # Call LLM
