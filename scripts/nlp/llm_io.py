@@ -1,39 +1,68 @@
-from collections import defaultdict
-from typing import Callable, Iterator, TextIO
+from typing import Any, Callable, Iterable, Iterator, TextIO
+
+
+class TSVReader(Iterator):
+    def __init__(self, lines: TextIO):
+        self.lines = lines
+        self.fields: list[str]
+
+    def parse(self, line):
+        return "\t".split(line)
+
+    def __next__(self):
+        if not self.fields:
+            header = next(self.lines)
+            self.fields = self.parse(header)
+
+        line = next(self.lines)
+        return (line, self.parse(line))
+
+
+class TSVWriter:
+    def __init__(self, input_fields: list[str]):
+        self.input_fields = input_fields
+        self.output_fields: list[str]
+
+    def print(self, values: Iterable[Any]):
+        return "\t".join(map(str, values))
+
+    def write(self, data: dict[str, Any]):
+        if not self.output_fields:
+            self.output_fields = list(data.keys())
+            self.print(self.input_fields + self.output_fields)
+
+        self.print(data.values())
+
 
 class IOHandler:
-    def __init__(self, patterns: list[str], unescape_input: bool, line_filter: Callable[[str], bool]):
+    def __init__(self, patterns: list[str], unescape_input: bool, required_output_fields: list[str], line_filter: Callable[[str], bool]):
         self.patterns = patterns
         self.unescape_input = unescape_input
+        self.required_output_fields = required_output_fields
         self.line_filter = line_filter
-        self.header = ""
+        self.input_fields: list[str] = []
+        self.reader: TSVReader
 
     def unescape(self, string):
         if '"' == string[0] == string[-1] or "'" == string[0] == string[-1]:
             return eval(string)
-        else:
-            return string
+        return string
 
     def batched(self, iterable, n):
         args = [iter(iterable)] * n
         return zip(*args)
 
     def make_query_generator(self, lines: TextIO) -> Iterator[tuple[str, str]]:
-        self.header = next(lines)[:-1]
+        self.reader = TSVReader(lines)
 
-        fields = self.header.split("\t")
-        
-        for line in lines:
-            line = line[:-1]
-            values = line.split("\t")
-            
+        for line, values in self.reader:
             if self.unescape_input:
                 values = list(map(self.unescape, values))
 
             pattern_queries = []
             for pattern in self.patterns:
                 if self.line_filter(line):
-                    field_values = dict(zip(fields, values))
+                    field_values = dict(zip(self.reader.fields, values))
                     pattern_queries.append((line, pattern.format(**field_values)))
 
             yield from pattern_queries
@@ -49,41 +78,11 @@ class IOHandler:
         pass
 
     def show(self, results):
-        write = lambda *args: print(*args, sep="\t")
-        header = self.header.split("\t") + [
-            "query", "response", "question number", 
-            "top tokens", "top tokens logprobs", 
-            "input token count", "output token count"
-        ]
-        write(*header)
-        
-        # Group results by (input, query)
-        grouped_results = defaultdict(list)
+        writer = TSVWriter(self.reader.fields)
+
         for result in results:
-            key = (result['input'], result['query'])
-            grouped_results[key].append(result)
-        
-        for (input_line, query), group in grouped_results.items():
-            for result in group:
-                row = [
-                    input_line,
-                    query,
-                    result['responses'],
-                    result['question number'],
-                    result['top tokens'],
-                    result['top tokens logprobs'],
-                    result['input token count'],
-                    result['output token count']
-                ]
-                write(*row)
+            missing_fields = {field for field in result if field not in self.required_output_fields}
+            if missing_fields:
+                raise RuntimeError("Missing output field(s): " + ", ".join(missing_fields))
 
-    def save_output(self):
-        pass
-
-    def save_input(self):
-        pass
-
-    def save(self):
-        # save_output
-        # save_input
-        pass
+            writer.write(result)

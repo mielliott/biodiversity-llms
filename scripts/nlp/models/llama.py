@@ -1,7 +1,7 @@
 import os
 import sys
 import torch
-from typing import Dict, Any, Iterator, List, Tuple
+from typing import Dict, Any, Iterator, Tuple
 from dotenv import load_dotenv
 from transformers import (
     AutoTokenizer,
@@ -28,9 +28,8 @@ class Llama(Model):
         load_dotenv(override=True, verbose=True)
         self.params: Dict[str, Any] = {}
 
-        assert os.getenv(
-            "HF_TOKEN"
-        ), "Environment variable HF_TOKEN not defined. Generate a token at https://huggingface.co/settings/tokens."
+        if not os.getenv("HF_TOKEN"):
+            raise RuntimeError("Environment variable HF_TOKEN not defined. Generate a token at https://huggingface.co/settings/tokens.")
 
         print("Using HuggingFace cache directory", os.getenv("HF_HOME"))
 

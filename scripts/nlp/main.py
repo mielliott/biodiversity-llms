@@ -38,6 +38,7 @@ def main():
     parser.add_argument("--test", "-x", action="store_true")
     parser.add_argument("--batch-size", "-bs", default=10)
     parser.add_argument("--temperature", "-temp", default=0.1)
+    parser.add_argument("--required-output-fields", "-f", type=",".split, default=[])
 
     # Convert args to dict for easier handling
     args = parser.parse_args()
@@ -47,6 +48,7 @@ def main():
     io_handler = IOHandler(
         args.patterns,
         args.unescape_input,
+        args.required_output_fields,
         lambda query: True
     )
 
