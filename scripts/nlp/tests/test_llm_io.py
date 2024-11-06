@@ -1,30 +1,40 @@
 import io
-from llm_io import IOHandler
+from llm_io import IOHandler, TSVReader
 
 
-def list_as_io(lines: list[str]):
-    return io.StringIO("\n".join(lines) + "\n")
+def make_io(*args: str):
+    return io.StringIO("\n".join(args) + "\n")
+
+
+def test_tsv_reader():
+    tsv = [
+        "a\tb",
+        "1\t2",
+        "3\t4"
+    ]
+
+    reader = TSVReader(make_io(*tsv))
+
+    data = list(reader)
+
+    assert data == [
+        {"a": "1", "b": "2"},
+        {"a": "3", "b": "4"}
+    ]
 
 
 def test_query_generator():
-    handler = IOHandler(
-        [
-            "just {x}",
-            "{x} and {y}"
-        ],
-        False,
-        lambda query: "horse" not in query
-    )
+    handler = IOHandler(["just {x}", "{x} and {y}"], False, [])
 
     query_gen = handler.make_query_generator(
-        list_as_io(["x\ty", "apple\torange", "horse\tcarriage", "1\t2"]),
+        make_io("x\ty", "apple\torange", "horse\tcarriage"),
     )
 
     queries = list(query_gen)
 
     assert queries == [
-        ('apple\torange', 'just apple'),
-        ('apple\torange', 'apple and orange'),
-        ('1\t2', 'just 1'),
-        ('1\t2', '1 and 2')
+        {"x": "apple", "y": "orange", "query": "just apple"},
+        {"x": "apple", "y": "orange", "query": "apple and orange"},
+        {"x": "horse", "y": "carriage", "query": "just horse"},
+        {"x": "horse", "y": "carriage", "query": "horse and carriage"},
     ]

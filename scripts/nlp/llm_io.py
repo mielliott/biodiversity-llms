@@ -4,23 +4,23 @@ from typing import Any, Callable, Iterable, Iterator, TextIO
 class TSVReader(Iterator):
     def __init__(self, lines: TextIO):
         self.lines = lines
-        self.fields: list[str]
+        self.fields: list[str] = []
 
-    def parse(self, line):
-        return "\t".split(line)
+    def read(self):
+        line = next(self.lines)
+        return list(map(str.strip, line.split("\t")))
 
     def __next__(self):
         if not self.fields:
-            header = next(self.lines)
-            self.fields = self.parse(header)
+            self.fields = self.read()
 
-        line = next(self.lines)
-        return (line, self.parse(line))
+        values = self.read()
+        field_values = dict(zip(self.fields, values))
+        return field_values
 
 
 class TSVWriter:
-    def __init__(self, input_fields: list[str]):
-        self.input_fields = input_fields
+    def __init__(self):
         self.output_fields: list[str]
 
     def print(self, values: Iterable[Any]):
@@ -29,24 +29,18 @@ class TSVWriter:
     def write(self, data: dict[str, Any]):
         if not self.output_fields:
             self.output_fields = list(data.keys())
-            self.print(self.input_fields + self.output_fields)
+            self.print(self.output_fields)
 
         self.print(data.values())
 
 
 class IOHandler:
-    def __init__(self, patterns: list[str], unescape_input: bool, required_output_fields: list[str], line_filter: Callable[[str], bool]):
+    def __init__(self, patterns: list[str], unescape_input: bool, required_output_fields: list[str]):
         self.patterns = patterns
         self.unescape_input = unescape_input
         self.required_output_fields = required_output_fields
-        self.line_filter = line_filter
         self.input_fields: list[str] = []
         self.reader: TSVReader
-
-    def unescape(self, string):
-        if '"' == string[0] == string[-1] or "'" == string[0] == string[-1]:
-            return eval(string)
-        return string
 
     def batched(self, iterable, n):
         args = [iter(iterable)] * n
@@ -55,17 +49,9 @@ class IOHandler:
     def make_query_generator(self, lines: TextIO) -> Iterator[tuple[str, str]]:
         self.reader = TSVReader(lines)
 
-        for line, values in self.reader:
-            if self.unescape_input:
-                values = list(map(self.unescape, values))
-
-            pattern_queries = []
+        for field_values in self.reader:
             for pattern in self.patterns:
-                if self.line_filter(line):
-                    field_values = dict(zip(self.reader.fields, values))
-                    pattern_queries.append((line, pattern.format(**field_values)))
-
-            yield from pattern_queries
+                yield field_values | {"query": pattern.format(**field_values)}
 
     def record_input(self):
         pass
@@ -78,7 +64,7 @@ class IOHandler:
         pass
 
     def show(self, results):
-        writer = TSVWriter(self.reader.fields)
+        writer = TSVWriter()
 
         for result in results:
             missing_fields = {field for field in result if field not in self.required_output_fields}
