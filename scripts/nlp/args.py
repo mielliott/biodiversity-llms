@@ -2,8 +2,11 @@ from enum import StrEnum, auto
 
 class EnumArg(StrEnum):
     @classmethod
-    def choices(cls):
-        return list(map(lambda e: e.value, cls))
+    def arg(cls):
+        return dict(
+            type=cls,
+            choices=list(map(lambda e: e.value, cls))
+        )
 
 
 class TokenScoresFormat(EnumArg):

@@ -26,7 +26,7 @@ from args import TokenScoresFormat
 def main():
     parser = argparse.ArgumentParser(description="Submit your questions to LLM of your choice")
     parser.add_argument("patterns", nargs="+")
-    parser.add_argument("--model-category", "-mc", default="openai", type=str, choices=ModelRegistry.list_models())
+    parser.add_argument("--model-category", "-mc", default="gpt", type=str, choices=ModelRegistry.list_models())
     parser.add_argument("--model-name", "-m", default="gpt-3.5-turbo-0125", type=str)
     parser.add_argument("--api-access-key", "-a", default=None, type=str)
     parser.add_argument("--num-responses", "-r", default=2, type=int)
@@ -40,7 +40,7 @@ def main():
     parser.add_argument("--batch-size", "-bs", default=10, type=int)
     parser.add_argument("--temperature", "-temp", default=0.1, type=float)
     parser.add_argument("--required-output-fields", "-f", default=[], type=",".split)
-    parser.add_argument("--scores", "-s", default=TokenScoresFormat.FIRST_TOKEN, type=str, choices=TokenScoresFormat.choices())
+    parser.add_argument("--scores", "-s", default=TokenScoresFormat.FIRST_TOKEN, **TokenScoresFormat.arg())
 
     args = parser.parse_args()
 
