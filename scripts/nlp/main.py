@@ -20,6 +20,7 @@ import sys
 from models.registry import ModelRegistry
 from runner import ExperimentRunner
 from llm_io import IOHandler
+from args import TokenScoresFormat
 
 
 def main():
@@ -39,6 +40,7 @@ def main():
     parser.add_argument("--batch-size", "-bs", default=10, type=int)
     parser.add_argument("--temperature", "-temp", default=0.1, type=float)
     parser.add_argument("--required-output-fields", "-f", default=[], type=",".split)
+    parser.add_argument("--scores", "-s", default=TokenScoresFormat.FIRST_TOKEN, type=str, choices=TokenScoresFormat.choices())
 
     args = parser.parse_args()
 
