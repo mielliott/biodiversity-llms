@@ -1,18 +1,12 @@
-import sys
 from collections import defaultdict
-from typing import Callable, Iterator
+from typing import Callable, Iterator, TextIO
 
 class IOHandler:
     def __init__(self, patterns: list[str], unescape_input: bool, line_filter: Callable[[str], bool]):
         self.patterns = patterns
         self.unescape_input = unescape_input
         self.line_filter = line_filter
-        
-        sys.stdin.reconfigure(encoding='utf-8')
-        self.lines = (line for line in sys.stdin)
-
-        # Get header of input data
-        self.header = next(self.lines)[:-1]
+        self.header = ""
 
     def unescape(self, string):
         if '"' == string[0] == string[-1] or "'" == string[0] == string[-1]:
@@ -24,10 +18,12 @@ class IOHandler:
         args = [iter(iterable)] * n
         return zip(*args)
 
-    def make_query_generator(self) -> Iterator[tuple[str, str]]:
+    def make_query_generator(self, lines: TextIO) -> Iterator[tuple[str, str]]:
+        self.header = next(lines)[:-1]
+
         fields = self.header.split("\t")
         
-        for line in self.lines:
+        for line in lines:
             line = line[:-1]
             values = line.split("\t")
             

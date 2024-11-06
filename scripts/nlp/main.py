@@ -16,6 +16,7 @@ Models:
 """
 
 import argparse
+import sys
 from models.registry import ModelRegistry
 from runner import ExperimentRunner
 from llm_io import IOHandler
@@ -50,7 +51,9 @@ def main():
     )
 
     runner = ExperimentRunner(args.model_category, params, io_handler)
-    runner.run_experiment()
+    
+    sys.stdin.reconfigure(encoding='utf-8')
+    runner.run_experiment(sys.stdin)
 
 
 if __name__ == "__main__":

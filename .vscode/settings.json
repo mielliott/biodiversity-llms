@@ -1,4 +1,5 @@
 {
+    "python.analysis.extraPaths": ["scripts/nlp"],
     "python.analysis.typeCheckingMode": "basic",
     "editor.formatOnSave": false,
     "python.testing.pytestArgs": [
@@ -6,9 +7,11 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
+    "python.testing.cwd": "scripts/nlp",
     "pylint.args": [
+        "--disable=C0114", // File docstrings
         "--disable=C0115", // Class docstrings
         "--disable=C0116", // Function doctstrings
         "--disable=C0301", // Line length
-    ]
+    ],
 }

@@ -8,6 +8,7 @@
             "name": "Python: NLP",
             "type": "debugpy",
             "request": "launch",
+            "cwd": "scripts/nlp",
             "program": "scripts/nlp/main.py",
             "args": [
                 "Does {genus} {specificepithet} naturally occur in {stateprovince}, {country}? Yes or no.",
@@ -16,7 +17,7 @@
                 "scripts/nlp/tests/occurrence-qa.tsv"
             ],
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
         }
     ]
 }
