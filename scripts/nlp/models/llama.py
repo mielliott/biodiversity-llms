@@ -39,7 +39,7 @@ class Llama(Model):
             "name": self.model_name,
             "provider": "Hugging Face",
             "device": self.model.device,
-            "precision": self.params.get("precision", "float32"),
+            "precision": self.params.get("precision", "bfloat16"),
         }
 
     def load_model(self):
@@ -87,25 +87,20 @@ class Llama(Model):
             collate_fn=custom_collate_fn,
         )
 
-        for batch_idx, batch in enumerate(
-            tqdm.tqdm(data_loader, desc="Processing batches")
-        ):
-            if len(batch) < 2:
-                inputs, batch_queries = batch[0]
-                batch_queries = [batch_queries]
-                inputs = [inputs]
-            else:
-                inputs, batch_queries = zip(*batch)
-            responses = self.generate(
-                batch_queries,
-            )
+        for i, batch_inputs in enumerate(tqdm.tqdm(data_loader, desc="Processing batches")):
+            responses = self.generate(batch_inputs)
+            yield from self.process_results(i, batch_inputs, responses)
 
-            yield from self.process_results(inputs, batch_queries, responses, batch_idx)
+    def generate(self, batch_inputs, **kwargs):
+        queries = [inputs["query"] for inputs in batch_inputs]
 
-    def generate(self, queries, **kwargs):
-        input_ids, attention_mask = self.tokenize(queries)
+        input_tensors = self.tokenizer(queries, return_tensors="pt", padding=True)
+        input_ids: torch.Tensor = input_tensors.input_ids
+        attention_mask: torch.Tensor = input_tensors.attention_mask
+
         batch_input_length = input_ids.shape[1]
         max_completion_length = batch_input_length + self.params.get("max_tokens", 512)
+
         with torch.no_grad():
             try:
                 outputs = self.model.generate(
@@ -130,12 +125,13 @@ class Llama(Model):
                 print(f"Device: {self.model.device}")
                 raise
 
-    def process_results(self, inputs, queries, outputs, batch_idx):
-        results = []
+    def process_results(self, batch_id, batch_inputs, outputs):
         generated_sequences = outputs.sequences
         scores = outputs.scores
 
-        for i, (input, query) in enumerate(zip(inputs, queries)):
+        for i, inputs in enumerate(batch_inputs):
+            query = inputs["query"]
+
             start_idx = i * self.params.get("num_responses", 1)
             end_idx = (i + 1) * self.params.get("num_responses", 1)
 
@@ -168,10 +164,9 @@ class Llama(Model):
                 ]
                 top_tokens_logprobs = top_log_probs[-1].tolist()
 
-                question_number = batch_idx * len(inputs) + i + 1
+                question_number = batch_id * len(batch_inputs) + i
 
-                results.append(
-                    {
+                yield inputs | {
                         "question number": question_number,
                         "input": input,
                         "query": query,
@@ -181,9 +176,6 @@ class Llama(Model):
                         "input token count": input_token_count,
                         "output token count": output_token_count,
                     }
-                )
-
-        return results
 
     def tokenize(self, queries):
         inputs = self.tokenizer(queries, return_tensors="pt", padding=True)

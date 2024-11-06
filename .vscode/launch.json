@@ -8,7 +8,8 @@
             "name": "Python: NLP",
             "type": "debugpy",
             "request": "launch",
-            "program": "scripts/nlp/main.py",
+            "program": "${workspaceFolder}/scripts/nlp/main.py",
+            "envFile": "${workspaceFolder}/.env",
             "args": [
                 "Does {genus} {specificepithet} naturally occur in {stateprovince}, {country}? Yes or no.",
                 "Does {stateprovince}, {country} have a population of {genus} {specificepithet}? Yes or no.",

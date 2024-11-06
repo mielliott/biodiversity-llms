@@ -6,7 +6,7 @@ Usage:
     Plug in field values using the field name, e.g. "Who is {name}?"
 
 e.g. 
-    echo -e "species\tlocation\nAcer saccharum\tArkansas" | python main.py -mc "llama" -m "Llama-3.1-8B" "Does {species} naturally occur in {location}? Yes or no"
+    echo -e "species\tlocation\nAcer saccharum\tArkansas" | python main.py -mc "llama" -m "llama-3.1-8b" "Does {species} naturally occur in {location}? Yes or no"
 
 Run it as a python module by checking out the parent directory.
 

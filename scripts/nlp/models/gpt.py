@@ -88,7 +88,7 @@ class GPT(Model):
                 else:
                     raise e
 
-    def process_results(self, idx: int, inputs: dict[str, Any], responses):
+    def process_results(self, question_number: int, inputs: dict[str, Any], responses):
         answers = []
         all_top_token_probs = []
         for response in responses.choices:
@@ -112,7 +112,7 @@ class GPT(Model):
         for answer, top_token_probs in zip(answers, all_top_token_probs):
             yield inputs | {
                 "responses": answer.replace("\n", " ").replace("\t", " "),
-                "question number": idx,
+                "question number": question_number,
                 "top tokens": list(top_token_probs.keys()),
                 "top tokens logprobs": list(top_token_probs.values()),
                 "input token count": responses.usage.prompt_tokens,
