@@ -1,11 +1,13 @@
 import os
 import sys
 import time
-from typing import Any, Dict, Iterator
+from typing import Any, Dict, Iterator, cast
 from dotenv import load_dotenv
 from openai import OpenAI
+from openai.types.chat.chat_completion import ChatCompletion
 import tqdm
 from torch.utils.data import DataLoader
+from args import TokenScoresFormat
 from .registry import ModelRegistry
 from .model import Model
 from .query import QueryDataset
@@ -51,7 +53,7 @@ class GPT(Model):
         for batch in tqdm.tqdm(dataloader, desc="Processing batches"):
             for inputs in batch:
                 message = [{"role": "user", "content": inputs["query"]}]
-                api_response = self.generate(
+                chat_completion = self.generate(
                     message,
                     n=self.params.get("num_responses"),
                     top_p=self.params.get("top_p"),
@@ -60,23 +62,24 @@ class GPT(Model):
                     temperature=self.params.get("temperature"),
                 )
 
-                yield from self.process_results(question_number, inputs, api_response)
+                yield from self.process_results(question_number, inputs, chat_completion)
                 question_number += 1
 
-    def generate(self, message, **kwargs):
+    def generate(self, message, **kwargs) -> ChatCompletion: # type: ignore[reportReturnType]
         max_retries = 3
-        retry_delay = 5
+        retry_delay_in_seconds = 5
+        max_allowed_top_logprobs = 5
 
         for attempt in range(max_retries):
             try:
-                api_response = self.client.chat.completions.create(
+                chat_completion = self.client.chat.completions.create(
                     model=self.model_name,
                     messages=message,
                     logprobs=True,
-                    top_logprobs=2,
+                    top_logprobs=max_allowed_top_logprobs,
                     **kwargs,
                 )
-                return api_response
+                return chat_completion
             except Exception as e:
                 print(
                     f"Request failed (attempt {attempt+1}/{max_retries}):",
@@ -84,37 +87,29 @@ class GPT(Model):
                     file=sys.stderr,
                 )
                 if attempt < max_retries - 1:
-                    time.sleep(retry_delay)
+                    time.sleep(retry_delay_in_seconds)
                 else:
                     raise e
 
-    def process_results(self, question_number: int, inputs: dict[str, Any], responses):
-        answers = []
-        all_top_token_probs = []
-        for response in responses.choices:
-            answers.append(str(response.message.content or ""))
-            top_token_probs = {
-                toplogprob.token: toplogprob.logprob
-                for logprob in response.logprobs.content
-                for toplogprob in logprob.top_logprobs
-            }
-            all_top_token_probs.append(top_token_probs)
-
-        if self.params.get("escape_responses", False):
-            answers = (
-                [repr(answers)]
-                if self.params.get("combine_responses", False)
-                else [repr(answer) for answer in answers]
-            )
-        elif self.params.get("combine_responses", False):
-            answers = [" ".join(answers)]
-
-        for answer, top_token_probs in zip(answers, all_top_token_probs):
+    def process_results(self, question_number: int, inputs: dict[str, Any], chat_completion: ChatCompletion):
+        for response_text, top_token_logprobs in self.process_chat_completion(chat_completion, self.params["scores"]):
             yield inputs | {
-                "responses": answer.replace("\n", " ").replace("\t", " "),
+                "responses": response_text,
                 "question number": question_number,
-                "top tokens": list(top_token_probs.keys()),
-                "top tokens logprobs": list(top_token_probs.values()),
-                "input token count": responses.usage.prompt_tokens,
-                "output token count": responses.usage.completion_tokens,
+                "top tokens": list(top_token_logprobs.keys()),
+                "top tokens logprobs": list(top_token_logprobs.values()),
+                "input token count": chat_completion.usage.prompt_tokens, # type: ignore[reportOptionalMemberAccess]
+                "output token count": chat_completion.usage.completion_tokens, # type: ignore[reportOptionalMemberAccess]
             }
+
+    def process_chat_completion(self, chat_completion: ChatCompletion, token_scores_format):
+        match token_scores_format:
+            case TokenScoresFormat.FIRST_TOKEN:
+                for choice in chat_completion.choices:
+                    top_token_logprobs = {
+                        top_logprob.token: top_logprob.logprob
+                        for logprob in choice.logprobs.content # type: ignore[reportOptionalMemberAccess]
+                        for top_logprob in logprob.top_logprobs
+                    }
+
+                    yield choice.message.content, top_token_logprobs
