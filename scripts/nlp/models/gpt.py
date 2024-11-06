@@ -1,10 +1,10 @@
 import os
 import sys
 import time
-from typing import Any, Dict, Iterator, cast
+from typing import Any, Dict, Iterator
 from dotenv import load_dotenv
 from openai import OpenAI
-from openai.types.chat.chat_completion import ChatCompletion
+from openai.types.chat.chat_completion import ChatCompletion, Choice, ChatCompletionTokenLogprob
 import tqdm
 from torch.utils.data import DataLoader
 from args import TokenScoresFormat
@@ -91,8 +91,9 @@ class GPT(Model):
                 else:
                     raise e
 
-    def process_results(self, question_number: int, inputs: dict[str, Any], chat_completion: ChatCompletion):
-        for response_text, top_token_logprobs in self.process_chat_completion(chat_completion, self.params["scores"]):
+    def process_results(self, question_number: int, inputs: dict[str, Any], chat_completion: ChatCompletion) -> Iterator[dict[str, Any]]:
+        for choice in chat_completion.choices:
+            response_text, top_token_logprobs = self.process_chat_completion(choice, self.params["scores"])
             yield inputs | {
                 "responses": response_text,
                 "question number": question_number,
@@ -102,14 +103,19 @@ class GPT(Model):
                 "output token count": chat_completion.usage.completion_tokens, # type: ignore[reportOptionalMemberAccess]
             }
 
-    def process_chat_completion(self, chat_completion: ChatCompletion, token_scores_format):
+    def process_chat_completion(self, chat_completion_choice: Choice, token_scores_format):
         match token_scores_format:
             case TokenScoresFormat.FIRST_TOKEN:
-                for choice in chat_completion.choices:
-                    top_token_logprobs = {
-                        top_logprob.token: top_logprob.logprob
-                        for logprob in choice.logprobs.content # type: ignore[reportOptionalMemberAccess]
-                        for top_logprob in logprob.top_logprobs
-                    }
+                first_token_data: ChatCompletionTokenLogprob = chat_completion_choice.logprobs.content[0] # type: ignore[reportOptionalMemberAccess]
+                first_token_logprobs = {
+                    top_logprob.token: top_logprob.logprob
+                    for top_logprob in first_token_data.top_logprobs
+                }
+                return chat_completion_choice.message.content, first_token_logprobs
 
-                    yield choice.message.content, top_token_logprobs
+            case TokenScoresFormat.RESPONSE_TOKENS:
+                response_token_logprobs = {
+                    token_data.token: token_data.logprob
+                    for token_data in chat_completion_choice.logprobs.content # type: ignore[reportOptionalMemberAccess]
+                }
+                return chat_completion_choice.message.content, response_token_logprobs
