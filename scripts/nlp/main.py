@@ -36,9 +36,9 @@ def main():
     parser.add_argument("--timeout", default=10, type=int)
     parser.add_argument("--unescape-input", action="store_true")
     parser.add_argument("--test", "-x", action="store_true")
-    parser.add_argument("--batch-size", "-bs", default=10)
-    parser.add_argument("--temperature", "-temp", default=0.1)
-    parser.add_argument("--required-output-fields", "-f", type=",".split, default=[])
+    parser.add_argument("--batch-size", "-bs", default=10, type=int)
+    parser.add_argument("--temperature", "-temp", default=0.1, type=float)
+    parser.add_argument("--required-output-fields", "-f", default=[], type=",".split)
 
     args = parser.parse_args()
 

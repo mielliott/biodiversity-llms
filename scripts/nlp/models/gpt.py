@@ -47,16 +47,16 @@ class GPT(Model):
         for batch in tqdm.tqdm(dataloader, desc="Processing batches"):
             for inputs in batch:
                 message = [{"role": "user", "content": inputs["query"]}]
-                response = self.generate(
+                api_response = self.generate(
                     message,
-                    n=self.params.get("num_responses", 1),
+                    n=self.params.get("num_responses"),
                     top_p=self.params.get("top_p"),
                     max_tokens=self.params.get("max_tokens"),
                     timeout=self.params.get("timeout"),
-                    temperature=float(self.params.get("temperature", 0.0)),
+                    temperature=self.params.get("temperature"),
                 )
 
-                yield from self.process_results(question_number, [input], [query], response)
+                yield from self.process_results(question_number, inputs, api_response)
                 question_number += 1
 
     def generate(self, message, **kwargs):
@@ -65,14 +65,14 @@ class GPT(Model):
 
         for attempt in range(max_retries):
             try:
-                response = self.client.chat.completions.create(
+                api_response = self.client.chat.completions.create(
                     model=self.model_name,
                     messages=message,
                     logprobs=True,
                     top_logprobs=2,
                     **kwargs,
                 )
-                return response
+                return api_response
             except Exception as e:
                 print(
                     f"Request failed (attempt {attempt+1}/{max_retries}):",
@@ -84,8 +84,7 @@ class GPT(Model):
                 else:
                     raise e
 
-    def process_results(self, idx: int, inputs: list[dict[str, str]], responses):
-        results = []
+    def process_results(self, idx: int, inputs: dict[str, Any], responses):
         answers = []
         all_top_token_probs = []
         for response in responses.choices:
@@ -107,16 +106,11 @@ class GPT(Model):
             answers = [" ".join(answers)]
 
         for answer, top_token_probs in zip(answers, all_top_token_probs):
-            results.append(
-                {
-                    "input": inputs[0],
-                    "query": repr(queries[0]),
-                    "responses": answer.replace("\n", " ").replace("\t", " "),
-                    "question number": idx,
-                    "top tokens": list(top_token_probs.keys()),
-                    "top tokens logprobs": list(top_token_probs.values()),
-                    "input token count": responses.usage.prompt_tokens,
-                    "output token count": responses.usage.completion_tokens,
-                }
-            )
-        return results
+            yield inputs | {
+                "responses": answer.replace("\n", " ").replace("\t", " "),
+                "question number": idx,
+                "top tokens": list(top_token_probs.keys()),
+                "top tokens logprobs": list(top_token_probs.values()),
+                "input token count": responses.usage.prompt_tokens,
+                "output token count": responses.usage.completion_tokens,
+            }
