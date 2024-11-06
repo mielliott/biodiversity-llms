@@ -11,20 +11,28 @@ def test_gpt_3_5():
 
     results = list(results_stream)
 
-    assert results[0]["x"] == "bear"
-    assert results[0]["query"] == "What is the best kind of bear? Only say its name."
-    assert results[0]["responses"]
-    assert results[0]["question number"] == 0
-    assert results[0]["top tokens"]
-    assert results[0]["top tokens logprobs"]
-    assert results[0]["input token count"] == 20
-    assert results[0]["output token count"]
+    assert len(results) == 2
 
-    assert results[1]["x"] == "toad"
-    assert results[1]["query"] == "What is the best kind of toad? Only say its name."
-    assert results[1]["responses"]
-    assert results[1]["question number"] == 1
-    assert results[1]["top tokens"]
-    assert results[1]["top tokens logprobs"]
-    assert results[1]["input token count"] == 21
-    assert results[1]["output token count"]
+    result = results[0]
+    assert result["x"] == "bear"
+    assert result["query"] == "What is the best kind of bear? Only say its name."
+    assert result["question number"] == 0
+    assert result["input token count"] == 20
+    assert len(result["top tokens"]) == 5
+    assert len(result["top tokens logprobs"]) == 5
+
+    assert list(result.keys()) == [
+        "x", "query", "question number", "input", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
+    ]
+
+    result = results[1]
+    assert result["x"] == "toad"
+    assert result["query"] == "What is the best kind of toad? Only say its name."
+    assert result["question number"] == 1
+    assert result["input token count"] == 21
+    assert len(result["top tokens"]) == 5
+    assert len(result["top tokens logprobs"]) == 5
+
+    assert list(result.keys()) == [
+        "x", "query", "question number", "input", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
+    ]
