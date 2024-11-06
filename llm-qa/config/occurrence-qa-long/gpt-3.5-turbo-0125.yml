@@ -1,12 +1,15 @@
 llm: gpt-3.5-turbo-0125
 prep_command: cat
-command: python3 ~/biodiversity-llms/scripts/nlp/qa.py
+command: python3 $ROOT/scripts/nlp/main.py
+command_env: $ROOT/scripts/nlp/env.yml
 input: resources/occurrence-qa.tsv
-output_dir: results/occurrence-qa-long
+output_dir: results/occurrence-qa
 args: # The arguments to `command`
   - --max-tokens 1
   - --num-responses 1
   - --timeout 10
+  - --model-category "openai"
+  - --model-name "gpt-3.5-turbo-0125"
 shuffle: false
 batch_size: 100
 query_limit: 0 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)

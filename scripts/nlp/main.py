@@ -48,8 +48,7 @@ def main():
     io_handler = IOHandler(
         args.patterns,
         args.unescape_input,
-        args.required_output_fields,
-        lambda query: True
+        args.required_output_fields
     )
 
     runner = ExperimentRunner(args.model_category, params, io_handler)

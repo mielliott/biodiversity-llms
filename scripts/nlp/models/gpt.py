@@ -1,9 +1,9 @@
 import os
 import sys
 import time
+from typing import Any, Dict, Iterable
 from dotenv import load_dotenv
 from openai import OpenAI
-from typing import Any, Dict, Iterable, List
 import tqdm
 from torch.utils.data import DataLoader
 from .registry import ModelRegistry
@@ -30,7 +30,7 @@ class GPT(Model):
         self.params = params
         self.model_name = self.params.get("model_name", "gpt-3.5-turbo-0125")
 
-    def run(self, queries: Iterable[tuple[str, str]]):
+    def run(self, queries: Iterable[dict[str, str]]):
         dataset = QueryDataset(queries)
 
         def custom_collate_fn(batch):
@@ -38,22 +38,15 @@ class GPT(Model):
 
         dataloader = DataLoader(
             dataset,
-            batch_size=self.params.get("batch_size", self.params.get("batch_size", 10)),
+            batch_size=self.params.get("batch_size", 10),
             shuffle=False,
             collate_fn=custom_collate_fn,
         )
 
         question_number = 0
         for batch in tqdm.tqdm(dataloader, desc="Processing batches"):
-            if len(batch) < 2:
-                inputs, batch_queries = batch[0]
-                batch_queries = [batch_queries]
-                inputs = [inputs]
-            else:
-                inputs, batch_queries = zip(*batch)
-
-            for input, query in zip(inputs, batch_queries):
-                message = [{"role": "user", "content": query}]
+            for inputs in batch:
+                message = [{"role": "user", "content": inputs["query"]}]
                 response = self.generate(
                     message,
                     n=self.params.get("num_responses", 1),
@@ -62,7 +55,7 @@ class GPT(Model):
                     timeout=self.params.get("timeout"),
                     temperature=float(self.params.get("temperature", 0.0)),
                 )
-                
+
                 yield from self.process_results(question_number, [input], [query], response)
                 question_number += 1
 
@@ -91,9 +84,7 @@ class GPT(Model):
                 else:
                     raise e
 
-    def process_results(
-        self, idx: int, inputs: List[str], queries: List[str], responses
-    ):
+    def process_results(self, idx: int, inputs: list[dict[str, str]], responses):
         results = []
         answers = []
         all_top_token_probs = []

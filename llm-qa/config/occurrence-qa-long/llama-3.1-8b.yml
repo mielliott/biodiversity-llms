@@ -1,4 +1,4 @@
-llm: gpt-3.5-turbo-0125
+llm: llama-3.1-8b
 prep_command: cat
 command: python3 $ROOT/scripts/nlp/main.py
 command_env: $ROOT/scripts/nlp/env.yml
@@ -8,11 +8,11 @@ args: # The arguments to `command`
   - --max-tokens 1
   - --num-responses 1
   - --timeout 10
-  - --model-category "openai"
-  - --model-name "gpt-3.5-turbo-0125"
+  - --model-category "meta-llama"
+  - --model-name "llama-3.1-8b"
 shuffle: false
-batch_size: 5
-query_limit: 10 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
+batch_size: 100
+query_limit: 0 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
 query_fields:
   - kingdom
   - phylum

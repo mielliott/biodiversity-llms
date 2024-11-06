@@ -1,4 +1,4 @@
-llm: gpt-3.5-turbo-0125
+llm: llama-3.1-8b
 prep_command: cat
 command: python3 $ROOT/scripts/nlp/main.py
 command_env: $ROOT/scripts/nlp/env.yml
@@ -6,10 +6,10 @@ input: resources/free-response.tsv
 output_dir: results/free-response
 args: # The arguments to `command`
   - --max-tokens 100
-  - --timeout 10
   - --num-responses 2
-  - --model-category "openai"
-  - --model-name "gpt-3.5-turbo-0125"
+  - --timeout 10
+  - --model-category "meta-llama"
+  - --model-name "llama-3.1-8b"
 shuffle: false
 batch_size: 1
 query_limit: 0 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)
