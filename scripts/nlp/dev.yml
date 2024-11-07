@@ -1,0 +1,13 @@
+channels:
+  - conda-forge
+dependencies:
+  - python =3.12
+  - openai =1.54.0
+  - transformers =4.43.1
+  - sentencepiece =0.1
+  - protobuf =4.24
+  - pytorch =2.1
+  - accelerate =0.26
+  - python-dotenv =1.0.1
+  - pandas =2.2.3
+  - pytest =8.3.3
