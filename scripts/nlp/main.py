@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 from models.registry import ModelRegistry
 from runner import ExperimentRunner
 from llm_io import IOHandler
-from args import TokenScoresFormat, Params
+from args import TokenScoresFormat, Params, get_default_params
 
 
 def main():
@@ -34,18 +34,21 @@ def main():
     parser.add_argument("patterns", nargs="+")
     parser.add_argument("--required-fields", "-f", default=[], type=",".split)
     parser.add_argument("--model-category", "-mc", default="gpt", type=str, choices=ModelRegistry.list_models())
-    parser.add_argument("--model-name", "-m", default="gpt-3.5-turbo-0125", type=str)
-    parser.add_argument("--num-responses", "-r", default=1, type=int)
-    parser.add_argument("--max-tokens", "-t", default=128, type=int)
-    parser.add_argument("--combine-responses", "-c", action="store_true")
-    parser.add_argument("--batch-size", "-bs", default=10, type=int)
-    parser.add_argument("--top-p", "-p", default=0.95, type=float)
-    parser.add_argument("--top-k", "-k", default=1, type=int)
-    parser.add_argument("--temperature", "-temp", default=0.1, type=float)
-    parser.add_argument("--precision", "-np", default="bfloat16", type=str)
-    parser.add_argument("--timeout", default=10, type=int)
     parser.add_argument("--test", "-x", action="store_true")
-    parser.add_argument("--scores", "-s", default=TokenScoresFormat.RESPONSE_TOKENS, **TokenScoresFormat.arg())
+
+    # Model params
+    parser.add_argument("--model-name", "-m", type=str)
+    parser.add_argument("--num-responses", "-r", type=int)
+    parser.add_argument("--max-tokens", "-t", type=int)
+    parser.add_argument("--combine-responses", "-c", action="store_true")
+    parser.add_argument("--batch-size", "-bs", type=int)
+    parser.add_argument("--top-p", "-p", type=float)
+    parser.add_argument("--top-k", "-k", type=int)
+    parser.add_argument("--temperature", "-temp", type=float)
+    parser.add_argument("--precision", "-np", type=str)
+    parser.add_argument("--timeout", type=int)
+    parser.add_argument("--scores", "-s", **TokenScoresFormat.arg())
+    parser.set_defaults(**get_default_params())
 
     args = parser.parse_args()
     if args.test:

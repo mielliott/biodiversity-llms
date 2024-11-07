@@ -11,10 +11,11 @@
             "program": "${workspaceFolder}/scripts/nlp/main.py",
             "envFile": "${workspaceFolder}/.env",
             "args": [
-                "Does {genus} {specificepithet} naturally occur in {stateprovince}, {country}? Yes or no.",
-                "Does {stateprovince}, {country} have a population of {genus} {specificepithet}? Yes or no.",
+                "--test"
+                "Does {genus} {specificepithet} naturally occur in {country}? Yes or no.",
+                "Does {country} have a population of {genus} {specificepithet}? Yes or no.",
                 "<",
-                "scripts/nlp/tests/occurrence-qa.tsv"
+                "scripts/nlp/tests/resources/occurrence-qa.tsv"
             ],
             "console": "integratedTerminal",
             "justMyCode": true,

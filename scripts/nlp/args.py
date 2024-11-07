@@ -1,5 +1,4 @@
-import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, MISSING
 from enum import StrEnum, auto
 from typing import Any
 
@@ -35,3 +34,8 @@ class Params():
     def __getattr__(self, name: str) -> Any:
         cli_name = f"--{name}".replace("_", "-")
         raise RuntimeError(f"Require argument {cli_name} not set")
+
+
+def get_default_params():
+    fields = map(Params.__dataclass_fields__.get, Params.__dataclass_fields__)
+    return {f.name: f.default for f in fields if f is not None and f.default is not MISSING}
