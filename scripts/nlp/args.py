@@ -1,6 +1,7 @@
 from enum import StrEnum, auto
 from typing import Any
 
+
 class EnumArg(StrEnum):
     @classmethod
     def arg(cls) -> dict[str, Any]:

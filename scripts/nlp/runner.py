@@ -3,6 +3,7 @@ from typing import Dict, Any, TextIO
 from models.registry import ModelRegistry
 from llm_io import IOHandler
 
+
 class ExperimentRunner:
     def __init__(self, model_category: str, params: Dict[str, Any], io_handler: IOHandler):
         self.model_class = ModelRegistry.get_model(model_category)

@@ -66,7 +66,7 @@ class GPT(Model):
                 yield from self.process_results(question_number, inputs, chat_completion)
                 question_number += 1
 
-    def generate(self, message, **kwargs) -> ChatCompletion: # type: ignore[reportReturnType]
+    def generate(self, message, **kwargs) -> ChatCompletion:  # type: ignore[reportReturnType]
         max_retries = 3
         retry_delay_in_seconds = 5
         max_allowed_top_logprobs = 5
@@ -83,7 +83,7 @@ class GPT(Model):
                 return chat_completion
             except Exception as e:
                 print(
-                    f"Request failed (attempt {attempt+1}/{max_retries}):",
+                    f"Request failed (attempt {attempt + 1}/{max_retries}):",
                     e,
                     file=sys.stderr,
                 )
@@ -100,14 +100,14 @@ class GPT(Model):
                 "question number": question_number,
                 "top tokens": [x[0] for x in top_token_logprobs],
                 "top tokens logprobs": [x[1] for x in top_token_logprobs],
-                "input token count": chat_completion.usage.prompt_tokens, # type: ignore[reportOptionalMemberAccess]
-                "output token count": chat_completion.usage.completion_tokens, # type: ignore[reportOptionalMemberAccess]
+                "input token count": chat_completion.usage.prompt_tokens,  # type: ignore[reportOptionalMemberAccess]
+                "output token count": chat_completion.usage.completion_tokens,  # type: ignore[reportOptionalMemberAccess]
             }
 
     def process_chat_completion(self, chat_completion_choice: Choice, token_scores_format):
         match token_scores_format:
             case TokenScoresFormat.FIRST_TOKEN:
-                first_token_data: ChatCompletionTokenLogprob = chat_completion_choice.logprobs.content[0] # type: ignore[reportOptionalMemberAccess]
+                first_token_data: ChatCompletionTokenLogprob = chat_completion_choice.logprobs.content[0]  # type: ignore[reportOptionalMemberAccess]
                 first_token_logprobs = [
                     (top_logprob.token, top_logprob.logprob)
                     for top_logprob in first_token_data.top_logprobs
@@ -117,7 +117,7 @@ class GPT(Model):
             case TokenScoresFormat.RESPONSE_TOKENS:
                 response_token_logprobs = [
                     (token_data.token, token_data.logprob)
-                    for token_data in chat_completion_choice.logprobs.content # type: ignore[reportOptionalMemberAccess]
+                    for token_data in chat_completion_choice.logprobs.content  # type: ignore[reportOptionalMemberAccess]
                 ]
                 return chat_completion_choice.message.content, response_token_logprobs
 

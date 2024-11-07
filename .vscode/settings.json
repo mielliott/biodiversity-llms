@@ -1,7 +1,8 @@
 {
     "python.analysis.extraPaths": ["scripts/nlp"],
     "python.analysis.typeCheckingMode": "standard",
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.autopep8",
     "python.testing.pytestArgs": [
     ],
     "python.testing.unittestEnabled": false,
@@ -14,4 +15,7 @@
         "--disable=C0301", // Line length
         "--disable=R1735", // R1735:use-dict-literal
     ],
+    "autopep8.args": [
+        "--ignore=E501", // Line wrap
+    ]
 }

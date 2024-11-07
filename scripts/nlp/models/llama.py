@@ -146,7 +146,7 @@ class Llama(Model):
             ):
                 response_text = self.tokenizer.decode(seq, skip_special_tokens=True)
                 response_text = (
-                    response_text[len(query) :]
+                    response_text[len(query):]
                     .strip()
                     .replace("\n", " ")
                     .replace("\t", " ")
@@ -167,15 +167,15 @@ class Llama(Model):
                 question_number = batch_id * len(batch_inputs) + i
 
                 yield inputs | {
-                        "question number": question_number,
-                        "input": input,
-                        "query": query,
-                        "responses": response_text,
-                        "top tokens": top_tokens,
-                        "top tokens logprobs": top_tokens_logprobs,
-                        "input token count": input_token_count,
-                        "output token count": output_token_count,
-                    }
+                    "question number": question_number,
+                    "input": input,
+                    "query": query,
+                    "responses": response_text,
+                    "top tokens": top_tokens,
+                    "top tokens logprobs": top_tokens_logprobs,
+                    "input token count": input_token_count,
+                    "output token count": output_token_count,
+                }
 
     def tokenize(self, queries):
         inputs = self.tokenizer(queries, return_tensors="pt", padding=True)

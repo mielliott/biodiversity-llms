@@ -1,6 +1,7 @@
 from typing import Dict, Type
 from .model import Model
 
+
 class ModelRegistry:
     _models: Dict[str, Type[Model]] = {}
 
