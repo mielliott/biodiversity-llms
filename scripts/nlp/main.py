@@ -18,6 +18,8 @@ Models:
 import argparse
 import io
 import sys
+
+from dotenv import load_dotenv
 from models.registry import ModelRegistry
 from runner import ExperimentRunner
 from llm_io import IOHandler
@@ -25,6 +27,8 @@ from args import TokenScoresFormat
 
 
 def main():
+    load_dotenv(override=True, verbose=True)
+
     parser = argparse.ArgumentParser(description="Submit your questions to LLM of your choice")
     parser.add_argument("patterns", nargs="+")
     parser.add_argument("--model-category", "-mc", default="gpt", type=str, choices=ModelRegistry.list_models())

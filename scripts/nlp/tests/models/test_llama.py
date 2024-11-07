@@ -2,8 +2,7 @@ from models.llama import Llama
 
 
 def test_llama():
-    llama = Llama()
-    llama.set_parameters({"model_name": "llama-3.1-8b", "precision": "float8"})
+    llama = Llama({"model_name": "llama-3.1-8b", "precision": "float8"})
     llama.load_model()
 
     results_stream = llama.run(iter([

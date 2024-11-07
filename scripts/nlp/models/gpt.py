@@ -1,8 +1,7 @@
 import os
 import sys
 import time
-from typing import Any, Dict, Iterator
-from dotenv import load_dotenv
+from typing import Any, Iterator
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai.types.chat.chat_completion_token_logprob import ChatCompletionTokenLogprob
@@ -16,11 +15,24 @@ from .query import QueryDataset
 
 @ModelRegistry.register("gpt")
 class GPT(Model):
-    def __init__(self):
-        load_dotenv()
-        self.params: Dict[str, Any] = {}
+    def __init__(self, params: dict[str, Any]):
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model_name: str = "gpt-3.5-turbo-0125"
+
+        self.batch_size = params.get("batch_size", 10),
+
+        if "model_name" not in params:
+            raise RuntimeError("Parameter --model_name not set")
+
+        self.model_name = params["model_name"]
+
+        self.num_responses = params.get("num_responses"),
+        self.top_p = params.get("top_p"),
+        self.max_tokens = params.get("max_tokens"),
+        self.timeout = params.get("timeout"),
+        self.temperature = params.get("temperature"),
+        self.token_scores_format = params.get("scores")
+        self.batch_size = params.get("batch_size")
 
     def load_model(self):
         # OpenAI models are accessible through API
@@ -28,14 +40,6 @@ class GPT(Model):
 
     def get_model_info(self) -> dict:
         return {"name": "GPT-3.5 Turbo", "version": "0125"}
-
-    def set_parameters(self, params: Dict[str, Any]):
-        self.params = params
-
-        if "model_name" not in self.params:
-            raise RuntimeError("Parameter --model_name not set")
-
-        self.model_name = self.params["model_name"]
 
     def run(self, queries: Iterator[dict[str, str]]) -> Iterator[dict[str, Any]]:
         dataset = QueryDataset(queries)
@@ -45,7 +49,7 @@ class GPT(Model):
 
         dataloader = DataLoader(
             dataset,
-            batch_size=self.params.get("batch_size", 10),
+            batch_size=self.batch_size,
             shuffle=False,
             collate_fn=custom_collate_fn,
         )
@@ -56,11 +60,11 @@ class GPT(Model):
                 message = [{"role": "user", "content": inputs["query"]}]
                 chat_completion = self.generate(
                     message,
-                    n=self.params.get("num_responses"),
-                    top_p=self.params.get("top_p"),
-                    max_tokens=self.params.get("max_tokens"),
-                    timeout=self.params.get("timeout"),
-                    temperature=self.params.get("temperature"),
+                    n=self.num_responses,
+                    top_p=self.top_p,
+                    max_tokens=self.max_tokens,
+                    timeout=self.timeout,
+                    temperature=self.temperature,
                 )
 
                 yield from self.process_results(question_number, inputs, chat_completion)
@@ -92,7 +96,7 @@ class GPT(Model):
 
     def process_results(self, question_number: int, inputs: dict[str, Any], chat_completion: ChatCompletion) -> Iterator[dict[str, Any]]:
         for choice in chat_completion.choices:
-            response_text, top_token_logprobs = self.process_chat_completion(choice, self.params["scores"])
+            response_text, top_token_logprobs = self.process_chat_completion(choice, self.token_scores_format)
             yield inputs | {
                 "responses": response_text,
                 "question number": question_number,

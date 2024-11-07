@@ -1,14 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Iterator
+from typing import Any, Iterator
 
 
 class Model(ABC):
     @abstractmethod
-    def load_model(self):
-        pass
-
-    @abstractmethod
-    def set_parameters(self, params: Dict[str, Any]):
+    def __init__(self, params: dict[str, Any]):
         pass
 
     @abstractmethod

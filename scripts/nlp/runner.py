@@ -10,8 +10,7 @@ class ExperimentRunner:
         if not self.model_class:
             raise ValueError(f"Model {model_category} not found in registry")
 
-        self.model = self.model_class()
-        self.model.set_parameters(params)
+        self.model = self.model_class(params)
         self.model.load_model()
         self.io_handler = io_handler
 

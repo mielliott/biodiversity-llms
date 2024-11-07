@@ -18,35 +18,45 @@ from .query import QueryDataset
 
 @ModelRegistry.register("llama")
 class Llama(Model):
-    model_name: str
     model: PreTrainedModel
     tokenizer: PreTrainedTokenizerBase
     config: Any
 
-    def __init__(self):
-        load_dotenv(override=True, verbose=True)
-        self.params: Dict[str, Any] = {}
-
+    def __init__(self, params: dict[str, Any]):
         if not os.getenv("HF_TOKEN"):
-            raise RuntimeError("Environment variable HF_TOKEN not defined. Generate a token at https://huggingface.co/settings/tokens.")
+            raise RuntimeError("Environment variable HF_TOKEN not set. Generate a token at https://huggingface.co/settings/tokens.")
 
         print("Using HuggingFace cache directory", os.getenv("HF_HOME"))
+
+        if "model_name" not in params:
+            raise RuntimeError("Parameter --model_name not set")
+        self.hf_model_path = "meta-llama/" + params.get("model_name", "")
+
+        self.batch_size = params.get("batch_size", 0)
+        self.max_tokens = params.get("max_tokens", 0)
+        self.num_responses = params.get("num_responses", 0)
+        self.top_p = params.get("top_p", 0)
+        self.top_k = params.get("top_k", 0)
+
+        self.precision = params.get("precision")
+        if self.precision is None:
+            raise RuntimeError("--precision is required for Llama models")
 
     def get_model_info(self) -> dict:
         return {
             "family": "llama",
             "version": "3.2-1b-Instruct",
-            "name": self.model_name,
+            "name": self.hf_model_path,
             "provider": "Hugging Face",
             "device": self.model.device,
-            "precision": self.params.get("precision"),
+            "precision": self.precision,
         }
 
     def load_model(self):
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.hf_model_path)
         self.tokenizer.pad_token = self.tokenizer.eos_token
         self.tokenizer.padding_side = "right"
-        self.config = AutoConfig.from_pretrained(self.model_name)
+        self.config = AutoConfig.from_pretrained(self.hf_model_path)
 
         precision_map = {
             "float16": torch.float16,
@@ -54,27 +64,14 @@ class Llama(Model):
             "float32": torch.float32,
         }
 
-        precision = self.params.get("precision")
-        if precision is None:
-            raise RuntimeError("--precision is required for Llama models")
-
-        torch_dtype = precision_map.get(precision)
+        torch_dtype = precision_map.get(self.precision)
 
         self.model = LlamaForCausalLM.from_pretrained(
-            self.model_name,
+            self.hf_model_path,
             device_map="auto",
             torch_dtype=torch_dtype,
             low_cpu_mem_usage=True,
         )
-
-    def set_parameters(self, params):
-        self.params.update(params)
-        # set default model from the category
-
-        if "model_name" not in self.params:
-            raise RuntimeError("Parameter --model_name not set")
-
-        self.model_name = "meta-llama/" + self.params["model_name"]
 
     def run(self, queries: Iterator[dict[str, str]]) -> Iterator[dict[str, Any]]:
         dataset = QueryDataset(queries)
@@ -85,7 +82,7 @@ class Llama(Model):
         # TODO: check how to batch on the number of tokens here
         data_loader = DataLoader(
             dataset,
-            batch_size=self.params.get("batch_size", 10),
+            batch_size=self.batch_size,
             shuffle=False,
             collate_fn=custom_collate_fn,
         )
@@ -102,7 +99,7 @@ class Llama(Model):
         attention_mask: torch.Tensor = input_tensors.attention_mask
 
         batch_input_length = input_ids.shape[1]
-        max_completion_length = batch_input_length + self.params.get("max_tokens", 0)
+        max_completion_length = batch_input_length + self.max_tokens
 
         with torch.no_grad():
             try:
@@ -110,9 +107,9 @@ class Llama(Model):
                     input_ids=input_ids.to(self.model.device),
                     attention_mask=attention_mask.to(self.model.device),
                     max_length=max_completion_length,
-                    num_return_sequences=self.params.get("num_responses"),
-                    top_p=self.params.get("top_p"),
-                    top_k=self.params.get("top_k"),
+                    num_return_sequences=self.num_responses,
+                    top_p=self.top_p,
+                    top_k=self.top_k,
                     do_sample=True,
                     output_scores=True,
                     low_memory=True,
@@ -135,8 +132,8 @@ class Llama(Model):
         for i, inputs in enumerate(batch_inputs):
             query = inputs["query"]
 
-            start_idx = i * self.params.get("num_responses")
-            end_idx = (i + 1) * self.params.get("num_responses")
+            start_idx = i * self.num_responses
+            end_idx = (i + 1) * self.num_responses
 
             batch_sequences = generated_sequences[start_idx:end_idx]
             batch_scores = [score[start_idx:end_idx] for score in scores]
