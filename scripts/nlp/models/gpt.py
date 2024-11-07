@@ -66,12 +66,13 @@ class GPT(Model):
                 yield from self.process_results(question_number, inputs, chat_completion)
                 question_number += 1
 
-    def generate(self, message, **kwargs) -> ChatCompletion:  # type: ignore[reportReturnType]
+    def generate(self, message, **kwargs) -> ChatCompletion:
         max_retries = 3
         retry_delay_in_seconds = 5
         max_allowed_top_logprobs = 5
 
-        for attempt in range(max_retries):
+        attempt = 0
+        while True:
             try:
                 chat_completion = self.client.chat.completions.create(
                     model=self.model_name,
@@ -82,12 +83,9 @@ class GPT(Model):
                 )
                 return chat_completion
             except Exception as e:
-                print(
-                    f"Request failed (attempt {attempt + 1}/{max_retries}):",
-                    e,
-                    file=sys.stderr,
-                )
+                print(f"Request failed (attempt {attempt + 1}/{max_retries}):", e, file=sys.stderr)
                 if attempt < max_retries - 1:
+                    attempt += 1
                     time.sleep(retry_delay_in_seconds)
                 else:
                     raise e

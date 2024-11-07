@@ -9,11 +9,11 @@ from transformers import (
     PreTrainedModel,
     PreTrainedTokenizerBase,
 )
+from torch.utils.data import DataLoader
+import tqdm
 from .registry import ModelRegistry
 from .model import Model
 from .query import QueryDataset
-from torch.utils.data import DataLoader
-import tqdm
 
 
 @ModelRegistry.register("llama")
