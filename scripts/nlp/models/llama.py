@@ -39,7 +39,7 @@ class Llama(Model):
             "name": self.model_name,
             "provider": "Hugging Face",
             "device": self.model.device,
-            "precision": self.params.get("precision", "bfloat16"),
+            "precision": self.params.get("precision"),
         }
 
     def load_model(self):
@@ -54,8 +54,11 @@ class Llama(Model):
             "float32": torch.float32,
         }
 
-        precision = self.params.get("precision", "float32")
-        torch_dtype = precision_map.get(precision, torch.float32)
+        precision = self.params.get("precision")
+        if precision is None:
+            raise RuntimeError("--precision is required for Llama models")
+
+        torch_dtype = precision_map.get(precision)
 
         self.model = LlamaForCausalLM.from_pretrained(
             self.model_name,
@@ -99,7 +102,7 @@ class Llama(Model):
         attention_mask: torch.Tensor = input_tensors.attention_mask
 
         batch_input_length = input_ids.shape[1]
-        max_completion_length = batch_input_length + self.params.get("max_tokens", 512)
+        max_completion_length = batch_input_length + self.params.get("max_tokens", 0)
 
         with torch.no_grad():
             try:
@@ -107,7 +110,7 @@ class Llama(Model):
                     input_ids=input_ids.to(self.model.device),
                     attention_mask=attention_mask.to(self.model.device),
                     max_length=max_completion_length,
-                    num_return_sequences=self.params.get("num_responses", 1),
+                    num_return_sequences=self.params.get("num_responses"),
                     top_p=self.params.get("top_p"),
                     top_k=self.params.get("top_k"),
                     do_sample=True,
@@ -132,8 +135,8 @@ class Llama(Model):
         for i, inputs in enumerate(batch_inputs):
             query = inputs["query"]
 
-            start_idx = i * self.params.get("num_responses", 1)
-            end_idx = (i + 1) * self.params.get("num_responses", 1)
+            start_idx = i * self.params.get("num_responses")
+            end_idx = (i + 1) * self.params.get("num_responses")
 
             batch_sequences = generated_sequences[start_idx:end_idx]
             batch_scores = [score[start_idx:end_idx] for score in scores]
