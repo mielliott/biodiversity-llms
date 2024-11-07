@@ -1,4 +1,5 @@
 import io
+import pytest
 from llm_io import IOHandler
 from runner import ExperimentRunner
 from tests import test_util
@@ -26,3 +27,18 @@ def test_runner():
         "horse\tcarriage\tjust horse\tEchoing query \\\"just horse\\\"\n"
         "horse\tcarriage\thorse and carriage\tEchoing query \\\"horse and carriage\\\"\n"
     )
+
+
+def test_runner_missing_required_fields():
+    tsv = test_util.make_tsv_stream([{"x": "apple", "y": "orange"}, {"x": "horse", "y": "carriage"}])
+    io_handler = IOHandler(
+        ["just {x}", "{x} and {y}"],
+        False,
+        ["zorp"]
+    )
+
+    runner = ExperimentRunner("test", {}, io_handler)
+
+    with pytest.raises(RuntimeError):
+        out_stream = io.StringIO()
+        runner.run_experiment(tsv, out_stream)

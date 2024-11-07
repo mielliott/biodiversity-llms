@@ -11,10 +11,10 @@ class IOHandler:
         quoting=csv.QUOTE_NONE
     )
 
-    def __init__(self, patterns: list[str], unescape_input: bool, required_output_fields: list[str]):
+    def __init__(self, patterns: list[str], unescape_input: bool, required_fields: list[str]):
         self.patterns = patterns
         self.unescape_input = unescape_input
-        self.required_output_fields = required_output_fields
+        self.required_fields = required_fields
 
     def batched(self, iterable, n):
         args = [iter(iterable)] * n
@@ -27,7 +27,7 @@ class IOHandler:
 
     def write_results(self, out_stream: TextIO, results: Iterator[dict]):
         first_result = next(results)
-        missing_fields = {field for field in self.required_output_fields if field not in first_result}
+        missing_fields = {field for field in self.required_fields if field not in first_result}
         if missing_fields:
             raise RuntimeError("Missing output field(s): " + ", ".join(missing_fields))
 
