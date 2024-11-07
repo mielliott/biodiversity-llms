@@ -16,6 +16,7 @@ Models:
 """
 
 import argparse
+import io
 import sys
 from models.registry import ModelRegistry
 from runner import ExperimentRunner
@@ -57,9 +58,10 @@ def main():
         args.required_fields
     )
 
-    runner = ExperimentRunner(args.model_category, params, io_handler)
+    if isinstance(sys.stdout, io.TextIOWrapper):
+        sys.stdout.reconfigure(encoding='utf-8')
 
-    sys.stdin.reconfigure(encoding='utf-8')
+    runner = ExperimentRunner(args.model_category, params, io_handler)
     runner.run_experiment(sys.stdin, sys.stdout)
 
 

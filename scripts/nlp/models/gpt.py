@@ -4,7 +4,8 @@ import time
 from typing import Any, Dict, Iterator
 from dotenv import load_dotenv
 from openai import OpenAI
-from openai.types.chat.chat_completion import ChatCompletion, Choice, ChatCompletionTokenLogprob
+from openai.types.chat.chat_completion import ChatCompletion, Choice
+from openai.types.chat.chat_completion_token_logprob import ChatCompletionTokenLogprob
 import tqdm
 from torch.utils.data import DataLoader
 from args import TokenScoresFormat

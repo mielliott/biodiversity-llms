@@ -1,6 +1,6 @@
 import csv
 import itertools
-from typing import Any, Iterator, TextIO
+from typing import Any, Iterable, Iterator, TextIO
 
 
 class IOHandler:
@@ -16,16 +16,16 @@ class IOHandler:
         self.unescape_input = unescape_input
         self.required_fields = required_fields
 
-    def batched(self, iterable, n):
+    def batched(self, iterable: Iterable[Any], n: int):
         args = [iter(iterable)] * n
         return zip(*args)
 
-    def make_queries(self, lines: TextIO) -> Iterator[dict]:
+    def make_queries(self, lines: TextIO) -> Iterator[dict[str, Any]]:
         for field_values in csv.DictReader(lines, None, **self.tsv_args):
             for pattern in self.patterns:
                 yield field_values | {"query": pattern.format(**field_values)}
 
-    def write_results(self, out_stream: TextIO, results: Iterator[dict]):
+    def write_results(self, out_stream: TextIO, results: Iterator[dict[str, Any]]):
         first_result = next(results)
         missing_fields = {field for field in self.required_fields if field not in first_result}
         if missing_fields:

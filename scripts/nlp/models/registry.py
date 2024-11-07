@@ -12,7 +12,7 @@ class ModelRegistry:
         return decorator
 
     @classmethod
-    def get_model(cls, name: str) -> Type[Model]:
+    def get_model(cls, name: str) -> Type[Model] | None:
         return cls._models.get(name)
 
     @classmethod

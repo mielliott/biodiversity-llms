@@ -1,6 +1,7 @@
 import io
+from typing import Any
 
-def make_tsv_stream(data: list[dict]):
+def make_tsv_stream(data: list[dict[str, Any]]) -> io.StringIO:
     header = "\t".join(data[0].keys())
     rows = "\n".join(["\t".join(x.values()) for x in data])
 

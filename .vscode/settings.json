@@ -1,6 +1,6 @@
 {
     "python.analysis.extraPaths": ["scripts/nlp"],
-    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.typeCheckingMode": "standard",
     "editor.formatOnSave": false,
     "python.testing.pytestArgs": [
     ],
@@ -12,5 +12,6 @@
         "--disable=C0115", // Class docstrings
         "--disable=C0116", // Function doctstrings
         "--disable=C0301", // Line length
+        "--disable=R1735", // R1735:use-dict-literal
     ],
 }
