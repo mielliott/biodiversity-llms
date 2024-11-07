@@ -11,9 +11,8 @@ class IOHandler:
         quoting=csv.QUOTE_NONE
     )
 
-    def __init__(self, patterns: list[str], unescape_input: bool, required_fields: list[str]):
+    def __init__(self, patterns: list[str], required_fields: list[str]):
         self.patterns = patterns
-        self.unescape_input = unescape_input
         self.required_fields = required_fields
 
     def batched(self, iterable: Iterable[Any], n: int):

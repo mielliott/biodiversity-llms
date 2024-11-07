@@ -9,7 +9,6 @@ def test_runner():
     tsv = test_util.make_tsv_stream([{"x": "apple", "y": "orange"}, {"x": "horse", "y": "carriage"}])
     io_handler = IOHandler(
         ["just {x}", "{x} and {y}"],
-        False,
         []
     )
 
@@ -32,7 +31,6 @@ def test_runner():
 def test_runner_with_disk_io():
     io_handler = IOHandler(
         ["Does species {genus} {specificepithet} live in {country}?"],
-        False,
         []
     )
 
@@ -56,7 +54,6 @@ def test_runner_missing_required_fields():
     tsv = test_util.make_tsv_stream([{"x": "apple", "y": "orange"}, {"x": "horse", "y": "carriage"}])
     io_handler = IOHandler(
         ["just {x}", "{x} and {y}"],
-        False,
         ["zorp"]
     )
 

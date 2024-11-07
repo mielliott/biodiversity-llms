@@ -14,6 +14,8 @@
         "--disable=C0116", // Function doctstrings
         "--disable=C0301", // Line length
         "--disable=R1735", // R1735:use-dict-literal
+        "--disable=R0903", // R0903:too-few-public-methods
+        "--disable=R0902", // R0902:too-many-instance-attributes
     ],
     "autopep8.args": [
         "--ignore=E501", // Line wrap

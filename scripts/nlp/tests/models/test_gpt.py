@@ -1,9 +1,9 @@
-from args import TokenScoresFormat
+from args import Params, TokenScoresFormat
 from models.gpt import GPT
 
 
 def test_gpt_3_5_first_token_scores():
-    gpt = GPT({"model_name": "gpt-3.5-turbo-0125", "scores": TokenScoresFormat.FIRST_TOKEN})
+    gpt = GPT(Params(model_name="gpt-3.5-turbo-0125", scores=TokenScoresFormat.FIRST_TOKEN))
     results_stream = gpt.run(iter([
         {"x": "bear", "query": "What is the best kind of bear? Only say its name."},
         {"x": "toad", "query": "What is the best kind of toad? Only say its name."}
@@ -39,7 +39,7 @@ def test_gpt_3_5_first_token_scores():
 
 
 def test_gpt_3_5_response_token_scores():
-    gpt = GPT({"model_name": "gpt-3.5-turbo-0125", "scores": TokenScoresFormat.RESPONSE_TOKENS})
+    gpt = GPT(Params(model_name="gpt-3.5-turbo-0125", scores=TokenScoresFormat.RESPONSE_TOKENS))
     results_stream = gpt.run(iter([
         {"x": "bear", "query": "Repeat after me: bear"},
         {"x": "bear bear bear", "query": "Repeat after me: bear bear bear"}

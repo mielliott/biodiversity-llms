@@ -1,8 +1,9 @@
+from args import Params
 from models.llama import Llama
 
 
 def test_llama():
-    llama = Llama({"model_name": "llama-3.1-8b", "precision": "float8"})
+    llama = Llama(Params(model_name="llama-3.1-8b", precision="float8"))
     llama.load_model()
 
     results_stream = llama.run(iter([

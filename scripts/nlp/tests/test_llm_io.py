@@ -6,7 +6,7 @@ from tests import test_util
 
 
 def test_query_generator():
-    handler = IOHandler(["just {x}", "{x} and {y}"], False, [])
+    handler = IOHandler(["just {x}", "{x} and {y}"], [])
 
     tsv = test_util.make_tsv_stream([{"x": "apple", "y": "orange"}, {"x": "horse", "y": "carriage"}])
     query_gen = handler.make_queries(tsv)
@@ -22,7 +22,7 @@ def test_query_generator():
 
 
 def test_read_output_tsv_with_pandas():
-    handler = IOHandler([], False, [])
+    handler = IOHandler([], [])
 
     out_stream = io.StringIO()
     handler.write_results(out_stream, iter([{
@@ -43,7 +43,7 @@ def test_read_output_tsv_with_pandas():
 
 
 def test_read_escaped_output_tsv_with_pandas():
-    handler = IOHandler([], False, [])
+    handler = IOHandler([], [])
 
     out_stream = io.StringIO()
     handler.write_results(out_stream, iter([{

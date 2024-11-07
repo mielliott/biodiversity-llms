@@ -11,6 +11,8 @@ from transformers import (
 )
 from torch.utils.data import DataLoader
 import tqdm
+
+from args import Params
 from .registry import ModelRegistry
 from .model import Model
 from .query import QueryDataset
@@ -22,23 +24,20 @@ class Llama(Model):
     tokenizer: PreTrainedTokenizerBase
     config: Any
 
-    def __init__(self, params: dict[str, Any]):
+    def __init__(self, params: Params):
         if not os.getenv("HF_TOKEN"):
             raise RuntimeError("Environment variable HF_TOKEN not set. Generate a token at https://huggingface.co/settings/tokens.")
 
         print("Using HuggingFace cache directory", os.getenv("HF_HOME"))
 
-        if "model_name" not in params:
-            raise RuntimeError("Parameter --model_name not set")
-        self.hf_model_path = "meta-llama/" + params.get("model_name", "")
+        self.hf_model_path = f"meta-llama/{params.model_name}"
+        self.batch_size = params.batch_size
+        self.max_tokens = params.max_tokens
+        self.num_responses = params.num_responses
+        self.top_p = params.top_p
+        self.top_k = params.top_k
 
-        self.batch_size = params.get("batch_size", 0)
-        self.max_tokens = params.get("max_tokens", 0)
-        self.num_responses = params.get("num_responses", 0)
-        self.top_p = params.get("top_p", 0)
-        self.top_k = params.get("top_k", 0)
-
-        self.precision = params.get("precision")
+        self.precision = params.precision
         if self.precision is None:
             raise RuntimeError("--precision is required for Llama models")
 

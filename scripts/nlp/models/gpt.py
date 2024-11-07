@@ -7,7 +7,7 @@ from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai.types.chat.chat_completion_token_logprob import ChatCompletionTokenLogprob
 import tqdm
 from torch.utils.data import DataLoader
-from args import TokenScoresFormat
+from args import Params, TokenScoresFormat
 from .registry import ModelRegistry
 from .model import Model
 from .query import QueryDataset
@@ -15,24 +15,18 @@ from .query import QueryDataset
 
 @ModelRegistry.register("gpt")
 class GPT(Model):
-    def __init__(self, params: dict[str, Any]):
+    def __init__(self, params: Params):
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        self.model_name: str = "gpt-3.5-turbo-0125"
 
-        self.batch_size = params.get("batch_size", 10),
-
-        if "model_name" not in params:
-            raise RuntimeError("Parameter --model_name not set")
-
-        self.model_name = params["model_name"]
-
-        self.num_responses = params.get("num_responses"),
-        self.top_p = params.get("top_p"),
-        self.max_tokens = params.get("max_tokens"),
-        self.timeout = params.get("timeout"),
-        self.temperature = params.get("temperature"),
-        self.token_scores_format = params.get("scores")
-        self.batch_size = params.get("batch_size")
+        self.batch_size = params.batch_size
+        self.model_name = params.model_name
+        self.num_responses = params.num_responses
+        self.top_p = params.top_p
+        self.max_tokens = params.max_tokens
+        self.timeout = params.timeout
+        self.temperature = params.temperature
+        self.token_scores_format = params.scores
+        self.batch_size = params.batch_size
 
     def load_model(self):
         # OpenAI models are accessible through API
