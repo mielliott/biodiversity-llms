@@ -21,8 +21,8 @@ def test_runner():
 
     assert out_tsv == (
         "x\ty\tquery\tresponse\n"
-        "apple\torange\tjust apple\tEchoing query \"just apple\"\n"
-        "apple\torange\tapple and orange\tEchoing query \"apple and orange\"\n"
-        "horse\tcarriage\tjust horse\tEchoing query \"just horse\"\n"
-        "horse\tcarriage\thorse and carriage\tEchoing query \"horse and carriage\"\n"
+        "apple\torange\tjust apple\tEchoing query \\\"just apple\\\"\n"
+        "apple\torange\tapple and orange\tEchoing query \\\"apple and orange\\\"\n"
+        "horse\tcarriage\tjust horse\tEchoing query \\\"just horse\\\"\n"
+        "horse\tcarriage\thorse and carriage\tEchoing query \\\"horse and carriage\\\"\n"
     )

@@ -15,6 +15,6 @@ class ExperimentRunner:
         self.io_handler = io_handler
 
     def run_experiment(self, input_stream: TextIO, output_stream: TextIO):
-        queries = self.io_handler.make_query_reader(input_stream)
+        queries = self.io_handler.make_queries(input_stream)
         results = self.model.run(queries)
-        self.io_handler.write_queries(output_stream, results)
+        self.io_handler.write_results(output_stream, results)

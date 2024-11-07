@@ -1,51 +1,15 @@
+import csv
 import io
-from llm_io import IOHandler, TSVReader, TSVWriter
+import pandas as pd
+from llm_io import IOHandler
 from tests import test_util
-
-
-def test_tsv_reader():
-    tsv = (
-        "a\tb\n"
-        "1\t2\n"
-        "3\t4\n"
-    )
-
-    reader = TSVReader(io.StringIO(tsv))
-
-    data = list(reader)
-
-    assert data == [
-        {"a": "1", "b": "2"},
-        {"a": "3", "b": "4"}
-    ]
-
-
-def test_tsv_writer():
-    data = [
-        {"a": "1", "b": "2"},
-        {"a": "3", "b": "4"}
-    ]
-
-    out_stream = io.StringIO()
-    writer = TSVWriter(out_stream)
-
-    for obj in data:
-        writer.write(obj)
-
-    tsv = out_stream.getvalue()
-
-    assert tsv == (
-        "a\tb\n"
-        "1\t2\n"
-        "3\t4\n"
-    )
 
 
 def test_query_generator():
     handler = IOHandler(["just {x}", "{x} and {y}"], False, [])
 
     tsv = test_util.make_tsv_stream([{"x": "apple", "y": "orange"}, {"x": "horse", "y": "carriage"}])
-    query_gen = handler.make_query_reader(tsv)
+    query_gen = handler.make_queries(tsv)
 
     queries = list(query_gen)
 
@@ -55,3 +19,47 @@ def test_query_generator():
         {"x": "horse", "y": "carriage", "query": "just horse"},
         {"x": "horse", "y": "carriage", "query": "horse and carriage"},
     ]
+
+
+def test_read_output_tsv_with_pandas():
+    handler = IOHandler([], False, [])
+
+    out_stream = io.StringIO()
+    handler.write_results(out_stream, iter([{
+        "field 1": "value 1",
+        "field 2": "value 2",
+        "field 3": "value 3",
+    }]))
+
+    in_stream = io.StringIO(out_stream.getvalue())
+    table = pd.read_csv(in_stream, sep="\t")
+
+    assert len(table) == 1
+    assert table.iloc[0].to_dict() == {
+        "field 1": "value 1",
+        "field 2": "value 2",
+        "field 3": "value 3",
+    }
+
+
+def test_read_escaped_output_tsv_with_pandas():
+    handler = IOHandler([], False, [])
+
+    out_stream = io.StringIO()
+    handler.write_results(out_stream, iter([{
+        "field\t1": "value\t1",
+        "field\n2": "value\n2",
+        "field\r3": "value\r3",
+    }]))
+
+    in_stream = io.StringIO(out_stream.getvalue())
+    table = pd.read_csv(in_stream, sep="\t", escapechar="\\", quoting=csv.QUOTE_NONE)
+
+    assert len(table) == 1
+
+    first_row = table.iloc[0].to_dict()
+    assert first_row == {
+        "field\t1": "value\t1",
+        "field\n2": "value\n2",
+        "field\r3": "value\r3",
+    }
