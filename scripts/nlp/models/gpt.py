@@ -35,7 +35,7 @@ class GPT(Model):
     def get_model_info(self) -> dict:
         return {"name": "GPT-3.5 Turbo", "version": "0125"}
 
-    def run(self, queries: Iterator[dict[str, str]]) -> Iterator[dict[str, Any]]:
+    def run(self, queries: Iterator[dict[str, Any]]) -> Iterator[dict[str, Any]]:
         dataset = QueryDataset(queries)
 
         def custom_collate_fn(batch):

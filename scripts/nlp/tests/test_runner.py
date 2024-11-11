@@ -1,5 +1,6 @@
 import io
 import pytest
+from args import Params
 from llm_io import IOHandler
 from runner import ExperimentRunner
 from tests import test_util
@@ -12,7 +13,7 @@ def test_runner():
         []
     )
 
-    runner = ExperimentRunner("test", {}, io_handler)
+    runner = ExperimentRunner("test", Params("echo"), io_handler)
 
     out_stream = io.StringIO()
     runner.run_experiment(tsv, out_stream)
@@ -34,7 +35,7 @@ def test_runner_with_disk_io():
         []
     )
 
-    runner = ExperimentRunner("test", {}, io_handler)
+    runner = ExperimentRunner("test", Params("echo"), io_handler)
 
     out_stream = io.StringIO()
 
@@ -57,7 +58,7 @@ def test_runner_missing_required_fields():
         ["zorp"]
     )
 
-    runner = ExperimentRunner("test", {}, io_handler)
+    runner = ExperimentRunner("test", Params("echo"), io_handler)
 
     with pytest.raises(RuntimeError):
         out_stream = io.StringIO()

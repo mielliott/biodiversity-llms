@@ -72,7 +72,7 @@ class Llama(Model):
             low_cpu_mem_usage=True,
         )
 
-    def run(self, queries: Iterator[dict[str, str]]) -> Iterator[dict[str, Any]]:
+    def run(self, queries: Iterator[dict[str, Any]]) -> Iterator[dict[str, Any]]:
         dataset = QueryDataset(queries)
 
         def custom_collate_fn(batch):
