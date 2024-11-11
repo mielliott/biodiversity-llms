@@ -11,7 +11,7 @@ e.g.
 Run it as a python module by checking out the parent directory.
 
 Models:
-    -mc openai -m gpt-3.5-turbo-0125
+    -mc gpt -m gpt-3.5-turbo-0125
     -mc llama -m llama-3.1-8b
 """
 

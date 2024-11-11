@@ -8,7 +8,7 @@ args: # The arguments to `command`
   - --max-tokens 1
   - --num-responses 1
   - --timeout 10
-  - --model-category "openai"
+  - --model-category "gpt"
   - --model-name "gpt-3.5-turbo-0125"
 shuffle: false
 batch_size: 5
