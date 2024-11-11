@@ -1,4 +1,4 @@
-from args import Params, TokenScoresFormat
+from args import BatchProcess, Params, TokenScoresFormat
 from models.gpt import GPT
 
 
@@ -72,3 +72,23 @@ def test_gpt_3_5_response_token_scores():
     assert set(result.keys()) == {
         "x", "query", "responses", "question number", "top tokens", "top tokens logprobs", "input token count", "output token count"
     }
+
+
+def gpt_3_5_batch_write():
+    gpt = GPT(Params(
+        model_name="gpt-3.5-turbo-0125",
+        batch=BatchProcess.WRITE
+    ))
+
+    results_stream = gpt.run(iter([
+        {"x": "bear", "query": "What do bears eat?"},
+        {"x": "toad", "query": "What do toads eat?"}
+    ]))
+
+    results = list(results_stream)
+
+    batch_id = results[0]["batch id"]
+    assert results == [
+        {"x": "bear", "query": "What do bears eat?", "batch id": batch_id, "request id": "0"},
+        {"x": "toad", "query": "What do toads eat?", "batch id": batch_id, "request id": "1"}
+    ]

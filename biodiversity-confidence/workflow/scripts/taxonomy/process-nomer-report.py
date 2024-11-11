@@ -8,10 +8,14 @@ alignments_tsv = smk.output[0]
 bad_names_tsv = smk.output[1]
 
 
-def clean_name(name):
+def clean_name(name) -> str:
+    split = name.lstrip().split()
+    return split[0].lower() if len(split) > 0 else ""
+
+
+def clean_name_or_nan(name) -> str | float:
     if type(name) == str:
-        split = name.lstrip().split()
-        return split[0].lower() if len(split) > 0 else ""
+        return clean_name(name)
     else:
         return np.nan
 
@@ -42,10 +46,10 @@ bads.to_csv(bad_names_tsv, sep="\t", index=False)
 raw = raw.iloc[raw["alignedPathNames"].dropna().index]
 
 data = pd.DataFrame(index=raw.index)
-data["providedName"] = raw["providedName"].map(clean_name)
-data["alignedName"] = raw["alignedName"].map(clean_name)
-data["alignedRank"] = raw["alignedRank"].map(clean_name)
-data["alignedPath"] = raw["alignedPath"].map(clean_path)
+data["providedName"] = raw["providedName"].map(clean_name_or_nan)
+data["alignedName"] = raw["alignedName"].map(clean_name_or_nan)
+data["alignedRank"] = raw["alignedRank"].map(clean_name_or_nan)
+data["alignedPath"] = raw["alignedPath"].map(clean_name_or_nan)
 data["alignedPathNames"] = raw["alignedPathNames"].map(clean_path)
 
 # Build alias lists, map all aliases of each name to a shared set

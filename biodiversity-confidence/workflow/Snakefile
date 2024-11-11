@@ -18,6 +18,7 @@ ALL_IN_UNSHUFFLED = f"results/{JOB}/input/all.tsv"
 
 ABSENCE_VALID = f"results/{JOB}/input/absence-valid.tsv"
 
+OUTPUTS_DIR = os.path.join(config["output_dir"], config["llm"])
 NOTEBOOK_OUT = f"results/{JOB}/{LLM}/" + config["results"]["notebook"]
 TAXQA_NOTEBOOK_OUT = f"results/{JOB}/{LLM}/taxqa-results.py.ipynb"
 
@@ -42,11 +43,7 @@ include: "rules/tsv.smk"
 include: "rules/occ-qa-analysis.smk"
 include: "rules/tax-qa-analysis.smk"
 include: "rules/get-taxonomy-alignments.smk"
-
-
-if os.path.exists(f"workflow/rules/{JOB}/Snakefile"):
-
-    include: f"rules/{JOB}/Snakefile"
+include: f"rules/{JOB}/Snakefile"
 
 
 module test_qa_workflow:

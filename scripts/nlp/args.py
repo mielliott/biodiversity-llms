@@ -17,6 +17,12 @@ class TokenScoresFormat(EnumArg):
     RESPONSE_TOKENS = auto()
 
 
+class BatchProcess(EnumArg):
+    NONE = auto()
+    WRITE = auto()
+    READ = auto()
+
+
 @dataclass(init=True, frozen=True)
 class Params():
     model_name: str
@@ -30,6 +36,7 @@ class Params():
     precision: str = "bfloat16"
     timeout: int = 10
     scores: TokenScoresFormat = TokenScoresFormat.RESPONSE_TOKENS
+    batch: BatchProcess = BatchProcess.NONE
 
     def __getattr__(self, name: str) -> Any:
         cli_name = f"--{name}".replace("_", "-")

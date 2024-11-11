@@ -19,5 +19,8 @@
     ],
     "autopep8.args": [
         "--ignore=E501", // Line wrap
-    ]
+    ],
+    "[snakemake]": {
+        "editor.defaultFormatter": "tfehlmann.snakefmt"
+    }
 }

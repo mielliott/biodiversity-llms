@@ -1,9 +1,11 @@
-# print(f"Config for QA job \"{config['output_dir']}\":\n", config, "\n")
+import os
 
 if "shuffle" in config and config["shuffle"]:
-    BATCH_OUTPUTS_DIR = f"{config['output_dir']}/{config['batch_size']}-shuffled-{config['random_seed']}"
+    BATCH_OUTPUTS_DIR = (
+        f"{OUTPUTS_DIR}/{config['batch_size']}-shuffled-{config['random_seed']}"
+    )
 else:
-    BATCH_OUTPUTS_DIR = f"{config['output_dir']}/{config['batch_size']}"
+    BATCH_OUTPUTS_DIR = f"{OUTPUTS_DIR}/{config['batch_size']}"
 
 
 def get_batches(wildcards):
@@ -36,7 +38,7 @@ rule answer_questions:
     input:
         ancient(get_batches),
     output:
-        config["output_dir"] + "/responses.tsv",
+        OUTPUTS_DIR + "/responses.tsv",
     shell:
         "mlr --tsvlite cat {input} > {output}"
 
@@ -49,14 +51,14 @@ rule answer_questions_batch:
     params:
         prep_command=config["prep_command"],
         qa_command=config["command"],
-        qa_args=" ".join(config["args"] + [f"--model {config['llm']}"]),
+        qa_args=" ".join(config["args"]),
         qa_questions=lambda wildcards: " ".join(
             [f'"{q} {config["query_suffix"]}"' for q in config["query_templates"]]
         ),
     log:
         "logs/" + BATCH_OUTPUTS_DIR + "/{first}-{last}.tsv",
     conda:
-        "../envs/qa.yml"
+        os.path.expandvars(config["command_env"])
     shell:
         """
         workflow/scripts/cat-range {input} {wildcards.first} {wildcards.last}\
