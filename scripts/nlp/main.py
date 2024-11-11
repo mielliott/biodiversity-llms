@@ -64,7 +64,7 @@ def main():
 
     params = cast(Params, args)
     runner = ExperimentRunner(args.model_category, params, io_handler)
-    runner.run_experiment(sys.stdin, sys.stdout)
+    runner.run_experiment(sys.stdin)
 
 
 if __name__ == "__main__":

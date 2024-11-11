@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/scripts/nlp/main.py",
             "envFile": "${workspaceFolder}/.env",
             "args": [
-                "--test"
+                "--test",
                 "Does {genus} {specificepithet} naturally occur in {country}? Yes or no.",
                 "Does {country} have a population of {genus} {specificepithet}? Yes or no.",
                 "<",
