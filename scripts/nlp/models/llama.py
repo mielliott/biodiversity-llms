@@ -1,6 +1,6 @@
 import os
-from typing import Dict, Any, Iterator
-from dotenv import load_dotenv
+import sys
+from typing import Any, Iterator
 import torch
 from transformers import (
     AutoTokenizer,
@@ -28,7 +28,7 @@ class Llama(Model):
         if not os.getenv("HF_TOKEN"):
             raise RuntimeError("Environment variable HF_TOKEN not set. Generate a token at https://huggingface.co/settings/tokens.")
 
-        print("Using HuggingFace cache directory", os.getenv("HF_HOME"))
+        print("Using HuggingFace cache directory", os.getenv("HF_HOME"), file=sys.stderr)
 
         self.hf_model_path = f"meta-llama/{params.model_name}"
         self.batch_size = params.batch_size

@@ -1,4 +1,5 @@
 
+import sys
 from typing import TextIO
 from args import Params
 from models.registry import ModelRegistry
@@ -15,7 +16,7 @@ class ExperimentRunner:
         self.model.load_model()
         self.io_handler = io_handler
 
-    def run_experiment(self, input_stream: TextIO, output_stream: TextIO):
+    def run_experiment(self, input_stream: TextIO):
         queries = self.io_handler.make_queries(input_stream)
         results = self.model.run(queries)
-        self.io_handler.write_results(output_stream, results)
+        self.io_handler.write_results(sys.stdout, results)
