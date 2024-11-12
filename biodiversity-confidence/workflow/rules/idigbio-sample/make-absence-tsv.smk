@@ -1,11 +1,8 @@
-ABSENCE_IN_UNVALIDATED = ABSENCE_IN + ".unvalidated"
-
-
 rule create_pseudo_absence_dataset:
     input:
-        PRESENCE_IN,
+        f"{inputs}/presence.tsv",
     output:
-        temp(ABSENCE_IN_UNVALIDATED),
+        temp(f"{inputs}/absence.tsv.unvalidated"),
     params:
         shuffle_fields="'country','stateprovince','county'",
         seed=config["random_seed"],
@@ -19,21 +16,21 @@ rule create_pseudo_absence_dataset:
 
 rule validate_absences:
     input:
-        ABSENCE_IN_UNVALIDATED,
+        f"{inputs}/absence.tsv.unvalidated",
     output:
-        protected(ABSENCE_VALID),
+        protected(f"{inputs}/absence-valid.tsv"),
     conda:
         "../../envs/analysis.yml"
     script:
-        "../../scripts/validate-absences.py"
+        "../../scripts/validate_absences.py"
 
 
 rule filter_absences:
     input:
-        unvalidated=ABSENCE_IN_UNVALIDATED,
-        validation=ancient(ABSENCE_VALID),
+        unvalidated=f"{inputs}/absence.tsv.unvalidated",
+        validation=ancient(f"{inputs}/absence-valid.tsv"),
     output:
-        ABSENCE_IN,
+        f"{inputs}/absence.tsv",
     shell:
         """
         paste <(cat {input.unvalidated})\

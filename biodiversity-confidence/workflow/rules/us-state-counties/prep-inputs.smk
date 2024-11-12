@@ -1,8 +1,8 @@
 rule usqa_prep_inputs:
     input:
-        f"resources/{JOB}/us-state-counties.tsv",
+        f"{resources}/us-state-counties.tsv",
     output:
-        f"results/{JOB}/input/acer-saccharum.tsv",
+        f"{inputs}/acer-saccharum.tsv",
     script:
         """
         cat {input}\

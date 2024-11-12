@@ -1,11 +1,11 @@
 import os
 
+outputs = config["outputs"]
+
 if "shuffle" in config and config["shuffle"]:
-    BATCH_OUTPUTS_DIR = (
-        f"{OUTPUTS_DIR}/{config['batch_size']}-shuffled-{config['random_seed']}"
-    )
+    batch_outputs = f"{outputs}/{config['batch_size']}-shuffled-{config['random_seed']}"
 else:
-    BATCH_OUTPUTS_DIR = f"{OUTPUTS_DIR}/{config['batch_size']}"
+    batch_outputs = f"{outputs}/{config['batch_size']}"
 
 
 def get_batches(wildcards):
@@ -30,7 +30,7 @@ def get_batches(wildcards):
 def get_batch_path(batch, batch_size, limit):
     first = batch * batch_size
     last = min(limit - 1, (batch + 1) * batch_size - 1)
-    path = f"{BATCH_OUTPUTS_DIR}/{first}-{last}.tsv"
+    path = f"{batch_outputs}/{first}-{last}.tsv"
     return path
 
 
@@ -38,7 +38,7 @@ rule answer_questions:
     input:
         ancient(get_batches),
     output:
-        OUTPUTS_DIR + "/responses.tsv",
+        f"{outputs}/responses.tsv",
     shell:
         "mlr --tsvlite cat {input} > {output}"
 
@@ -47,7 +47,7 @@ rule answer_questions_batch:
     input:
         config["input"],
     output:
-        BATCH_OUTPUTS_DIR + "/{first}-{last}.tsv",
+        batch_outputs + "/{first}-{last}.tsv",
     params:
         prep_command=config["prep_command"],
         qa_command=config["command"],
@@ -56,7 +56,7 @@ rule answer_questions_batch:
             [f'"{q} {config["query_suffix"]}"' for q in config["query_templates"]]
         ),
     log:
-        "logs/" + BATCH_OUTPUTS_DIR + "/{first}-{last}.tsv",
+        "logs/" + batch_outputs + "/{first}-{last}.tsv",
     conda:
         os.path.expandvars(config["command_env"])
     shell:

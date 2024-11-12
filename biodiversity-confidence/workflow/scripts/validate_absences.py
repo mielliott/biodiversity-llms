@@ -34,7 +34,7 @@ for record in absences.itertuples():
 
 absence_matches = pd.Series(responses)
 m = sum(absence_matches == 0)
-print(f"Records missing location: {m}/{n} ({100* m/ n:2.2f}%)")
+print(f"Records missing location: {m}/{n} ({100 * m / n:2.2f}%)")
 
 absences["valid"] = absence_matches == 0
 absences["valid"].to_csv(open(file_out, "w"), sep="\t")

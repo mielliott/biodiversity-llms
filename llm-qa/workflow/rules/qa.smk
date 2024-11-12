@@ -2,10 +2,10 @@ import os
 
 if "shuffle" in config and config["shuffle"]:
     BATCH_OUTPUTS_DIR = (
-        f"{OUTPUTS_DIR}/{config['batch_size']}-shuffled-{config['random_seed']}"
+        f"{outputs}/{config['batch_size']}-shuffled-{config['random_seed']}"
     )
 else:
-    BATCH_OUTPUTS_DIR = f"{OUTPUTS_DIR}/{config['batch_size']}"
+    BATCH_OUTPUTS_DIR = f"{outputs}/{config['batch_size']}"
 
 
 def get_batches(wildcards):
@@ -38,7 +38,7 @@ rule answer_questions:
     input:
         ancient(get_batches),
     output:
-        OUTPUTS_DIR + "/responses.tsv",
+        f"{outputs}/responses.tsv",
     shell:
         "mlr --tsvlite cat {input} > {output}"
 

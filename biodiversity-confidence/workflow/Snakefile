@@ -1,40 +1,30 @@
 import os
 from deepmerge import Merger
+from util import get_job_and_dataset
 
 
 configfile: "config/defaults.yml"
 
 
-config = Merger([(dict, ["merge"])], ["override"], ["override"]).merge(
-    config["defaults"], config
-)
+config_merger = Merger([(dict, ["merge"])], ["override"], ["override"])
+config = config_merger.merge(config["defaults"], config)
 
-JOB = config["job_name"]
-LLM = config["llm"]
-
-PRESENCE_IN = f"results/{JOB}/input/presence.tsv"
-ABSENCE_IN = f"results/{JOB}/input/absence.tsv"
-ALL_IN_UNSHUFFLED = f"results/{JOB}/input/all.tsv"
-
-ABSENCE_VALID = f"results/{JOB}/input/absence-valid.tsv"
-
-OUTPUTS_DIR = os.path.join(config["output_dir"], config["llm"])
-NOTEBOOK_OUT = f"results/{JOB}/{LLM}/" + config["results"]["notebook"]
-TAXQA_NOTEBOOK_OUT = f"results/{JOB}/{LLM}/taxqa-results.py.ipynb"
+job, dataset = get_job_and_dataset()
+resources = f"resources/{dataset}"
+inputs = f"results/{dataset}/input"
+outputs = f"results/{dataset}/{job}"
 
 
 def make_qa_config(template):
-    c = {"llm": config["llm"]}
-    c |= config["qa"]["defaults"]
-    c |= config["qa"][template]
-    if "random_seed" not in c:
-        c |= {"random_seed": config["random_seed"]}
-    if "output_dir" not in c:
-        c |= {"output_dir": f"results/{JOB}/{c['llm']}/{template}"}
+    job_params = {
+        "random_seed": config["random_seed"],
+        "outputs": f"{outputs}/{template}",
+    }
+    c = config_merger.merge(config["qa"]["defaults"].copy(), config["qa"][template])
+    config_merger.merge(c, job_params)
     return c
 
 
-config["qa"]["test"] = make_qa_config("test")
 config["qa"]["occurrence"] = make_qa_config("occurrence")
 config["qa"]["taxonomy"] = make_qa_config("taxonomy")
 
@@ -43,17 +33,7 @@ include: "rules/tsv.smk"
 include: "rules/occ-qa-analysis.smk"
 include: "rules/tax-qa-analysis.smk"
 include: "rules/get-taxonomy-alignments.smk"
-include: f"rules/{JOB}/Snakefile"
-
-
-module test_qa_workflow:
-    snakefile:
-        "modules/qa.smk"
-    config:
-        config["qa"]["test"]
-
-
-use rule * from test_qa_workflow as test_qa_*
+include: f"rules/{dataset}/Snakefile"
 
 
 module occ_qa_workflow:
@@ -78,4 +58,4 @@ use rule * from tax_qa_workflow as tax_qa_*
 
 rule all:
     input:
-        NOTEBOOK_OUT,
+        f"{outputs}/{config['results']['notebook']}",

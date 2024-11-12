@@ -1,9 +1,9 @@
 checkpoint combine_presence_and_absence:
     input:
-        presence=PRESENCE_IN,
-        absence=ABSENCE_IN,
+        presence=f"{inputs}/presence.tsv",
+        absence=f"{inputs}/absence.tsv",
     output:
-        ALL_IN_UNSHUFFLED,
+        f"{inputs}/all.tsv",
     shell:
         """
         mlr --tsvlite cat <(mlr --tsvlite put '$present = "Yes"' {input.presence})\

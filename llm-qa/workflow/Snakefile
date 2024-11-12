@@ -3,9 +3,9 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv()
 
-OUTPUTS_DIR = os.path.join(config["output_dir"], config["llm"])
+outputs = os.path.join(config["output_dir"], config["llm"])
 
-print(f"out: {OUTPUTS_DIR}/responses.tsv")
+print(f"out: {outputs}/responses.tsv")
 
 
 include: "rules/qa.smk"
@@ -13,8 +13,8 @@ include: "rules/qa.smk"
 
 rule all:
     input:
-        f"{OUTPUTS_DIR}/responses.tsv",
+        f"{outputs}/responses.tsv",
     output:
-        f"{OUTPUTS_DIR}/all-done",
+        f"{outputs}/all-done",
     shell:
         "touch {output}"

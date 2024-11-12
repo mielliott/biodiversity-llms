@@ -1,32 +1,35 @@
 rule occqa_make_training_and_test_sets:
     input:
-        f"results/{JOB}/input/all-shuffled-{config['random_seed']}.tsv" if config["qa"]["occurrence"]["shuffle"] else ALL_IN_UNSHUFFLED
+        f"{inputs}/all-shuffled-{config['random_seed']}.tsv"
+        if config["qa"]["occurrence"]["shuffle"]
+        else f"{inputs}/all.tsv",
     output:
-        f"results/{JOB}/input/train_test_split.tsv"
+        f"{inputs}/train_test_split.tsv",
     params:
         query_fields=config["qa"]["occurrence"]["query_fields"],
         seed=config["results"]["random_seed"],
         split_rank=config["results"]["train_test_split_rank"],
-        split_test_fraction=config["results"]["split_test_fraction"]
+        split_test_fraction=config["results"]["split_test_fraction"],
     script:
-        "../scripts/split-training-test-sets.py"
+        "../scripts/split_training_test_sets.py"
+
 
 rule occqa_analyze_results:
     input:
-        responses=f"results/{JOB}/{LLM}/occurrence/responses.tsv",
-        taxonomy_scores=f"results/{JOB}/{LLM}/taxonomy/summary.tsv",
-        taxonomy=f"results/{JOB}/input/taxa-genus.tsv",
+        responses=f"{outputs}/occurrence/responses.tsv",
+        taxonomy_scores=f"{outputs}/taxonomy/summary.tsv",
+        taxonomy=f"{inputs}/taxa-genus.tsv",
         taxon_counts="resources/idigbio-sample/taxon-counts.tsv",
-        train_test_split=f"results/{JOB}/input/train_test_split.tsv",
+        train_test_split=f"{inputs}/train_test_split.tsv",
     output:
-        NOTEBOOK_OUT
+        f"{outputs}/{config['results']['notebook']}",
     params:
         phrasings=lambda wildcards: config["qa"]["occurrence"]["query_templates"],
         query_fields=config["qa"]["occurrence"]["query_fields"],
         seed=config["results"]["random_seed"],
-        validate_absences=config["results"]["validate_absences"]
+        validate_absences=config["results"]["validate_absences"],
     log:
-        notebook=NOTEBOOK_OUT
+        notebook=f"{outputs}/{config['results']['notebook']}",
     conda:
         "../envs/analysis.yml"
     notebook:

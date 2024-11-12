@@ -12,7 +12,7 @@ rule get_records:
     input:
         "resources/preston.jar",
     output:
-        f"resources/{JOB}/records.zip",
+        f"{resources}/records.zip",
     params:
         records_zip=config["recordset"],
         preston="java -jar resources/preston.jar",
