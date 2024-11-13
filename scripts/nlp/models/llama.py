@@ -30,7 +30,13 @@ class Llama(Model):
 
         print("Using HuggingFace cache directory", os.getenv("HF_HOME"), file=sys.stderr)
 
-        self.hf_model_path = f"meta-llama/{params.model_name}"
+        if params.model_name.startswith("/"):
+            self.hf_model_path = params.model_name
+            self.local_files_only = True
+        else:
+            self.hf_model_path = f"meta-llama/{params.model_name}"
+            self.local_files_only = False
+
         self.batch_size = params.batch_size
         self.max_tokens = params.max_tokens
         self.num_responses = params.num_responses
@@ -52,10 +58,10 @@ class Llama(Model):
         }
 
     def load_model(self):
-        self.tokenizer = AutoTokenizer.from_pretrained(self.hf_model_path)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.hf_model_path, local_files_only=self.local_files_only)
         self.tokenizer.pad_token = self.tokenizer.eos_token
         self.tokenizer.padding_side = "right"
-        self.config = AutoConfig.from_pretrained(self.hf_model_path)
+        self.config = AutoConfig.from_pretrained(self.hf_model_path, local_files_only=self.local_files_only)
 
         precision_map = {
             "float16": torch.float16,
@@ -70,6 +76,7 @@ class Llama(Model):
             device_map="auto",
             torch_dtype=torch_dtype,
             low_cpu_mem_usage=True,
+            local_files_only=self.local_files_only
         )
 
     def run(self, queries: Iterator[dict[str, Any]]) -> Iterator[dict[str, Any]]:

@@ -5,13 +5,32 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: NLP",
+            "name": "Debug NLP: Test",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/nlp/main.py",
             "envFile": "${workspaceFolder}/.env",
             "args": [
                 "--test",
+                "Does {genus} {specificepithet} naturally occur in {country}? Yes or no.",
+                "Does {country} have a population of {genus} {specificepithet}? Yes or no.",
+                "<",
+                "scripts/nlp/tests/resources/occurrence-qa.tsv"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+        },
+        {
+            "name": "Debug NLP: Local Llama",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/nlp/main.py",
+            "envFile": "${workspaceFolder}/.env",
+            "args": [
+                "-mc",
+                "llama",
+                "-m",
+                "/storage/hf-models/cache/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b/",
                 "Does {genus} {specificepithet} naturally occur in {country}? Yes or no.",
                 "Does {country} have a population of {genus} {specificepithet}? Yes or no.",
                 "<",
