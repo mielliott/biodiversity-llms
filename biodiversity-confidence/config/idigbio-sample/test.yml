@@ -4,14 +4,13 @@ nomer_alignment_report_url: https://raw.githubusercontent.com/mielliott/idigbio-
 qa:
   defaults:
     args:
-      - --model-category gpt
-      - --model-name gpt-3.5-turbo-0125
+      - --test
   occurrence:
-    input: results/idigbio-sample/input/all.tsv
+    input: results/idigbio-sample/8f0594be7f88e4fc7b30c0854e7ca029/input/all.tsv
     query_limit: 15
     batch_size: 5
   taxonomy:
-    input: results/idigbio-sample/input/taxonomy-qa.tsv
+    input: results/idigbio-sample/8f0594be7f88e4fc7b30c0854e7ca029/input/taxonomy-qa.tsv
     query_limit: 15
     batch_size: 5
 results:

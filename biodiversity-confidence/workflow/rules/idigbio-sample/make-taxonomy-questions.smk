@@ -48,4 +48,4 @@ checkpoint make_taxonomy_questions:
     params:
         ranks=RANKS,
     script:
-        "../scripts/make_taxonomy_qa_table.py"
+        "../../scripts/make_taxonomy_qa_table.py"

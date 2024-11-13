@@ -18,10 +18,6 @@ resources = f"resources/{dataset}"
 inputs = f"results/{dataset}/{recordset_hash}/input"
 outputs = f"results/{dataset}/{recordset_hash}/{job}"
 
-resources = f"resources/{dataset}"
-inputs = f"results/{dataset}/input"
-outputs = f"results/{dataset}/{job}"
-
 
 def make_qa_config(template):
     job_params = {
