@@ -10,6 +10,14 @@ config_merger = Merger([(dict, ["merge"])], ["override"], ["override"])
 config = config_merger.merge(config["defaults"], config)
 
 job, dataset = get_job_and_dataset()
+
+recordset_id = config["recordset"]
+recordset_hash = config["recordset"].split("/")[-1]
+
+resources = f"resources/{dataset}"
+inputs = f"results/{dataset}/{recordset_hash}/input"
+outputs = f"results/{dataset}/{recordset_hash}/{job}"
+
 resources = f"resources/{dataset}"
 inputs = f"results/{dataset}/input"
 outputs = f"results/{dataset}/{job}"

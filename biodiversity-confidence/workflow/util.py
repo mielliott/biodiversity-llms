@@ -7,6 +7,8 @@ def get_config_file_path():
         i = sys.argv.index("--configfile")
     elif "--configfiles" in sys.argv:
         i = sys.argv.index("--configfiles")
+    else:
+        raise RuntimeError("Set --configfile or --configfiles")
 
     return sys.argv[i + 1]
 
