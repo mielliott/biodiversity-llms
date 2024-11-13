@@ -1,6 +1,6 @@
 rule gather_binomials:  # Not used, it's a lot of questions and genus is present in binomial, so might as well only test on genus
     input:
-        f"{resources}/records.zip",
+        f"{resources}/{{recordset_hash}}/records.zip",
     output:
         f"{inputs}/taxa-species.tsv",
     shell:
@@ -18,7 +18,7 @@ RANKS = ["kingdom", "phylum", "class", "order", "family", "genus"]
 
 rule gather_taxa_for_upper_ranks:
     input:
-        f"{resources}/records.zip",
+        f"{resources}/{{recordset_hash}}/records.zip",
     output:
         f"{inputs}/taxa-{{rank}}.tsv",
     params:

@@ -11,12 +11,9 @@ config = config_merger.merge(config["defaults"], config)
 
 job, dataset = get_job_and_dataset()
 
-recordset_id = config["recordset"]
-recordset_hash = config["recordset"].split("/")[-1]
-
 resources = f"resources/{dataset}"
-inputs = f"results/{dataset}/{recordset_hash}/input"
-outputs = f"results/{dataset}/{recordset_hash}/{job}"
+inputs = f"results/{dataset}/{{recordset_hash}}/input"
+outputs = f"results/{dataset}/{{recordset_hash}}/{job}"
 
 
 def make_qa_config(template):

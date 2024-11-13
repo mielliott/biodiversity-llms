@@ -3,7 +3,7 @@ from glob import glob
 
 rule clean_records:
     input:
-        f"{resources}/records.zip",
+        f"{resources}/{{recordset_hash}}/records.zip",
     output:
         f"{inputs}/presence-unfiltered.tsv",
     params:
@@ -11,7 +11,7 @@ rule clean_records:
             [f'"{field}"' for field in config["qa"]["occurrence"]["query_fields"]]
         ),
     log:
-        "logs/clean_raws.log",
+        f"logs/{inputs}/clean_raws.log",
     shell:
         """
         unzip -p {input}\
