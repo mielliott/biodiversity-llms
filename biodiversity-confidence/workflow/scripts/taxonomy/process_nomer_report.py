@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
+from snakemake.script import Snakemake
 
-smk = snakemake  # type: ignore
+smk: Snakemake = snakemake  # type: ignore[undefined-variable]
 
 report_tsv = smk.input[0]
 alignments_tsv = smk.output[0]
@@ -14,14 +15,14 @@ def clean_name(name) -> str:
 
 
 def clean_name_or_nan(name) -> str | float:
-    if type(name) == str:
+    if isinstance(name, str):
         return clean_name(name)
     else:
         return np.nan
 
 
 def clean_path(path):
-    if type(path) == str:
+    if isinstance(type(path), str):
         return "|".join([clean_name(x) for x in path.split("|")])
     else:
         return np.nan
