@@ -1,5 +1,6 @@
 from args import BatchProcess, Params, TokenScoresFormat
 from models.gpt import GPT
+from models.batch_gpt import BatchGPT
 
 
 def test_gpt_3_5_first_token_scores():
@@ -74,8 +75,8 @@ def test_gpt_3_5_response_token_scores():
     }
 
 
-def gpt_3_5_batch_write():
-    gpt = GPT(Params(
+def test_gpt_3_5_batch_write():
+    gpt = BatchGPT(Params(
         model_name="gpt-3.5-turbo-0125",
         batch=BatchProcess.WRITE
     ))
@@ -86,9 +87,22 @@ def gpt_3_5_batch_write():
     ]))
 
     results = list(results_stream)
-
     batch_id = results[0]["batch id"]
     assert results == [
-        {"x": "bear", "query": "What do bears eat?", "batch id": batch_id, "request id": "0"},
-        {"x": "toad", "query": "What do toads eat?", "batch id": batch_id, "request id": "1"}
+        {"x": "bear", "query": "What do bears eat?", "batch id": batch_id, "request id": "request-0"},
+        {"x": "toad", "query": "What do toads eat?", "batch id": batch_id, "request id": "request-1"}
     ]
+
+
+def test_gpt_3_5_read_batch():
+    gpt = BatchGPT(Params(
+        model_name="gpt-3.5-turbo-0125",
+        batch=BatchProcess.READ
+    ))
+    results = gpt.run(iter([
+        {"x": "bear", "query": "What do bears eat?"},
+        {"x": "toad", "query": "What do toads eat?"}
+    ]))
+    results = list(results)
+
+    assert results[0]["x"] == "toad"
