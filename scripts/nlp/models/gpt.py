@@ -33,7 +33,7 @@ class GPT(Model):
         pass
 
     def get_model_info(self) -> dict:
-        return {"name": "GPT-3.5 Turbo", "version": "0125"}
+        return {"name": self.model_name}
 
     def run(self, queries: Iterator[dict[str, Any]]) -> Iterator[dict[str, Any]]:
         dataset = QueryDataset(queries)
