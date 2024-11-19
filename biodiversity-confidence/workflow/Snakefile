@@ -15,6 +15,11 @@ resources = f"resources/{dataset}"
 inputs = f"results/{dataset}/{{recordset_hash}}/input"
 outputs = f"results/{dataset}/{{recordset_hash}}/{job}"
 
+print("Parameters:")
+print(f"- Resources: {resources}")
+print(f"- Inputs: {inputs}")
+print(f"- Outputs: {outputs}")
+
 
 def make_qa_config(template):
     job_params = {

@@ -10,15 +10,16 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/nlp/main.py",
             "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}/scripts/nlp",
             "args": [
                 "--test",
                 "Does {genus} {specificepithet} naturally occur in {country}? Yes or no.",
                 "Does {country} have a population of {genus} {specificepithet}? Yes or no.",
                 "<",
-                "scripts/nlp/tests/resources/occurrence-qa.tsv"
+                "tests/resources/occurrence-qa.tsv"
             ],
             "console": "integratedTerminal",
-            "justMyCode": true,
+            "justMyCode": false,
         },
         {
             "name": "Debug NLP: Local Llama",
@@ -26,6 +27,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/nlp/main.py",
             "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}/scripts/nlp",
             "args": [
                 "-mc",
                 "llama",
@@ -37,7 +39,7 @@
                 "scripts/nlp/tests/resources/occurrence-qa.tsv"
             ],
             "console": "integratedTerminal",
-            "justMyCode": true,
+            "justMyCode": false,
         }
     ]
 }

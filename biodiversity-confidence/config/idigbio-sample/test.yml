@@ -4,7 +4,8 @@ nomer_alignment_report_url: https://raw.githubusercontent.com/mielliott/idigbio-
 qa:
   defaults:
     args:
-      - --test
+      model_category: test
+      model_name: yes_no
   occurrence:
     input: results/idigbio-sample/8f0594be7f88e4fc7b30c0854e7ca029/input/all.tsv
     query_limit: 15
