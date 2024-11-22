@@ -41,7 +41,7 @@ families_per_kingdom = len(plantae_phyla) * len(animalia_phyla)
 
 rule get_animalia_records:
     output:
-        "animalia.jsonl",
+        "results/animalia.jsonl",
     params:
         records_per_family=records_per_family,
         families_per_kingdom=families_per_kingdom,
@@ -57,7 +57,7 @@ rule get_animalia_records:
 
 rule get_plantae_records:
     output:
-        "plantae.jsonl",
+        "results/plantae.jsonl",
     params:
         records_per_family=records_per_family,
         families_per_kingdom=families_per_kingdom,
