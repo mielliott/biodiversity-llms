@@ -1,0 +1,77 @@
+animalia_phyla = {
+    "acanthocephala",
+    "annelida",
+    "arthropoda",
+    "brachiopoda",
+    "bryozoa",
+    "chaetognatha",
+    "chordata",
+    "cnidaria",
+    "ctenophora",
+    "echinodermata",
+    "entoprocta",
+    "hemichordata",
+    "mollusca",
+    "nematoda",
+    "nematomorpha",
+    "nemertea",
+    "onychophora",
+    "phoronida",
+    "platyhelminthes",
+    "priapulida",
+    "rotifera",
+    "sipuncula",
+    "tardigrada",
+    "xenacoelomorpha",
+}
+
+plantae_phyla = {
+    "tracheophyta",
+    "bryophyta",
+    "marchantiophyta",
+    "rhodophyta",
+    "chlorophyta",
+    "charophyta",
+    "anthocerotophyta",
+}
+
+records_per_family = 120
+families_per_kingdom = len(plantae_phyla) * len(animalia_phyla)
+
+
+rule get_animalia_records:
+    output:
+        "animalia.jsonl",
+    params:
+        records_per_family=records_per_family,
+        families_per_kingdom=families_per_kingdom,
+        kingdom="animalia",
+        phyla=animalia_phyla,
+    log:
+        notebook="results/animalia.py.ipynb",
+    conda:
+        "download.yml"
+    notebook:
+        "download.py.ipynb"
+
+
+rule get_plantae_records:
+    output:
+        "plantae.jsonl",
+    params:
+        records_per_family=records_per_family,
+        families_per_kingdom=families_per_kingdom,
+        kingdom="plantae",
+        phyla=plantae_phyla,
+    log:
+        notebook="results/plantae.py.ipynb",
+    conda:
+        "download.yml"
+    notebook:
+        "download.py.ipynb"
+
+
+rule all:
+    input:
+        "animalia.jsonl",
+        "plantae.jsonl",
