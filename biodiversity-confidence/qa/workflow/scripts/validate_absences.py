@@ -1,7 +1,8 @@
 import requests as rq
 import pandas as pd
+from snakemake.script import Snakemake
 
-smk = snakemake  # type: ignore
+smk: Snakemake = snakemake  # type: ignore
 
 file_in = smk.input[0]
 file_out = smk.output[0]
