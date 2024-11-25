@@ -39,6 +39,12 @@ records_per_family = 120
 families_per_kingdom = len(plantae_phyla) * len(animalia_phyla)
 
 
+rule all:
+    input:
+        "results/animalia.jsonl",
+        "results/plantae.jsonl",
+
+
 rule get_animalia_records:
     output:
         "results/animalia.jsonl",
@@ -71,9 +77,3 @@ rule get_plantae_records:
         "download.yml"
     notebook:
         "download.py.ipynb"
-
-
-rule all:
-    input:
-        "animalia.jsonl",
-        "plantae.jsonl",
