@@ -36,10 +36,6 @@ config["qa"]["taxonomy"] = make_qa_config("taxonomy")
 
 
 include: "rules/tsv.smk"
-include: "rules/occ-qa-analysis.smk"
-include: "rules/tax-qa-analysis.smk"
-include: "rules/get-taxonomy-alignments.smk"
-include: f"rules/{dataset}/Snakefile"
 
 
 module occ_qa_workflow:

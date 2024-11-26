@@ -1,0 +1,3 @@
+include: "rules/occ-qa-analysis.smk"
+include: "rules/tax-qa-analysis.smk"
+include: "rules/get-taxonomy-alignments.smk"
