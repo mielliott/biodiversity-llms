@@ -3,7 +3,6 @@ include: "rules/combine-tsv.smk"
 include: "rules/make-absence-tsv.smk"
 include: "rules/make-presence-tsv.smk"
 include: "rules/make-taxonomy-questions.smk"
-include: "rules/sign-results.smk"
 
 
 rule sample_idigbio:
