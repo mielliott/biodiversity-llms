@@ -6,6 +6,6 @@ include: "rules/make-taxonomy-questions.smk"
 include: "rules/sign-results.smk"
 
 
-rule download:
+rule sample_idigbio:
     input:
         "results/manifest",
