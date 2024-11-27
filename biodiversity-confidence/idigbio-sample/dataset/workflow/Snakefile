@@ -1,11 +1,11 @@
-include: "rules/combine-tsv.smk"
 include: "rules/download-records.smk"
+include: "rules/combine-tsv.smk"
 include: "rules/make-absence-tsv.smk"
 include: "rules/make-presence-tsv.smk"
 include: "rules/make-taxonomy-questions.smk"
-include: "rules/package-records.smk"
+include: "rules/sign-results.smk"
 
 
 rule download:
     input:
-        "results/records.zip.md5"
+        "results/manifest",

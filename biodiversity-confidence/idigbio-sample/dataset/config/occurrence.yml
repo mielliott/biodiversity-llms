@@ -1,0 +1,9 @@
+record_fields:
+  - kingdom
+  - phylum
+  - family
+  - genus
+  - specificepithet
+  - country
+  - stateprovince
+  - county

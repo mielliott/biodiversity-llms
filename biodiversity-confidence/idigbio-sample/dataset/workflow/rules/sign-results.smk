@@ -1,16 +1,3 @@
-rule make_zip:
-    input:
-        ancient("results/animalia.jsonl"),
-        ancient("results/plantae.jsonl"),
-    output:
-        "results/records.zip",
-    shell:
-        """
-        rm -f {output} &&\
-        zip {output} {input}
-        """
-
-
 rule package_and_sign:
     input:
         "results/records.zip",

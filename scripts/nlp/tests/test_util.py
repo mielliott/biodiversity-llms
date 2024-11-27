@@ -22,3 +22,9 @@ def test_make_tsv_stream():
         "Marge\ttrucker\n"
         "Louis\ttrumpet\n"
     )
+
+import asyncio
+
+asyncio.get_running_loop()
+
+asyncio.Queue.task_done

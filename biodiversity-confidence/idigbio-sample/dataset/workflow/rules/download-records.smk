@@ -48,6 +48,7 @@ rule get_animalia_records:
         families_per_kingdom=families_per_kingdom,
         kingdom="animalia",
         phyla=animalia_phyla,
+        required_fields=config["record_fields"],
     log:
         notebook="results/animalia.py.ipynb",
     conda:
@@ -65,9 +66,23 @@ rule get_plantae_records:
         families_per_kingdom=families_per_kingdom,
         kingdom="plantae",
         phyla=plantae_phyla,
+        required_fields=config["record_fields"],
     log:
         notebook="results/plantae.py.ipynb",
     conda:
         "../envs/download.yml"
     notebook:
         "download.py.ipynb"
+
+
+rule zip_records:
+    input:
+        ancient("results/animalia.jsonl"),
+        ancient("results/plantae.jsonl"),
+    output:
+        "results/records.zip",
+    shell:
+        """
+        rm -f {output} &&\
+        zip {output} {input}
+        """

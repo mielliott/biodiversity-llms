@@ -1,0 +1,29 @@
+input: results/input/taxonomy-qa.tsv
+args:
+  max_tokens: 10
+  timeout: 10
+  combine-responses: true
+  response_tokens: true
+query_fields:
+  - subject_rank
+  - object_rank
+  - taxon
+  - kingdom
+  - phylum
+  - class
+  - order
+  - family
+  - genus
+query_templates:
+  - What taxonomic {object_rank} does {subject_rank} \"{taxon}\" belong to?
+query_suffix: Only say its scientific name.
+results:
+notebook: process-occ-gpt.py.ipynb
+random_seed: 69847
+validate_absences: true
+train_test_split_rank: family
+split_test_fraction: 0.5
+preston:
+remotes:
+- https://zenodo.org
+- https://linker.bio
