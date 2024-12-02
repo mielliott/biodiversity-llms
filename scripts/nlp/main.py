@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 from models.registry import ModelRegistry
 from runner import ExperimentRunner
 from llm_io import IOHandler
-from args import TokenScoresFormat, Params, get_default_params
+from args import TokenScoresFormat, Params, get_default_params, BatchProcess
 
 
 def main():
@@ -48,6 +48,7 @@ def main():
     parser.add_argument("--precision", "-np", type=str)
     parser.add_argument("--timeout", type=int)
     parser.add_argument("--scores", "-s", **TokenScoresFormat.arg())
+    parser.add_argument("--batch", "-b", **BatchProcess.arg())
     parser.set_defaults(**get_default_params())
 
     args = parser.parse_args()
@@ -65,7 +66,6 @@ def main():
     params = cast(Params, args)
     runner = ExperimentRunner(args.model_category, params, io_handler)
     runner.run_experiment(sys.stdin)
-
 
 if __name__ == "__main__":
     main()

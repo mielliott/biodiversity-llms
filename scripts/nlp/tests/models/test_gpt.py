@@ -1,5 +1,6 @@
 from args import BatchProcess, Params, TokenScoresFormat
 from models.gpt import GPT
+from models.batch_gpt import BatchGPT
 
 
 def test_gpt_3_5_first_token_scores():
@@ -74,8 +75,8 @@ def test_gpt_3_5_response_token_scores():
     }
 
 
-def gpt_3_5_batch_write():
-    gpt = GPT(Params(
+def test_gpt_3_5_batch_write():
+    gpt = BatchGPT(Params(
         model_name="gpt-3.5-turbo-0125",
         batch=BatchProcess.WRITE
     ))
@@ -86,9 +87,55 @@ def gpt_3_5_batch_write():
     ]))
 
     results = list(results_stream)
-
-    batch_id = results[0]["batch id"]
+    batch_result = results[-1]
+    results = results[:-1]
+    # update each results with the batch id
+    for result in results:
+        result["batch id"] = batch_result["batch id"]
+    batch_id = results[-1]["batch id"]
     assert results == [
-        {"x": "bear", "query": "What do bears eat?", "batch id": batch_id, "request id": "0"},
-        {"x": "toad", "query": "What do toads eat?", "batch id": batch_id, "request id": "1"}
+        {"x": "bear", "query": "What do bears eat?", "batch id": batch_id, "request id": "request-0"},
+        {"x": "toad", "query": "What do toads eat?", "batch id": batch_id, "request id": "request-1"}
     ]
+
+
+def test_gpt_3_5_read_batch():
+    gpt = BatchGPT(Params(
+        model_name="gpt-3.5-turbo-0125",
+        batch=BatchProcess.READ,
+        scores=TokenScoresFormat.FIRST_TOKEN)
+    )
+    batch_id = "batch_674e0a1daee08190ac1e13b30379b84b"
+    queries = iter([
+        {"x": "bear", "query": "What do bears eat?", "batch id": batch_id, "request id": "request-0"},
+        {"x": "toad", "query": "What do toads eat?", "batch id": batch_id, "request id": "request-1"}
+    ])
+    results = gpt.run(queries, batch_id)
+    results = list(results)
+    print('results', results[0].keys())
+
+    assert len(results) == 2
+
+    result = results[0]
+    assert result["x"] == "bear"
+    assert result["query"] == "What do bears eat?"
+    assert result["question number"] == 0
+    assert result["input token count"] == 12
+    assert len(result["top tokens"]) == 5
+    assert len(result["top tokens logprobs"]) == 5
+
+    assert set(result.keys()) == {
+        "x", "query", "responses", "question number", "top tokens", "top tokens logprobs", "input token count", "output token count"
+    }
+
+    result = results[1]
+    assert result["x"] == "toad"
+    assert result["query"] == "What do toads eat?"
+    assert result["question number"] == 1
+    assert result["input token count"] == 13
+    assert len(result["top tokens"]) == 5
+    assert len(result["top tokens logprobs"]) == 5
+
+    assert set(result.keys()) == {
+        "x", "query", "responses", "question number", "top tokens", "top tokens logprobs", "input token count", "output token count"
+    }
