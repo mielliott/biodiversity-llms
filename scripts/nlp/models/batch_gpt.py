@@ -40,7 +40,7 @@ class BatchGPT(Model):
     def get_model_info(self):
         return {"name": self.model_name}
 
-    def run(self, queries):
+    def run(self, queries, batch_id=None):
         if self.batch is BatchProcess.WRITE:
             self.loop = asyncio.get_event_loop()
             self.thread = threading.Thread(target=self.loop.run_forever, daemon=True)
@@ -54,7 +54,7 @@ class BatchGPT(Model):
                 yield item
         else:
             # read batch file
-            yield from self.read_batch(None)
+            yield from self.read_batch(queries, batch_id)
 
     async def create_req_object(self, queries, queue):
         max_allowed_top_logprobs = 5
@@ -158,8 +158,7 @@ class BatchGPT(Model):
         await queue.put(("", {"x": "", "query": ""}, str(job.id)))
         return job
 
-    def read_batch(self, batch_id):
-        batch_id = "batch_673b766ad57c819081d67d2ded69c944"
+    def read_batch(self, queries, batch_id):
         batch = self.client.batches.retrieve(batch_id)
         # handle batch status
         if batch.status == "failed":
@@ -170,15 +169,24 @@ class BatchGPT(Model):
             if batch.output_file_id:
                 output_content = self.client.files.content(batch.output_file_id)
                 question_number = 0
+                # output dict -> custom_id: response
+                responses = {}
                 for line in output_content.iter_lines():
-                    chat_completion_response = json.loads(line)['response']['body']
-                    yield from self.process_results(question_number, chat_completion_response)
+                    line = json.loads(line)
+                    responses[line["custom_id"]] = line['response']['body']
+
+                for query in queries:
+                    chat_completion_response = responses[query["request id"]]
+                    # remove batch id and request id from query
+                    del query["batch id"]
+                    del query["request id"]
+                    yield from self.process_results(question_number, query, chat_completion_response)
                     question_number += 1
 
-    def process_results(self, question_number: int, chat_completion: Dict[str, Any]) -> Iterator[dict[str, Any]]:
+    def process_results(self, question_number: int, inputs: dict[str, Any], chat_completion: Dict[str, Any]) -> Iterator[dict[str, Any]]:
         for choice in chat_completion['choices']:
             response_text, top_token_logprobs = self.process_chat_completion(choice, self.token_scores_format)
-            yield {
+            yield inputs | {
                 "responses": response_text,
                 "question number": question_number,
                 "top tokens": [x[0] for x in top_token_logprobs],

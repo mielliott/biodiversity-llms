@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Iterator
+from typing import Any, Iterator, Optional
 
 from args import Params
 
@@ -14,7 +14,7 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def run(self, queries: Iterator[dict[str, Any]]) -> Iterator[dict[str, Any]]:
+    def run(self, queries: Iterator[dict[str, Any]], batch_id: Optional[str] = None) -> Iterator[dict[str, Any]]:
         pass
 
     @abstractmethod
