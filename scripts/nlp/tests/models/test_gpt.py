@@ -87,7 +87,12 @@ def test_gpt_3_5_batch_write():
     ]))
 
     results = list(results_stream)
-    batch_id = results[0]["batch id"]
+    batch_result = results[-1]
+    results = results[:-1]
+    # update each results with the batch id
+    for result in results:
+        result["batch id"] = batch_result["batch id"]
+    batch_id = results[-1]["batch id"]
     assert results == [
         {"x": "bear", "query": "What do bears eat?", "batch id": batch_id, "request id": "request-0"},
         {"x": "toad", "query": "What do toads eat?", "batch id": batch_id, "request id": "request-1"}

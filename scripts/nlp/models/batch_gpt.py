@@ -1,6 +1,12 @@
 import io
 import os
 import time
+import queue
+import asyncio
+import aiohttp
+from aiohttp import ClientSession
+import threading
+from utils.async_stream import AsyncFileLikeObject
 import json
 from typing import Iterator, Any, Dict
 from openai import OpenAI
@@ -9,6 +15,9 @@ from .registry import ModelRegistry
 from args import Params, BatchProcess, TokenScoresFormat
 from utils.stream import to_file_like_obj
 
+
+class RunStatus:
+    running = True
 
 @ModelRegistry.register("batch_gpt")
 class BatchGPT(Model):
@@ -33,12 +42,21 @@ class BatchGPT(Model):
 
     def run(self, queries):
         if self.batch is BatchProcess.WRITE:
-            yield from self.create_batch(queries)
+            self.loop = asyncio.get_event_loop()
+            self.thread = threading.Thread(target=self.loop.run_forever, daemon=True)
+            self.item_queue = asyncio.Queue()
+            self.run_status = RunStatus()
+            self.thread.start()
+            asyncio.run_coroutine_threadsafe(self.create_batch(queries, self.item_queue, self.run_status), self.loop)
+            for item in self.wrap_async_iter(self.flush_queue(self.item_queue, self.run_status), self.loop):
+                if item["request id"] == 'response':
+                    continue
+                yield item
         else:
-            #     # read batch file
+            # read batch file
             yield from self.read_batch(None)
 
-    def create_req_object(self, queries):
+    async def create_req_object(self, queries, queue):
         max_allowed_top_logprobs = 5
         for idx, query in enumerate(queries):
             request = {
@@ -61,27 +79,84 @@ class BatchGPT(Model):
                     "top_logprobs": max_allowed_top_logprobs
                 }
             }
+            await queue.put((f"request-{idx}", query))
             # .jsonl format (newline is required)
             yield (json.dumps(request) + '\n').encode()
 
-    def create_batch(self, queries):
-        request_objects = self.create_req_object(queries)
-        file = to_file_like_obj(request_objects)
-        data = file.read()
-        batch_file = self.client.files.create(
-            file=data,
-            purpose="batch"
-        )
+    # Refer: https://stackoverflow.com/a/55164899
+    def wrap_async_iter(self, ait, loop):
+        """Wrap an asynchronous iterator into a synchronous one"""
+        q = queue.Queue()
+        _END = object()
+
+        async def aiter_to_queue():
+            try:
+                async for item in ait:
+                    q.put(item)
+            finally:
+                q.put(_END)
+
+        def yield_queue_items():
+            while True:
+                next_item = q.get()
+                if next_item is _END:
+                    break
+                yield next_item
+            # After observing _END we know the aiter_to_queue coroutine has
+            # completed.  Invoke result() for side effect - if an exception
+            # was raised by the async iterator, it will be propagated here.
+            async_result.result()
+
+        async_result = asyncio.run_coroutine_threadsafe(aiter_to_queue(), loop)
+        return yield_queue_items()
+
+    async def upload_to_openai(self, file_like_obj, queue, run_status_obj):
+        url = 'https://api.openai.com/v1/files'
+        headers = {
+            'Authorization': 'Bearer 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'
+        }
+
+        async with ClientSession() as session:
+            data = aiohttp.FormData()
+            data.add_field('purpose', 'batch')
+            data.add_field('file', file_like_obj, filename='batch.jsonl')
+            async with session.post(url, headers=headers, data=data) as response:
+                run_status_obj.running = False
+                return await response.json()
+
+    async def flush_queue(self, queue, run_status_obj):
+        while run_status_obj.running:
+            item = await queue.get()
+            print('flush item type: ', type(item[1]))
+            if len(item) > 2:
+                yield {
+                    "x": item[1]["x"],
+                    "query": item[1]["query"],
+                    "batch id": str(item[2]),
+                    "request id": str(item[0]),
+                }
+            else:
+                yield {
+                    "x": item[1]["x"],
+                    "query": item[1]["query"],
+                    "batch id": "",
+                    "request id": str(item[0]),
+                }
+
+    async def create_batch(self, data, queue, run_status_obj):
+        objects = self.create_req_object(data, queue)
+        file = AsyncFileLikeObject(objects)
+        file_data = file.read()
+        response = await self.upload_to_openai(file_data, queue, run_status_obj)
+        print(response['id'])
+
         job = self.client.batches.create(
-            input_file_id=batch_file.id,
+            input_file_id=response['id'],
             endpoint="/v1/chat/completions",
             completion_window="24h"
         )
-        # yield query | {
-        #     "batch id": self.batch_id,
-        #     "request id": f"request-{idx}"
-        # }
-        yield {"batch id": job.id}
+        await queue.put(("", {"x": "", "query": ""}, str(job.id)))
+        return job
 
     def read_batch(self, batch_id):
         batch_id = "batch_673b766ad57c819081d67d2ded69c944"
