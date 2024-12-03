@@ -17,6 +17,8 @@ results/
   plantae.jsonl
   animalia.py.ipynb
   plantae.py.ipynb
+  presence.tsv
+  records.zip
 ```
 
 TODO: Zip it all up
