@@ -1,0 +1,18 @@
+random_seed: 69847
+recordset: hash://md5/8f0594be7f88e4fc7b30c0854e7ca029
+nomer_alignment_report_url: https://raw.githubusercontent.com/mielliott/idigbio-sample-alignment/main/alignment-report/names-aligned.tsv
+qa:
+  defaults:
+    args:
+      model_category: test
+      model_name: yes_no
+  occurrence:
+    input: results/idigbio-sample/8f0594be7f88e4fc7b30c0854e7ca029/input/all.tsv
+    query_limit: 15
+    batch_size: 5
+  taxonomy:
+    input: results/idigbio-sample/8f0594be7f88e4fc7b30c0854e7ca029/input/taxonomy-qa.tsv
+    query_limit: 15
+    batch_size: 5
+results:
+  notebook: process-occ-gpt.py.ipynb

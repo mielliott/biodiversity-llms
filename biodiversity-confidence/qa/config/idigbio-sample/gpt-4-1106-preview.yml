@@ -1,0 +1,18 @@
+llm: gpt-4-1106-preview
+random_seed: 69847
+job_name: idigbio-sample
+recordset: hash://md5/8f0594be7f88e4fc7b30c0854e7ca029
+nomer_alignment_report_url: https://raw.githubusercontent.com/mielliott/idigbio-sample-alignment/main/alignment-report/names-aligned.tsv
+qa:
+  occurrence:
+    input: results/idigbio-sample/input/all-shuffled-69847.tsv
+    shuffle: true
+    query_limit: 40000
+    batch_size: 100
+  taxonomy:
+    input: results/idigbio-sample/input/taxonomy-qa.tsv
+    shuffle: false
+    query_limit: 0
+    batch_size: 100
+results:
+  notebook: process-occ-gpt.py.ipynb

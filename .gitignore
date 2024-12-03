@@ -2,18 +2,7 @@ __pycache__
 .snakemake
 .conda
 .micromamba
-raw
-processed
-results
-logs
 .env
 .locks
 
-*.pyc
-
-!**/results/**/*.ipynb
-**/results/**.tsv
-**/results/**.old.*
-**/results/**test*
-
-biodiversity-confidence/resources
+**.pyc
