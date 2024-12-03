@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Any, Iterator
+from typing import Any, Iterator, Optional
 import torch
 from transformers import (
     AutoTokenizer,
@@ -27,7 +27,6 @@ class Llama(Model):
     def __init__(self, params: Params):
         if not os.getenv("HF_TOKEN"):
             raise RuntimeError("Environment variable HF_TOKEN not set. Generate a token at https://huggingface.co/settings/tokens.")
-
         print("Using HuggingFace cache directory", os.getenv("HF_HOME"), file=sys.stderr)
 
         self.hf_model_path = f"meta-llama/{params.model_name}"
@@ -72,7 +71,7 @@ class Llama(Model):
             low_cpu_mem_usage=True,
         )
 
-    def run(self, queries: Iterator[dict[str, Any]]) -> Iterator[dict[str, Any]]:
+    def run(self, queries: Iterator[dict[str, Any]], batch_id: Optional[str] = None) -> Iterator[dict[str, Any]]:
         dataset = QueryDataset(queries)
 
         def custom_collate_fn(batch):
@@ -90,9 +89,17 @@ class Llama(Model):
             responses = self.generate(batch_inputs)
             yield from self.process_results(i, batch_inputs, responses)
 
-    def generate(self, batch_inputs, **kwargs):
-        queries = [inputs["query"] for inputs in batch_inputs]
+    def append_llama_special_tokens(self, query):
+        return f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
+Based on your knowledge, strictly answer the question with Yes/No.<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+{query}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+"""
+
+    def generate(self, batch_inputs, **kwargs):
+        queries = [self.append_llama_special_tokens(inputs["query"]) for inputs in batch_inputs]
         input_tensors = self.tokenizer(queries, return_tensors="pt", padding=True)
         input_ids: torch.Tensor = input_tensors.input_ids
         attention_mask: torch.Tensor = input_tensors.attention_mask
@@ -113,7 +120,7 @@ class Llama(Model):
                     output_scores=True,
                     low_memory=True,
                     return_dict_in_generate=True,
-                    max_new_tokens=10,
+                    max_new_tokens=1,
                     **kwargs,
                 )
                 return outputs
@@ -123,6 +130,15 @@ class Llama(Model):
                 print(f"Attention mask shape: {attention_mask.shape}")
                 print(f"Device: {self.model.device}")
                 raise
+
+    def extract_assistant_response(self, text: str) -> str:
+        # Split at assistant header
+        parts = text.split("<|start_header_id|>assistant<|end_header_id|>")
+        if len(parts) > 1:
+            # Get everything after header and before next marker
+            response = parts[1].split("<|eot_id|>")[0].strip()
+            return response
+        return ""
 
     def process_results(self, batch_id, batch_inputs, outputs):
         generated_sequences = outputs.sequences
@@ -143,13 +159,8 @@ class Llama(Model):
             for _, (seq, seq_scores) in enumerate(
                 zip(batch_sequences, zip(*batch_scores))
             ):
-                response_text = self.tokenizer.decode(seq, skip_special_tokens=True)
-                response_text = (
-                    response_text[len(query):]
-                    .strip()
-                    .replace("\n", " ")
-                    .replace("\t", " ")
-                )
+                response_text = self.tokenizer.decode(seq, clean_up_tokenization_spaces=True)
+                response_text = self.extract_assistant_response(response_text).strip()
 
                 output_tokens = self.tokenizer.encode(response_text)
                 output_token_count = len(output_tokens)
