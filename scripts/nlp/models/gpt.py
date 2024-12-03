@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from typing import Any, Iterator
+from typing import Any, Iterator, Optional
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai.types.chat.chat_completion_token_logprob import ChatCompletionTokenLogprob
@@ -35,7 +35,7 @@ class GPT(Model):
     def get_model_info(self) -> dict:
         return {"name": self.model_name}
 
-    def run(self, queries: Iterator[dict[str, Any]]) -> Iterator[dict[str, Any]]:
+    def run(self, queries: Iterator[dict[str, Any]], batch_id: Optional[str] = None) -> Iterator[dict[str, Any]]:
         dataset = QueryDataset(queries)
 
         def custom_collate_fn(batch):

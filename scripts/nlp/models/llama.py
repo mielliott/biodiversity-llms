@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Any, Iterator
+from typing import Any, Iterator, Optional
 import torch
 from transformers import (
     AutoTokenizer,
@@ -72,7 +72,7 @@ class Llama(Model):
             low_cpu_mem_usage=True,
         )
 
-    def run(self, queries: Iterator[dict[str, Any]]) -> Iterator[dict[str, Any]]:
+    def run(self, queries: Iterator[dict[str, Any]], batch_id: Optional[str] = None) -> Iterator[dict[str, Any]]:
         dataset = QueryDataset(queries)
 
         def custom_collate_fn(batch):
