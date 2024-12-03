@@ -91,10 +91,9 @@ class Llama(Model):
 
     def append_llama_special_tokens(self, query):
         return f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+        Based on your knowledge, strictly answer the question with Yes/No.<|eot_id|><|start_header_id|>user<|end_header_id|>
 
-Based on your knowledge, strictly answer the question with Yes/No.<|eot_id|><|start_header_id|>user<|end_header_id|>
-
-{query}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+        {query}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 
 """
 
@@ -120,7 +119,6 @@ Based on your knowledge, strictly answer the question with Yes/No.<|eot_id|><|st
                     output_scores=True,
                     low_memory=True,
                     return_dict_in_generate=True,
-                    max_new_tokens=1,
                     **kwargs,
                 )
                 return outputs
@@ -132,11 +130,11 @@ Based on your knowledge, strictly answer the question with Yes/No.<|eot_id|><|st
                 raise
 
     def extract_assistant_response(self, text: str) -> str:
-        # Split at assistant header
-        parts = text.split("<|start_header_id|>assistant<|end_header_id|>")
+        parts = text.split("assistant\n\n")
         if len(parts) > 1:
-            # Get everything after header and before next marker
-            response = parts[1].split("<|eot_id|>")[0].strip()
+            response = parts[1].strip()
+            # Remove special characters
+            response = ''.join(e for e in response if e.isalnum() or e.isspace())
             return response
         return ""
 
@@ -159,9 +157,8 @@ Based on your knowledge, strictly answer the question with Yes/No.<|eot_id|><|st
             for _, (seq, seq_scores) in enumerate(
                 zip(batch_sequences, zip(*batch_scores))
             ):
-                response_text = self.tokenizer.decode(seq, clean_up_tokenization_spaces=True)
+                response_text = self.tokenizer.decode(seq, clean_up_tokenization_spaces=True, skip_special_tokens=True)
                 response_text = self.extract_assistant_response(response_text).strip()
-
                 output_tokens = self.tokenizer.encode(response_text)
                 output_token_count = len(output_tokens)
 
