@@ -20,5 +20,3 @@ results/
   presence.tsv
   records.zip
 ```
-
-TODO: Zip it all up
