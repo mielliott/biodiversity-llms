@@ -1,0 +1,49 @@
+record_fields:
+  - kingdom
+  - phylum
+  - family
+  - genus
+  - specificepithet
+  - country
+  - stateprovince
+  - county
+download:
+  min_records_per_family: 25
+  max_records_per_family: 500
+  families_per_kingdom: 500
+  kingdoms:
+    animalia:
+      phyla:
+        - acanthocephala
+        - annelida
+        - arthropoda
+        - brachiopoda
+        - bryozoa
+        - chaetognatha
+        - chordata
+        - cnidaria
+        - ctenophora
+        - echinodermata
+        - entoprocta
+        - hemichordata
+        - mollusca
+        - nematoda
+        - nematomorpha
+        - nemertea
+        - onychophora
+        - phoronida
+        - platyhelminthes
+        - priapulida
+        - rotifera
+        - sipuncula
+        - tardigrada
+        - xenacoelomorpha
+    plantae:
+      phyla:
+        - tracheophyta
+        - bryophyta
+        - marchantiophyta
+        - rhodophyta
+        - chlorophyta
+        - charophyta
+        - anthocerotophyta
