@@ -3,7 +3,8 @@ from glob import glob
 
 rule make_presence_tsv:
     input:
-        "results/records.zip",
+        manifest="results/manifest",
+        records="results/records.zip",
     output:
         "results/presence.tsv",
     params:
@@ -12,7 +13,7 @@ rule make_presence_tsv:
         "logs/presence.tsv",
     shell:
         """
-        unzip -p {input}\
+        unzip -p {input.records}\
         | jq .indexTerms\
         | mlr --ijson --otsv template -f {params.fields}\
         | python3 workflow/scripts/clean_records.py\

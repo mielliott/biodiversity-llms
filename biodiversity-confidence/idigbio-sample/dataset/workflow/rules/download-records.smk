@@ -21,8 +21,8 @@ rule get_kingdom_records:
 
 rule zip_records:
     input:
-        ancient("results/animalia.jsonl"),
-        ancient("results/plantae.jsonl"),
+        "results/animalia.jsonl",
+        "results/plantae.jsonl",
     output:
         "results/records.zip",
     shell:
