@@ -1,6 +1,6 @@
 from dataclasses import dataclass, MISSING
 from enum import StrEnum, auto
-from typing import Any
+from typing import Any, Optional
 
 
 class EnumArg(StrEnum):
@@ -30,9 +30,9 @@ class Params():
     max_tokens: int = 128
     combine_responses: bool = False
     batch_size: int = 10
-    top_p: float = 0.95
-    top_k: int = 1
-    temperature: float = 0.1
+    top_p: float = 1.0
+    top_k: Optional[int] = None
+    temperature: float = 1.0
     precision: str = "bfloat16"
     timeout: int = 10
     scores: TokenScoresFormat = TokenScoresFormat.RESPONSE_TOKENS
