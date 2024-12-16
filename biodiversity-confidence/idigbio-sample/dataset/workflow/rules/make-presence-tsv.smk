@@ -14,7 +14,7 @@ rule make_presence_tsv:
         """
         unzip -p {input}\
         | jq .indexTerms\
-        | mlr --ijson --otsv template -f {params.fields} --fill-with MISSING\
+        | mlr --ijson --otsv template -f {params.fields}\
         | python3 workflow/scripts/clean_records.py\
         1> {output} 2> {log}
         """

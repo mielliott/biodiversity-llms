@@ -1,2 +1,0 @@
-echo -e "id\tstatus\trank\tkingdom_key\tphylum_key\tclass_key\torder_key\tfamily_key\tgenus_key\tspecies_key\tname_id\tscientific_name\tcanonical_name" > gbif-backbone-2022.tsv
-preston get hash://sha256/50c155f66efb2efba0b8b624f8541e81cbe16a701d420a5073791fb993f72919 | gunzip | cut -f1,5,6,11,12,13,14,15,16,17,18,19,20 >> gbif-backbone-2022.tsv
