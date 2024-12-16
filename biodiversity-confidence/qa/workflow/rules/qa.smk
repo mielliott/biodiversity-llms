@@ -1,11 +1,11 @@
 import os
 
+outputs = config["outputs"]
+
 if "shuffle" in config and config["shuffle"]:
-    BATCH_OUTPUTS_DIR = (
-        f"{outputs}/{config['batch_size']}-shuffled-{config['random_seed']}"
-    )
+    batch_outputs = f"{outputs}/{config['batch_size']}-shuffled-{config['random_seed']}"
 else:
-    BATCH_OUTPUTS_DIR = f"{outputs}/{config['batch_size']}"
+    batch_outputs = f"{outputs}/{config['batch_size']}"
 
 
 def get_batches(wildcards):
@@ -22,7 +22,7 @@ def get_batches(wildcards):
         else min(num_lines, config["query_limit"])
     )
     return [
-        get_batch_path(batch, batch_size, limit)
+        get_batch_path(batch, batch_size, limit).format(**wildcards)
         for batch in range(ceil(limit / batch_size))
     ]
 
@@ -30,8 +30,15 @@ def get_batches(wildcards):
 def get_batch_path(batch, batch_size, limit):
     first = batch * batch_size
     last = min(limit - 1, (batch + 1) * batch_size - 1)
-    path = f"{BATCH_OUTPUTS_DIR}/{first}-{last}.tsv"
+    path = f"{batch_outputs}/{first}-{last}.tsv"
     return path
+
+
+print(
+    get_batch_path(50, 10, 100).format(
+        **{"recordset_hash": "8f0594be7f88e4fc7b30c0854e7ca029"}
+    )
+)
 
 
 rule answer_questions:
@@ -43,20 +50,35 @@ rule answer_questions:
         "mlr --tsvlite cat {input} > {output}"
 
 
+def convert_snake_case_to_hyphens(arg_name: str):
+    return arg_name.replace("_", "-")
+
+
+def convert_args_dict_to_cli(args: dict):
+    return " ".join(
+        f'--{convert_snake_case_to_hyphens(arg)} "{value}"'.lower()
+        for arg, value in config["args"].items()
+    )
+
+
+if not isinstance(config["args"], dict):
+    raise RuntimeError("Command args must be a dict. Not this:", config["args"])
+
+
 rule answer_questions_batch:
     input:
         config["input"],
     output:
-        BATCH_OUTPUTS_DIR + "/{first}-{last}.tsv",
+        batch_outputs + "/{first}-{last}.tsv",
     params:
         prep_command=config["prep_command"],
         qa_command=config["command"],
-        qa_args=" ".join(config["args"]),
+        qa_args=convert_args_dict_to_cli(config["args"]),
         qa_questions=lambda wildcards: " ".join(
             [f'"{q} {config["query_suffix"]}"' for q in config["query_templates"]]
         ),
     log:
-        "logs/" + BATCH_OUTPUTS_DIR + "/{first}-{last}.tsv",
+        "logs/" + batch_outputs + "/{first}-{last}.tsv",
     conda:
         os.path.expandvars(config["command_env"])
     shell:

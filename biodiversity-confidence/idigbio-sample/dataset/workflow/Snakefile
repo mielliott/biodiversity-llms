@@ -1,0 +1,10 @@
+include: "rules/download-records.smk"
+include: "rules/combine-tsv.smk"
+include: "rules/make-absence-tsv.smk"
+include: "rules/make-presence-tsv.smk"
+include: "rules/make-taxonomy-questions.smk"
+
+
+rule sample_idigbio:
+    input:
+        "results/manifest",

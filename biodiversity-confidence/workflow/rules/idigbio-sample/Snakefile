@@ -1,5 +1,0 @@
-include: "get-records.smk"
-include: "make-presence-tsv.smk"
-include: "make-absence-tsv.smk"
-include: "combine-tsv.smk"
-include: "make-taxonomy-questions.smk"

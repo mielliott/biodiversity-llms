@@ -12,34 +12,34 @@ mamba activate snakemake
 * Run taxonomy QA for GPT-3.5:
 
 ```bash
-snakemake "results/idigbio-sample/gpt-3.5-turbo-0125/taxonomy/responses.tsv" --sdm "conda" -c 8 --configfile "config/idigbio-sample/gpt-3.5-turbo-0125.yml"
+snakemake "results/idigbio-sample/gpt-3.5-turbo-0125/taxonomy/responses.tsv" -c 8 --configfile "config/idigbio-sample/gpt-3.5-turbo-0125.yml"
 ```
 
 * Run US counties occurrence questions for GPT-4
 
 ```bash
-snakemake "results/us-maps/gpt-4-1106-preview/occurrence/responses.tsv" --sdm "conda" -c 8 --configfile "config/us-maps/gpt-4-1106-preview.yml"
+snakemake "results/us-maps/gpt-4-1106-preview/occurrence/responses.tsv" -c 8 --configfile "config/us-maps/gpt-4-1106-preview.yml"
 ```
 
 ## Create process figures
 
 ```bash
 snakemake "results/idigbio-sample/gpt-3.5-turbo-0125/occurrence/responses.tsv" \
---sdm "conda" --configfile "config/idigbio-sample/gpt-test.yml" \
+--configfile "config/idigbio-sample/gpt-test.yml" \
 --forceall --dag \
 | dot -Tpdf > docs/processes/idigbio-sample-occqa.pdf
 ```
 
 ```bash
 snakemake "results/idigbio-sample/gpt-3.5-turbo-0125/taxonomy/responses.tsv" \
---sdm "conda" --configfile "config/idigbio-sample/gpt-test.yml" \
+--configfile "config/idigbio-sample/gpt-test.yml" \
 --forceall --dag \
 | dot -Tpdf > docs/processes/idigbio-sample-taxqa.pdf
 ```
 
 ```bash
 snakemake "results/idigbio-sample/gpt-3.5-turbo-0125/process-occ-gpt.py.ipynb" \
---sdm "conda" --configfile "config/idigbio-sample/gpt-test.yml" \
+--configfile "config/idigbio-sample/gpt-test.yml" \
 --forceall --dag \
 | dot -Tpdf > docs/processes/idigbio-sample-results.pdf
 ```
