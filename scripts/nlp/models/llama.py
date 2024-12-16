@@ -96,7 +96,6 @@ class Llama(Model):
                 inputs | {"prompt": prompt, "tensor": tensor, "mask": mask}
                 for inputs, prompt, tensor, mask in zip(batch_inputs, prompts, input_tensors.input_ids, input_tensors.attention_mask)
             ]
-            print(batch_inputs)
             # TODO: to enable multiple return sequences - turn on sampling and top_k should be passed as > 1 and write the process results function.
             # args = {"num_return_sequences": self.num_responses, "do_sample": True, num_beams = None} if self.num_responses > 1 else {}
             responses = self.generate(input_tensors)
