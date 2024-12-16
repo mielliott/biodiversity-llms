@@ -1,6 +1,6 @@
 from dataclasses import dataclass, MISSING
 from enum import StrEnum, auto
-from typing import Any, Optional
+from typing import Any
 
 
 class EnumArg(StrEnum):
@@ -31,7 +31,7 @@ class Params():
     combine_responses: bool = False
     batch_size: int = 10
     top_p: float = 1.0
-    top_k: Optional[int] = None
+    top_k: int = 0
     temperature: float = 1.0
     precision: str = "bfloat16"
     timeout: int = 10

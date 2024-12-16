@@ -105,7 +105,11 @@ class Llama(Model):
             ]
             # TODO: to enable multiple return sequences - turn on sampling and top_k should be passed as > 1 and write the process results function.
             # args = {"num_return_sequences": self.num_responses, "do_sample": True, num_beams = None} if self.num_responses > 1 else {}
-            responses = self.generate(input_tensors)
+
+            params = {}
+            if self.top_k > 0:
+                params["top_k"] = self.top_k
+            responses = self.generate(input_tensors, **params)
             yield from self.process_results(i, input_details, responses)
 
     def generate(self, input_tensors, **kwargs) -> GenerateOutput | LongTensor:
@@ -120,7 +124,6 @@ class Llama(Model):
                     attention_mask=attention_mask.to(self.model.device),
                     max_new_tokens=max_new_tokens,
                     top_p=self.top_p,
-                    top_k=self.top_k,
                     temperature=self.temperature,
                     do_sample=False,
                     num_beams=1,
