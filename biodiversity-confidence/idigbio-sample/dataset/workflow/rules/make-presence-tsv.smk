@@ -25,9 +25,9 @@ rule make_kingdom_presence_tsv:
     input:
         "results/records.tsv",
     output:
-        temp("results/{kingdom}.tsv"),
+        temp("results/kingdom-{kingdom}.tsv"),
     log:
-        "logs/{kingdom}.tsv",
+        "logs/kingdom-{kingdom}.tsv",
     conda:
         "../envs/download.yml"
     params:

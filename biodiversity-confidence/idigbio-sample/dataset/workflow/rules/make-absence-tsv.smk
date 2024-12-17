@@ -1,8 +1,8 @@
 rule create_pseudo_absence_dataset:
     input:
-        f"results/presence.tsv",
+        "results/presence.tsv",
     output:
-        temp(f"results/absence.tsv.unvalidated"),
+        temp("results/absence.tsv.unvalidated"),
     log:
         "logs/absence.tsv.unvalidated.tsv",
     params:
