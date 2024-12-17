@@ -16,7 +16,6 @@ rule extract_records_as_tsv:
         unzip -p {input.records}\
         | jq .indexTerms\
         | mlr --ijson --otsv template -f {params.fields}\
-        | python3 workflow/scripts/clean_records.py\
         | mlr --tsv uniq -a\
         1> {output} 2> {log}
         """

@@ -1,3 +1,4 @@
+idigbio_api: https://beta-search.idigbio.org/v2
 random_seed: 69847
 record_fields:
   - kingdom

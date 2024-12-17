@@ -3,6 +3,8 @@ rule create_pseudo_absence_dataset:
         f"results/presence.tsv",
     output:
         temp(f"results/absence.tsv.unvalidated"),
+    log:
+        "logs/absence.tsv.unvalidated.tsv",
     params:
         shuffle_fields="country,stateprovince,county",
         seed=config["random_seed"],
@@ -18,19 +20,29 @@ rule validate_absences:
     input:
         f"results/absence.tsv.unvalidated",
     output:
-        protected(f"results/absence-valid.tsv"),
+        f"results/absence-valid.tsv",
+    log:
+        "logs/absence-valid.tsv",
     conda:
-        "../envs/analysis.yml"
-    script:
-        "../scripts/validate_absences.py"
+        "../envs/download.yml"
+    params:
+        idigbio_api=config["idigbio_api"],
+    shell:
+        """
+        cat {input}\
+        | python3 workflow/scripts/validate_absences.py {params.idigbio_api}\
+        1> {output} 2> {log}
+        """
 
 
 rule filter_absences:
     input:
         unvalidated=f"results/absence.tsv.unvalidated",
-        validation=ancient(f"results/absence-valid.tsv"),
+        validation=f"results/absence-valid.tsv",
     output:
         f"results/absence.tsv",
+    log:
+        "logs/absence.tsv",
     shell:
         """
         paste <(cat {input.unvalidated})\
