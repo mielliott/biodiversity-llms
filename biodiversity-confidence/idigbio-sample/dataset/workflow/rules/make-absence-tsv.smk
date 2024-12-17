@@ -8,7 +8,7 @@ rule create_pseudo_absence_dataset:
     conda:
         "../envs/download.yml"
     params:
-        location_fields="country,stateprovince,county",
+        location_fields=",".join(config["location_fields"]),
         max_retries=100,
         idigbio_api=config["idigbio_api"],
         random_seed=config["random_seed"],

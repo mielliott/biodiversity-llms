@@ -10,5 +10,6 @@ rule create_occ_qa_dataset:
         """
         cat <(mlr --tsv filter '$answer = "yes"' {input.presence})\
             <(mlr --tsv filter '$answer = "no"'  {input.absence})\
+        | python3 workflow/scripts/format_records_for_qa.py\
         > {output}
         """

@@ -18,21 +18,6 @@ location_fields = LOCATION_FIELDS.split(",")
 locations = pd.read_csv(LOCATIONS_PATH, sep="\t", usecols=location_fields)
 
 
-def make_species_location_query(record):
-    return {
-        "rq": {
-            "kingdom": str(record["kingdom"]),
-            "genus": str(record["genus"]),
-            "specificepithet": str(record["specificepithet"]),
-            "country": str(record["country"]),
-            "stateprovince": str(record["stateprovince"]),
-            # "county": str(record["county"]), # County names do not match reliably, stateprovince is good enough
-        },
-        "limit": 1,
-        "offset": 0,
-    }
-
-
 tsv_args: dict[str, Any] = dict(
     delimiter="\t",
     lineterminator="\n",
@@ -47,6 +32,17 @@ fields = taxonomy_fields + location_fields
 
 validated_absences = csv.DictWriter(sys.stdout, fields, **tsv_args)
 validated_absences.writeheader()
+
+match_fields = set(taxonomy_fields) | set(location_fields) - {"county"}
+
+
+def make_species_location_query(record):
+    return {
+        "rq": {f: str(record[f]) for f in match_fields},
+        "limit": 1,
+        "offset": 0,
+    }
+
 
 random_box = [RANDOM_STATE]
 

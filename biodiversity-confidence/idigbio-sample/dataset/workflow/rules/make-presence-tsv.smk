@@ -8,7 +8,9 @@ rule extract_records_as_tsv:
     output:
         temp("results/records.tsv"),
     params:
-        fields=",".join([f'"{field}"' for field in config["record_fields"]]),
+        fields=",".join(
+            [field for field in config["taxonomy_fields"] + config["location_fields"]]
+        ),
     log:
         "logs/records.tsv",
     shell:
@@ -48,8 +50,8 @@ rule make_kingdom_presence_tsv:
 
 rule make_presence_tsv:
     input:
-        "results/animalia.tsv",
-        "results/plantae.tsv",
+        "results/kingdom-animalia.tsv",
+        "results/kingdom-plantae.tsv",
     output:
         "results/presence.tsv",
     log:

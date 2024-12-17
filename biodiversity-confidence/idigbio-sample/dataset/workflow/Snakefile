@@ -8,4 +8,4 @@ include: "rules/make-taxonomy-questions.smk"
 
 rule sample_idigbio:
     input:
-        "results/manifest",
+        "results/occurrence-qa.tsv",
