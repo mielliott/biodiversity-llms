@@ -1,63 +1,15 @@
-import os
-from deepmerge import Merger
-from util import get_job_and_dataset
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv()
 
 
-configfile: "config/defaults.yml"
+configfile: "config/qa/occurrence.yml"
+configfile: "config/llm/gpt-3.5-turbo-0125.yml"
 
 
-config_merger = Merger([(dict, ["merge"])], ["override"], ["override"])
-config = config_merger.merge(config["defaults"], config)
-
-job, dataset = get_job_and_dataset()
-
-resources = f"resources/{dataset}"
-inputs = f"results/{dataset}/{{recordset_hash}}/input"
-outputs = f"results/{dataset}/{{recordset_hash}}/{job}"
-
-print("Parameters:")
-print(f"- Resources: {resources}")
-print(f"- Inputs: {inputs}")
-print(f"- Outputs: {outputs}")
-
-
-def make_qa_config(template):
-    job_params = {
-        "random_seed": config["random_seed"],
-        "outputs": f"{outputs}/{template}",
-    }
-    c = config_merger.merge(config["qa"]["defaults"].copy(), config["qa"][template])
-    config_merger.merge(c, job_params)
-    return c
-
-
-config["qa"]["occurrence"] = make_qa_config("occurrence")
-config["qa"]["taxonomy"] = make_qa_config("taxonomy")
-
-
-include: "rules/tsv.smk"
-
-
-module occ_qa_workflow:
-    snakefile:
-        "modules/qa.smk"
-    config:
-        config["qa"]["occurrence"]
-
-
-use rule * from occ_qa_workflow as occ_qa_*
-
-
-module tax_qa_workflow:
-    snakefile:
-        "modules/qa.smk"
-    config:
-        config["qa"]["taxonomy"]
-
-
-use rule * from tax_qa_workflow as tax_qa_*
+include: "qa.smk"
 
 
 rule all:
     input:
-        f"{outputs}/{config['results']['notebook']}",
+        "results/responses.tsv",

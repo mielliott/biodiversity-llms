@@ -1,0 +1,19 @@
+qa:
+  input: resources/test-occurrence-qa.tsv
+  query_limit: 0
+  batch_size: 1000
+  query_templates:
+    - Does {genus} {specificepithet} naturally occur in {county}, {stateprovince}, {country}?
+    - Can species {genus} {specificepithet} be found in {county}, {stateprovince}, {country}?
+    - Is it possible to encounter species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
+    - Is there a presence of species {genus} {specificepithet} within {county}, {stateprovince}, {country}?
+    - Does {county}, {stateprovince}, {country} harbor species {genus} {specificepithet}?
+    - Is species {genus} {specificepithet} present in {county}, {stateprovince}, {country}?
+    - Can one observe species {genus} {specificepithet} in {county}, {stateprovince}, {country}?
+  query_suffix: Only respond yes or no.
+  command_env: $ROOT/scripts/nlp/env.yml
+  command: python3 $ROOT/scripts/nlp/main.py
+  command_args:
+    max_tokens: 1
+    timeout: 10
+    scores: first_token

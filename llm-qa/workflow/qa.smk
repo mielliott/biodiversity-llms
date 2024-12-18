@@ -1,16 +1,7 @@
-import os
-
-outputs = config["outputs"]
-
-if "shuffle" in config and config["shuffle"]:
-    batch_outputs = f"{outputs}/{config['batch_size']}-shuffled-{config['random_seed']}"
-else:
-    batch_outputs = f"{outputs}/{config['batch_size']}"
+from math import ceil
 
 
 def get_batches(wildcards):
-    from math import ceil
-
     batch_size = config["batch_size"]
     num_lines = (
         sum(1 for line in open(config["input"])) - 1
@@ -21,31 +12,24 @@ def get_batches(wildcards):
         if config["query_limit"] <= 0
         else min(num_lines, config["query_limit"])
     )
-    return [
-        get_batch_path(batch, batch_size, limit).format(**wildcards)
+
+    return (
+        get_batch_path(batch, batch_size, limit)
         for batch in range(ceil(limit / batch_size))
-    ]
+    )
 
 
 def get_batch_path(batch, batch_size, limit):
     first = batch * batch_size
     last = min(limit - 1, (batch + 1) * batch_size - 1)
-    path = f"{batch_outputs}/{first}-{last}.tsv"
-    return path
-
-
-print(
-    get_batch_path(50, 10, 100).format(
-        **{"recordset_hash": "8f0594be7f88e4fc7b30c0854e7ca029"}
-    )
-)
+    return f"results/batches/{first}-{last}.tsv"
 
 
 rule answer_questions:
     input:
-        ancient(get_batches),
+        get_batches,
     output:
-        f"{outputs}/responses.tsv",
+        "results/responses.tsv",
     shell:
         "mlr --tsvlite cat {input} > {output}"
 
@@ -57,33 +41,35 @@ def convert_snake_case_to_hyphens(arg_name: str):
 def convert_args_dict_to_cli(args: dict):
     return " ".join(
         f'--{convert_snake_case_to_hyphens(arg)} "{value}"'.lower()
-        for arg, value in config["args"].items()
+        for arg, value in config["qa"]["command_args"].items()
     )
 
 
-if not isinstance(config["args"], dict):
-    raise RuntimeError("Command args must be a dict. Not this:", config["args"])
+if not isinstance(config["qa"]["command_args"], dict):
+    raise RuntimeError(
+        "Command args must be a dict. Not this:", config["qa"]["command_args"]
+    )
 
 
 rule answer_questions_batch:
     input:
         config["input"],
     output:
-        batch_outputs + "/{first}-{last}.tsv",
+        "results/batches/{first}-{last}.tsv",
     params:
         prep_command=config["prep_command"],
         qa_command=config["command"],
-        qa_args=convert_args_dict_to_cli(config["args"]),
+        qa_args=" ".join(config["args"]),
         qa_questions=lambda wildcards: " ".join(
             [f'"{q} {config["query_suffix"]}"' for q in config["query_templates"]]
         ),
     log:
-        "logs/" + batch_outputs + "/{first}-{last}.tsv",
-    conda:
-        os.path.expandvars(config["command_env"])
+        "logs/" + BATCH_OUTPUTS_DIR + "/{first}-{last}.tsv",
     shell:
         """
-        workflow/scripts/cat-range {input} {wildcards.first} {wildcards.last}\
+        cat {input}\
+        | mlr --tsvlite head -n $(({wildcards.last} + 1))\
+        | mlr --tsvlite tail -n $(({wildcards.last} - {wildcards.first} + 1))\
         | {params.prep_command} \
         | {params.qa_command} {params.qa_args} {params.qa_questions}\
         1> {output} 2> {log}

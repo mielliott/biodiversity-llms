@@ -1,0 +1,13 @@
+qa:
+  input: resources/test-taxonomy-qa.tsv
+  query_limit: 0
+  batch_size: 1000
+  query_templates:
+    - What taxonomic {object_rank} does {subject_rank} \"{taxon}\" belong to?
+  query_suffix: Only say its scientific name.
+  command_env: $ROOT/scripts/nlp/env.yml
+  command: python3 $ROOT/scripts/nlp/main.py
+  command_args:
+    max_tokens: 10
+    timeout: 10
+    scores: response_tokens
