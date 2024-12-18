@@ -22,7 +22,7 @@ def get_country_by_code(code: str) -> Optional[str]:
     return country.name if country is not None else None
 
 
-def fix_countrycode(record: dict[str, str]) -> Optional[str]:
+def look_up_country_name_by_code(record: dict[str, str]) -> Optional[str]:
     code = clean_string(record["countrycode"])
     return get_country_by_code(code)
 
@@ -50,8 +50,7 @@ def generic_fixer(field, str_func):
 
 fixers = {
     "specificepithet": generic_fixer("specificepithet", str),
-    "country": fix_country,
-    "countrycode": fix_countrycode,
+    "country": look_up_country_name_by_code,
     "stateprovince": fix_stateprovince,
     "county": fix_county,
 }
@@ -68,13 +67,12 @@ tsv_args: dict[str, Any] = dict(
 )
 
 raw_records = csv.DictReader(sys.stdin, **tsv_args)
-fields: list[str] = cast(list[str], raw_records.fieldnames)
 
-cleaned_records = csv.DictWriter(sys.stdout, fieldnames=fields, **tsv_args)
-cleaned_records.writeheader()
+formatted_records = csv.DictWriter(sys.stdout, fieldnames=OUTPUT_FIELDS, **tsv_args)
+formatted_records.writeheader()
 
 
 for record in raw_records:
     formatted_record = {f: fixers[f](record) for f in OUTPUT_FIELDS}
     if all((v is not None for k, v in formatted_record.items())):
-        cleaned_records.writerow(record)
+        formatted_records.writerow(formatted_record)

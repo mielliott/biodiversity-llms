@@ -10,6 +10,16 @@ location_fields:
   - countrycode
   - stateprovince
   - county
+qa_fields:
+  - kingdom
+  - phylum
+  - family
+  - genus
+  - specificepithet
+  - country
+  - stateprovince
+  - county
+  - occurrence
 download:
   min_records_per_family: 25
   max_records_per_family: 500
