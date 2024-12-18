@@ -46,20 +46,20 @@ def test_gpt_3_5_response_token_scores():
     assert result["x"] == "bear"
     assert result["query"] == "Do you like bears?"
     assert result["responses"] in ("Yes", "No")
-    assert result["top tokens logprobs"][0] <= 0
-    assert result["top tokens logprobs"][1] <= 0
+    assert result["top_tokens_logprobs"][0] <= 0
+    assert result["top_tokens_logprobs"][1] <= 0
 
     assert set(result.keys()) == {
-        "x", "query", "responses", "top tokens logprobs"
+        "x", "query", "responses", "top_tokens_logprobs"
     }
 
     result = results[1]
     assert result["x"] == "toad"
     assert result["query"] == "Do you like toads?"
     assert result["responses"] in ("Yes", "No")
-    assert result["top tokens logprobs"][0] <= 0
-    assert result["top tokens logprobs"][1] <= 0
+    assert result["top_tokens_logprobs"][0] <= 0
+    assert result["top_tokens_logprobs"][1] <= 0
 
     assert set(result.keys()) == {
-        "x", "query", "responses", "top tokens logprobs"
+        "x", "query", "responses", "top_tokens_logprobs"
     }

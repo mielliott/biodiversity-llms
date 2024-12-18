@@ -161,10 +161,10 @@ class Llama(Model):
             yield filtered_input | {
                 "query": query,
                 "responses": response_text,
-                "top tokens": top_tokens,
-                "top tokens logprobs": top_tokens_logprobs,
-                "input token count": input_token_count,
-                "output token count": output_tokens_count,
+                "top_tokens": top_tokens,
+                "top_tokens_logprobs": top_tokens_logprobs,
+                "input_token_count": input_token_count,
+                "output_token_count": output_tokens_count,
             }
 
     def construct_prompt(self, query: str) -> str:

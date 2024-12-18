@@ -50,7 +50,7 @@ class BatchGPT(Model):
             self.thread.start()
             asyncio.run_coroutine_threadsafe(self.create_batch(queries, self.item_queue, self.run_status), self.loop)
             for item in self.wrap_async_iter(self.flush_queue(self.item_queue, self.run_status), self.loop):
-                if item["request id"] == 'response':
+                if item["request_id"] == 'response':
                     continue
                 yield item
         else:
@@ -133,15 +133,15 @@ class BatchGPT(Model):
                 yield {
                     "x": item[1]["x"],
                     "query": item[1]["query"],
-                    "batch id": str(item[2]),
-                    "request id": str(item[0]),
+                    "batch_id": str(item[2]),
+                    "request_id": str(item[0]),
                 }
             else:
                 yield {
                     "x": item[1]["x"],
                     "query": item[1]["query"],
-                    "batch id": "",
-                    "request id": str(item[0]),
+                    "batch_id": "",
+                    "request_id": str(item[0]),
                 }
 
     async def create_batch(self, data, queue, run_status_obj):
@@ -176,10 +176,10 @@ class BatchGPT(Model):
                     responses[line["custom_id"]] = line['response']['body']
 
                 for query in queries:
-                    chat_completion_response = responses[query["request id"]]
-                    # remove batch id and request id from query
-                    del query["batch id"]
-                    del query["request id"]
+                    chat_completion_response = responses[query["request_id"]]
+                    # remove batch_id and request_id from query
+                    del query["batch_id"]
+                    del query["request_id"]
                     yield from self.process_results(query, chat_completion_response)
 
     def process_results(self, inputs: dict[str, Any], chat_completion: Dict[str, Any]) -> Iterator[dict[str, Any]]:
@@ -187,10 +187,10 @@ class BatchGPT(Model):
             response_text, top_token_logprobs = self.process_chat_completion(choice, self.token_scores_format)
             yield inputs | {
                 "responses": response_text,
-                "top tokens": [x[0] for x in top_token_logprobs],
-                "top tokens logprobs": [x[1] for x in top_token_logprobs],
-                "input token count": chat_completion['usage']['prompt_tokens'],
-                "output token count": chat_completion['usage']['completion_tokens'],
+                "top_tokens": [x[0] for x in top_token_logprobs],
+                "top_tokens_logprobs": [x[1] for x in top_token_logprobs],
+                "input_token_count": chat_completion['usage']['prompt_tokens'],
+                "output_token_count": chat_completion['usage']['completion_tokens'],
             }
 
     def process_chat_completion(self, chat_completion_choice: Dict[str, Any], token_scores_format):

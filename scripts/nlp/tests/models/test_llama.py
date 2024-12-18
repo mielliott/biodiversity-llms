@@ -17,21 +17,21 @@ def test_llama():
     result = results[0]
     assert result["x"] == "bear"
     assert result["query"] == "What is the best kind of bear? Only say its name."
-    assert len(result["top tokens"]) == 5
-    assert len(result["top tokens logprobs"]) == 5
+    assert len(result["top_tokens"]) == 5
+    assert len(result["top_tokens_logprobs"]) == 5
 
     assert list(result.keys()) == [
-        "x", "query", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
+        "x", "query", "responses", "top_tokens", "top_tokens_logprobs", "input_token_count", "output_token_count"
     ]
 
     result = results[1]
     assert result["x"] == "toad"
     assert result["query"] == "What is the best kind of toad? Only say its name."
-    assert len(result["top tokens"]) == 5
-    assert len(result["top tokens logprobs"]) == 5
+    assert len(result["top_tokens"]) == 5
+    assert len(result["top_tokens_logprobs"]) == 5
 
     assert list(result.keys()) == [
-        "x", "query", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
+        "x", "query", "responses", "top_tokens", "top_tokens_logprobs", "input_token_count", "output_token_count"
     ]
 
 

@@ -15,7 +15,7 @@ def echo_response(inputs: dict[str, Any]):
 def yes_no_response(inputs: dict[str, Any]):
     prob = betavariate(1, 1)
     top_tokens = choice((["Yes", "No"], ["No", "Yes"]))
-    return inputs | {"responses": top_tokens[0], "top tokens logprobs": [log(prob), log(1 - prob)]}
+    return inputs | {"responses": top_tokens[0], "top_tokens_logprobs": [log(prob), log(1 - prob)]}
 
 
 @ModelRegistry.register("test")

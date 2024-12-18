@@ -10,6 +10,7 @@ import aiohttp
 class RunStatus:
     running = True
 
+
 def wrap_async_iter(ait, loop):
     """Wrap an asynchronous iterator into a synchronous one"""
     q = queue.Queue()
@@ -35,6 +36,7 @@ def wrap_async_iter(ait, loop):
 
     async_result = asyncio.run_coroutine_threadsafe(aiter_to_queue(), loop)
     return yield_queue_items()
+
 
 async def create_req_object(queries, queue):
     for idx, query in enumerate(queries):
@@ -71,7 +73,7 @@ async def flush_queue(queue, run_status_obj):
     while run_status_obj.running:
         item = await queue.get()
         yield {
-            "request id": item[0],
+            "request_id": item[0],
             "query": item[1]
         }
 
@@ -100,6 +102,6 @@ data = data_file()
 run_status_obj = RunStatus()
 asyncio.run_coroutine_threadsafe(create_batch(data, item_queue, run_status_obj), loop)
 for item in wrap_async_iter(flush_queue(item_queue, run_status_obj), loop):
-    if item["request id"] == 'response':
+    if item["request_id"] == 'response':
         continue
     print(item)

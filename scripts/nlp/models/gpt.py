@@ -91,10 +91,10 @@ class GPT(Model):
             response_text, top_token_logprobs = self.process_chat_completion(choice, self.token_scores_format)
             yield inputs | {
                 "responses": response_text,
-                "top tokens": [x[0] for x in top_token_logprobs],
-                "top tokens logprobs": [x[1] for x in top_token_logprobs],
-                "input token count": chat_completion.usage.prompt_tokens,  # type: ignore[reportOptionalMemberAccess]
-                "output token count": chat_completion.usage.completion_tokens,  # type: ignore[reportOptionalMemberAccess]
+                "top_tokens": [x[0] for x in top_token_logprobs],
+                "top_tokens_logprobs": [x[1] for x in top_token_logprobs],
+                "input_token_count": chat_completion.usage.prompt_tokens,  # type: ignore[reportOptionalMemberAccess]
+                "output_token_count": chat_completion.usage.completion_tokens,  # type: ignore[reportOptionalMemberAccess]
             }
 
     def process_chat_completion(self, chat_completion_choice: Choice, token_scores_format):
