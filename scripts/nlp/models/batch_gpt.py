@@ -19,6 +19,7 @@ from utils.stream import to_file_like_obj
 class RunStatus:
     running = True
 
+
 @ModelRegistry.register("batch_gpt")
 class BatchGPT(Model):
     def __init__(self, params: Params):
@@ -168,7 +169,6 @@ class BatchGPT(Model):
         elif batch.status == "completed":
             if batch.output_file_id:
                 output_content = self.client.files.content(batch.output_file_id)
-                question_number = 0
                 # output dict -> custom_id: response
                 responses = {}
                 for line in output_content.iter_lines():
@@ -180,15 +180,13 @@ class BatchGPT(Model):
                     # remove batch id and request id from query
                     del query["batch id"]
                     del query["request id"]
-                    yield from self.process_results(question_number, query, chat_completion_response)
-                    question_number += 1
+                    yield from self.process_results(query, chat_completion_response)
 
-    def process_results(self, question_number: int, inputs: dict[str, Any], chat_completion: Dict[str, Any]) -> Iterator[dict[str, Any]]:
+    def process_results(self, inputs: dict[str, Any], chat_completion: Dict[str, Any]) -> Iterator[dict[str, Any]]:
         for choice in chat_completion['choices']:
             response_text, top_token_logprobs = self.process_chat_completion(choice, self.token_scores_format)
             yield inputs | {
                 "responses": response_text,
-                "question number": question_number,
                 "top tokens": [x[0] for x in top_token_logprobs],
                 "top tokens logprobs": [x[1] for x in top_token_logprobs],
                 "input token count": chat_completion['usage']['prompt_tokens'],

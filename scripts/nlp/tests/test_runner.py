@@ -21,11 +21,11 @@ def test_runner(capsys):
     tsv, err = capsys.readouterr()
 
     assert tsv == (
-        "x\ty\tquery\tresponses\n"
-        "apple\torange\tjust apple\tEchoing query \\\"just apple\\\"\n"
-        "apple\torange\tapple and orange\tEchoing query \\\"apple and orange\\\"\n"
-        "horse\tcarriage\tjust horse\tEchoing query \\\"just horse\\\"\n"
-        "horse\tcarriage\thorse and carriage\tEchoing query \\\"horse and carriage\\\"\n"
+        "x\ty\tquery_number\tpattern_number\tquery\tresponses\n"
+        "apple\torange\t0\t0\tjust apple\tEchoing query \\\"just apple\\\"\n"
+        "apple\torange\t0\t1\tapple and orange\tEchoing query \\\"apple and orange\\\"\n"
+        "horse\tcarriage\t1\t0\tjust horse\tEchoing query \\\"just horse\\\"\n"
+        "horse\tcarriage\t1\t1\thorse and carriage\tEchoing query \\\"horse and carriage\\\"\n"
     )
 
 
@@ -42,9 +42,9 @@ def test_runner_with_disk_io(capsys):
     tsv, err = capsys.readouterr()
 
     assert tsv == (
-        "genus\tspecificepithet\tcountry\tquery\tresponses\n"
-        "Panicum\tlaxiflorum\tNepal\tDoes species Panicum laxiflorum live in Nepal?\tEchoing query \\\"Does species Panicum laxiflorum live in Nepal?\\\"\n"
-        "Fenestella\tcarinata\tUganda\tDoes species Fenestella carinata live in Uganda?\tEchoing query \\\"Does species Fenestella carinata live in Uganda?\\\"\n"
+        "genus\tspecificepithet\tcountry\tquery_number\tpattern_number\tquery\tresponses\n"
+        "Panicum\tlaxiflorum\tNepal\t0\t0\tDoes species Panicum laxiflorum live in Nepal?\tEchoing query \\\"Does species Panicum laxiflorum live in Nepal?\\\"\n"
+        "Fenestella\tcarinata\tUganda\t1\t0\tDoes species Fenestella carinata live in Uganda?\tEchoing query \\\"Does species Fenestella carinata live in Uganda?\\\"\n"
     )
 
 
@@ -69,8 +69,7 @@ def test_runner_gpt(capsys):
     runner.run_experiment(tsv)
 
     tsv, err = capsys.readouterr()
-    in_stream = io.StringIO(tsv)
-    table = pd.read_csv(in_stream, sep="\t", escapechar="\\", quoting=csv.QUOTE_NONE)
+    table = pd.read_csv(io.StringIO(tsv), sep="\t", escapechar="\\", quoting=csv.QUOTE_NONE)
 
     assert len(table) == 4
 
@@ -83,7 +82,6 @@ def test_runner_llama(capsys):
     runner.run_experiment(tsv)
 
     tsv, err = capsys.readouterr()
-    in_stream = io.StringIO(tsv)
-    table = pd.read_csv(in_stream, sep="\t", escapechar="\\", quoting=csv.QUOTE_NONE)
+    table = pd.read_csv(io.StringIO(tsv), sep="\t", escapechar="\\", quoting=csv.QUOTE_NONE)
 
     assert len(table) == 4

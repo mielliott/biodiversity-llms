@@ -20,9 +20,13 @@ class IOHandler:
         return zip(*args)
 
     def make_queries(self, lines: TextIO) -> Iterator[dict[str, Any]]:
-        for field_values in csv.DictReader(lines, None, **self.tsv_args):
-            for pattern in self.patterns:
-                yield field_values | {"query": pattern.format(**field_values)}
+        for query_number, field_values in enumerate(csv.DictReader(lines, None, **self.tsv_args)):
+            for pattern_number, pattern in enumerate(self.patterns):
+                yield field_values | {
+                    "query_number": query_number,
+                    "pattern_number": pattern_number,
+                    "query": pattern.format(**field_values)
+                }
 
     def write_results(self, out_stream: TextIO, results: Iterator[dict[str, Any]]):
         first_result = next(results)

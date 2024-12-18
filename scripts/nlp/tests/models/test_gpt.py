@@ -17,25 +17,23 @@ def test_gpt_3_5_first_token_scores():
     result = results[0]
     assert result["x"] == "bear"
     assert result["query"] == "What is the best kind of bear? Only say its name."
-    assert result["question number"] == 0
     assert result["input token count"] == 20
     assert len(result["top tokens"]) == 5
     assert len(result["top tokens logprobs"]) == 5
 
     assert set(result.keys()) == {
-        "x", "query", "responses", "question number", "top tokens", "top tokens logprobs", "input token count", "output token count"
+        "x", "query", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
     }
 
     result = results[1]
     assert result["x"] == "toad"
     assert result["query"] == "What is the best kind of toad? Only say its name."
-    assert result["question number"] == 1
     assert result["input token count"] == 21
     assert len(result["top tokens"]) == 5
     assert len(result["top tokens logprobs"]) == 5
 
     assert set(result.keys()) == {
-        "x", "query", "responses", "question number", "top tokens", "top tokens logprobs", "input token count", "output token count"
+        "x", "query", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
     }
 
 
@@ -53,25 +51,23 @@ def test_gpt_3_5_response_token_scores():
     result = results[0]
     assert result["x"] == "bear"
     assert result["query"] == "Repeat after me: bear"
-    assert result["question number"] == 0
     assert result["input token count"] == 12
     assert len(result["top tokens"]) == 1
     assert len(result["top tokens logprobs"]) == 1
 
     assert set(result.keys()) == {
-        "x", "query", "responses", "question number", "top tokens", "top tokens logprobs", "input token count", "output token count"
+        "x", "query", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
     }
 
     result = results[1]
     assert result["x"] == "bear bear bear"
     assert result["query"] == "Repeat after me: bear bear bear"
-    assert result["question number"] == 1
     assert result["input token count"] == 14
     assert len(result["top tokens"]) == 3
     assert len(result["top tokens logprobs"]) == 3
 
     assert set(result.keys()) == {
-        "x", "query", "responses", "question number", "top tokens", "top tokens logprobs", "input token count", "output token count"
+        "x", "query", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
     }
 
 
@@ -119,23 +115,21 @@ def test_gpt_3_5_read_batch():
     result = results[0]
     assert result["x"] == "bear"
     assert result["query"] == "What do bears eat?"
-    assert result["question number"] == 0
     assert result["input token count"] == 12
     assert len(result["top tokens"]) == 5
     assert len(result["top tokens logprobs"]) == 5
 
     assert set(result.keys()) == {
-        "x", "query", "responses", "question number", "top tokens", "top tokens logprobs", "input token count", "output token count"
+        "x", "query", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
     }
 
     result = results[1]
     assert result["x"] == "toad"
     assert result["query"] == "What do toads eat?"
-    assert result["question number"] == 1
     assert result["input token count"] == 13
     assert len(result["top tokens"]) == 5
     assert len(result["top tokens logprobs"]) == 5
 
     assert set(result.keys()) == {
-        "x", "query", "responses", "question number", "top tokens", "top tokens logprobs", "input token count", "output token count"
+        "x", "query", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
     }

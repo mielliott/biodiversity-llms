@@ -95,7 +95,7 @@ class Llama(Model):
             collate_fn=custom_collate_fn,
         )
 
-        for i, batch_inputs in enumerate(tqdm.tqdm(data_loader, desc="Processing batches")):
+        for batch_inputs in tqdm.tqdm(data_loader, desc="Processing batches"):
             prompts = [self.construct_prompt(inputs["query"]) for inputs in batch_inputs]
             input_tensors = self.tokenizer(prompts, return_tensors="pt", truncation=True, padding=True)
 
@@ -110,7 +110,7 @@ class Llama(Model):
             if self.top_k > 0:
                 params["top_k"] = self.top_k
             responses = self.generate(input_tensors, **params)
-            yield from self.process_results(i, input_details, responses)
+            yield from self.process_results(input_details, responses)
 
     def generate(self, input_tensors, **kwargs) -> GenerateOutput | LongTensor:
         input_ids: torch.Tensor = input_tensors.input_ids
@@ -139,7 +139,7 @@ class Llama(Model):
                 print(f"Device: {self.model.device}")
                 raise
 
-    def process_results(self, batch_id: int, inputs: list[dict[str, Any]], outputs: GenerateOutput | LongTensor) -> Iterator[dict[str, Any]]:
+    def process_results(self, inputs: list[dict[str, Any]], outputs: GenerateOutput | LongTensor) -> Iterator[dict[str, Any]]:
         if isinstance(outputs, GenerateOutput):
             generated_sequences = outputs.sequences
             scores = outputs.scores
@@ -155,12 +155,10 @@ class Llama(Model):
             # Implement TokenScoresFormat to return one or all tokens scores
             top_tokens, top_tokens_logprobs = self.get_top_k_scores(output_distributions[0], 5)
 
-            question_number = batch_id * len(inputs) + i
             query = input['query']
             output_tokens_count = len(output_tokens)
             filtered_input = {k: v for k, v in input.items() if k not in ["prompt", "tensor", "mask"]}
             yield filtered_input | {
-                "question number": question_number,
                 "query": query,
                 "responses": response_text,
                 "top tokens": top_tokens,

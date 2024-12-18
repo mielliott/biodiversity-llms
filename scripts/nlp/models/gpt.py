@@ -48,7 +48,6 @@ class GPT(Model):
             collate_fn=custom_collate_fn,
         )
 
-        question_number = 0
         for batch in tqdm.tqdm(dataloader, desc="Processing batches"):
             for inputs in batch:
                 message = [{"role": "user", "content": inputs["query"]}]
@@ -61,8 +60,7 @@ class GPT(Model):
                     temperature=self.temperature,
                 )
 
-                yield from self.process_results(question_number, inputs, chat_completion)
-                question_number += 1
+                yield from self.process_results(inputs, chat_completion)
 
     def generate(self, message, **kwargs) -> ChatCompletion:
         max_retries = 3
@@ -88,12 +86,11 @@ class GPT(Model):
                 else:
                     raise e
 
-    def process_results(self, question_number: int, inputs: dict[str, Any], chat_completion: ChatCompletion) -> Iterator[dict[str, Any]]:
+    def process_results(self, inputs: dict[str, Any], chat_completion: ChatCompletion) -> Iterator[dict[str, Any]]:
         for choice in chat_completion.choices:
             response_text, top_token_logprobs = self.process_chat_completion(choice, self.token_scores_format)
             yield inputs | {
                 "responses": response_text,
-                "question number": question_number,
                 "top tokens": [x[0] for x in top_token_logprobs],
                 "top tokens logprobs": [x[1] for x in top_token_logprobs],
                 "input token count": chat_completion.usage.prompt_tokens,  # type: ignore[reportOptionalMemberAccess]
