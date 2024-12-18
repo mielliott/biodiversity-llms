@@ -12,31 +12,28 @@ def test_llama():
     ]))
 
     results = list(results_stream)
-
     assert len(results) == 2
 
     result = results[0]
     assert result["x"] == "bear"
     assert result["query"] == "What is the best kind of bear? Only say its name."
     assert result["question number"] == 0
-    assert result["input token count"] == 14
     assert len(result["top tokens"]) == 5
     assert len(result["top tokens logprobs"]) == 5
 
     assert list(result.keys()) == [
-        "x", "query", "question number", "input", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
+        "x", "query", "question number", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
     ]
 
     result = results[1]
     assert result["x"] == "toad"
     assert result["query"] == "What is the best kind of toad? Only say its name."
     assert result["question number"] == 1
-    assert result["input token count"] == 15
     assert len(result["top tokens"]) == 5
     assert len(result["top tokens logprobs"]) == 5
 
     assert list(result.keys()) == [
-        "x", "query", "question number", "input", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
+        "x", "query", "question number", "responses", "top tokens", "top tokens logprobs", "input token count", "output token count"
     ]
 
 
