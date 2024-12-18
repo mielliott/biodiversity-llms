@@ -13,10 +13,8 @@ snakemake
 The workflow generates the following outputs:
 ```
 results/
-  animalia.jsonl 
-  plantae.jsonl
-  animalia.py.ipynb
-  plantae.py.ipynb
-  presence.tsv
-  records.zip
+  animalia.py.ipynb # Documents the download process for animalia records
+  plantae.py.ipynb  # Documents the download process for plantae records
+  records.zip       # Contains animalia and plantae records in jsonl files
+  occurrence-qa.tsv # Parameters for species presence and absence Q&A
 ```

@@ -1,7 +1,7 @@
 import csv
 import re
 import sys
-from typing import Any, Optional, cast
+from typing import Any, Optional
 import pycountry
 
 args = iter(sys.argv[1:])

@@ -1,7 +1,6 @@
 import csv
-import itertools
 import sys
-from typing import Any, Sequence, cast
+from typing import Any
 import concurrent.futures
 import pandas as pd
 import requests as rq
