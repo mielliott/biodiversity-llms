@@ -1,4 +1,4 @@
-llm: llama-3.1-8b
+llm: llama-3.2-1b-instruct
 prep_command: cat
 command: python3 $ROOT/scripts/nlp/main.py
 command_env: $ROOT/scripts/nlp/env.yml
@@ -9,7 +9,7 @@ args: # The arguments to `command`
   - --num-responses 2
   - --timeout 10
   - --model-category "llama"
-  - --model-name "llama-3.1-8b"
+  - --model-name "llama-3.2-1b-instruct"
 shuffle: false
 batch_size: 1
 query_limit: 0 # Set to 0 to run all queries, otherwise only run this many (x the number of query templates)

@@ -78,7 +78,7 @@ def test_runner_llama(capsys):
     tsv = test_util.make_tsv_stream([{"x": "apple", "y": "orange"}, {"x": "horse", "y": "carriage"}])
     io_handler = IOHandler(["just {x}", "{x} and {y}"], [])
 
-    runner = ExperimentRunner("llama", Params("llama-3.1-8b"), io_handler)
+    runner = ExperimentRunner("llama", Params("llama-3.2-1b-instruct"), io_handler)
     runner.run_experiment(tsv)
 
     tsv, err = capsys.readouterr()

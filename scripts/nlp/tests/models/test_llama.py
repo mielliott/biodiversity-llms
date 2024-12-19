@@ -3,7 +3,7 @@ from models.llama import Llama
 
 
 def test_llama():
-    llama = Llama(Params(model_name="llama-3.1-8b", precision="float16"))
+    llama = Llama(Params(model_name="llama-3.2-1b-instruct", precision="float16"))
     llama.load_model()
 
     results_stream = llama.run(iter([
@@ -36,7 +36,7 @@ def test_llama():
 
 
 def test_llama_batch():
-    llama = Llama(Params(model_name="Llama-3.2-1B-Instruct",
+    llama = Llama(Params(model_name="llama-3.2-1b-instruct",
                   precision="float16", batch_size=5))
     llama.load_model()
     queries = [

@@ -6,13 +6,13 @@ Usage:
     Plug in field values using the field name, e.g. "Who is {name}?"
 
 e.g.
-    echo -e "species\tlocation\nAcer saccharum\tArkansas" | python main.py -mc "llama" -m "llama-3.1-8b" "Does {species} naturally occur in {location}? Yes or no"
+    echo -e "species\tlocation\nAcer saccharum\tArkansas" | python main.py -mc "llama" -m "llama-3.2-1b-instruct" "Does {species} naturally occur in {location}? Yes or no"
 
 Run it as a python module by checking out the parent directory.
 
 Models:
     -mc gpt -m gpt-3.5-turbo-0125
-    -mc llama -m llama-3.1-8b
+    -mc llama -m llama-3.2-1b-instruct
 """
 
 import argparse
