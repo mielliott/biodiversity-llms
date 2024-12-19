@@ -1,15 +1,27 @@
+import os
 from dotenv import load_dotenv, find_dotenv
+from util import convert_args_dict_to_cli
 
 load_dotenv()
 
 
 configfile: "config/qa/occurrence.yml"
-configfile: "config/llm/gpt-3.5-turbo-0125.yml"
+configfile: "config/llm/gpt-4o-mini-2024-07-18.yml"
 
 
-include: "qa.smk"
+qa_command_env = os.path.expandvars(config["qa"]["command_env"])
+
+qa_command_args = convert_args_dict_to_cli(config["qa"]["command_args"])
+
+qa_questions = " ".join(
+    [f'"{q} {config["qa"]["query_suffix"]}"' for q in config["qa"]["query_templates"]]
+)
+
+
+include: "rules/local_batch_qa.smk"
+include: "rules/remote_batch_qa.smk"
 
 
 rule all:
     input:
-        "results/responses.tsv",
+        "results/local_batches/responses.tsv",
