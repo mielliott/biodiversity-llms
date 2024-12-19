@@ -8,7 +8,7 @@ outputs = os.path.join(config["output_dir"], config["llm"])
 print(f"out: {outputs}/responses.tsv")
 
 
-include: "rules/qa.smk"
+include: "qa.smk"
 
 
 rule all:
