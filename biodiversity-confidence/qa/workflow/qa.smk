@@ -53,9 +53,9 @@ rule submit_questions_to_batch_api:
     input:
         config["qa"]["input"],
     output:
-        "results/openai_batch.tsv",
+        "results/openai_batch_id.tsv",
     log:
-        "logs/openai_batch.tsv",
+        "logs/openai_batch_id.tsv",
     params:
         qa_command=config["qa"]["command"],
         qa_args=qa_command_args,
@@ -74,6 +74,49 @@ rule submit_questions_to_batch_api:
             {params.qa_args}\
             {params.qa_questions}\
         1> {output} 2> {log}
+        """
+
+
+rule download_batch_api_results:
+    input:
+        "results/openai_batch_id.tsv",
+    output:
+        "results/openai_batch_results.tsv",
+    log:
+        "logs/openai_batch_results.tsv",
+    params:
+        qa_command=config["qa"]["command"],
+        qa_args=qa_command_args,
+        qa_questions=lambda w: qa_questions,
+        model_family=config["llm"]["family"],
+        model_name=config["llm"]["model"],
+    conda:
+        os.path.expandvars(config["qa"]["command_env"])
+    shell:
+        """
+        cat {input}\
+        | {params.qa_command}\
+            --model-category batch_{params.model_family}\
+            --model-name {params.model_name}\
+            --batch read\
+            {params.qa_args}\
+        1> {output} 2> {log}
+        """
+
+
+rule form_batch_api_responses:
+    input:
+        queries=config["qa"]["input"],
+        results="results/openai_batch_results.tsv",
+    output:
+        "results/openai_batch_responses.tsv",
+    log:
+        "logs/openai_batch_responses.tsv",
+    shell:
+        """
+        mlr --tsv join -j query_number -f {input.queries} {input.results}\
+        | mlr --tsv reorder -f query_number,pattern_number\
+        > {output}
         """
 
 
@@ -105,7 +148,7 @@ rule answer_questions_batch:
         """
         cat {input}\
         | mlr --tsvlite head -n $(({wildcards.last} + 1))\
-        | mlr --tsvlite tail -n $(({wildcards.last} - {wildcards.first} + 1))\
+            then tail -n $(({wildcards.last} - {wildcards.first} + 1))\
         | {params.qa_command}\
             --model-category {params.model_family}\
             --model-name {params.model_name}\
