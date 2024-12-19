@@ -109,10 +109,11 @@ class BatchReader(BatchHandler):
         self.token_scores_format = params.scores
 
     def run(self, client: OpenAI, queries):
-        batch_id = next(queries)["batch_id"]
-        yield from self.read_batch(client, batch_id)
+        for query in queries:
+            batch_id = query["batch_id"]
+            yield from self.read_batch(client, batch_id)
 
-    def read_batch(self, client: OpenAI, batch_id):
+    def read_batch(self, client: OpenAI, batch_id: str):
         batch = client.batches.retrieve(batch_id)
         # handle batch status
         match batch.status:
@@ -131,6 +132,7 @@ class BatchReader(BatchHandler):
                     chat_completion = query_response_data["response"]["body"]
                     for query_response in self.process_results(chat_completion):
                         yield {
+                            "batch_id": batch_id,
                             "query_number": query_number,
                             "pattern_number": pattern_number,
                         } | query_response
