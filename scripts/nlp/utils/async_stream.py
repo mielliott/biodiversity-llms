@@ -24,7 +24,6 @@ class AsyncFileLikeObject(IOBase):
             yield part
 
     async def read(self, size=-1):
-        print('Reading file...')
         chunks = []
         async for part in self.load(float("inf") if size is None or size < 0 else size):
             chunks.append(part)

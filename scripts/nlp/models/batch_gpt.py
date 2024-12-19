@@ -1,22 +1,19 @@
-import io
 import os
-import time
 import queue
+import threading
+import json
+from typing import Iterator, Any, Dict
 import asyncio
 import aiohttp
 from aiohttp import ClientSession
-import threading
 from utils.async_stream import AsyncFileLikeObject
-import json
-from typing import Iterator, Any, Dict
 from openai import OpenAI
+from args import Params, BatchProcess, TokenScoresFormat
 from .model import Model
 from .registry import ModelRegistry
-from args import Params, BatchProcess, TokenScoresFormat
-from utils.stream import to_file_like_obj
 
 
-class RunStatus:
+class RunState:
     running = True
 
 
@@ -24,7 +21,6 @@ class RunStatus:
 class BatchGPT(Model):
     def __init__(self, params: Params):
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
         self.model_name = params.model_name
         self.num_responses = params.num_responses
         self.top_p = params.top_p
@@ -43,25 +39,25 @@ class BatchGPT(Model):
 
     def run(self, queries, batch_id=None):
         if self.batch is BatchProcess.WRITE:
-            self.loop = asyncio.get_event_loop()
-            self.thread = threading.Thread(target=self.loop.run_forever, daemon=True)
-            self.item_queue = asyncio.Queue()
-            self.run_status = RunStatus()
-            self.thread.start()
-            asyncio.run_coroutine_threadsafe(self.create_batch(queries, self.item_queue, self.run_status), self.loop)
-            for item in self.wrap_async_iter(self.flush_queue(self.item_queue, self.run_status), self.loop):
-                if item["request_id"] == 'response':
+            loop = asyncio.get_event_loop()
+            thread = threading.Thread(target=loop.run_forever, daemon=True)
+            query_buffer = asyncio.Queue()
+            run_status = RunState()
+            thread.start()
+            asyncio.run_coroutine_threadsafe(self.create_batch(queries, query_buffer, run_status), loop)
+            for query in self.wrap_async_iter(self.flush_queue(query_buffer, run_status), loop):
+                if query["request_id"] == "response":
                     continue
-                yield item
+                yield query
         else:
             # read batch file
             yield from self.read_batch(queries, batch_id)
 
-    async def create_req_object(self, queries, queue):
+    async def create_req_objects(self, queries, query_buffer):
         max_allowed_top_logprobs = 5
-        for idx, query in enumerate(queries):
+        for i, query in enumerate(queries):
             request = {
-                "custom_id": f"request-{idx}",
+                "custom_id": f"request-{i}",
                 "method": "POST",
                 "url": "/v1/chat/completions",
                 "body": {
@@ -69,7 +65,7 @@ class BatchGPT(Model):
                     "messages": [
                         {
                             "role": "user",
-                            "content": query['query']
+                            "content": query["query"]
                         }
                     ],
                     "temperature": self.temperature,
@@ -80,9 +76,9 @@ class BatchGPT(Model):
                     "top_logprobs": max_allowed_top_logprobs
                 }
             }
-            await queue.put((f"request-{idx}", query))
+            await query_buffer.put((f"request-{i}", query))
             # .jsonl format (newline is required)
-            yield (json.dumps(request) + '\n').encode()
+            yield (json.dumps(request) + "\n").encode()
 
     # Refer: https://stackoverflow.com/a/55164899
     def wrap_async_iter(self, ait, loop):
@@ -111,69 +107,70 @@ class BatchGPT(Model):
         async_result = asyncio.run_coroutine_threadsafe(aiter_to_queue(), loop)
         return yield_queue_items()
 
-    async def upload_to_openai(self, file_like_obj, queue, run_status_obj):
-        url = 'https://api.openai.com/v1/files'
+    async def upload_to_openai(self, file_data, run_status: RunState):
+        url = "https://api.openai.com/v1/files"
         headers = {
-            'Authorization': 'Bearer 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'
+            "Authorization": "Bearer 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"
         }
 
         async with ClientSession() as session:
             data = aiohttp.FormData()
-            data.add_field('purpose', 'batch')
-            data.add_field('file', file_like_obj, filename='batch.jsonl')
+            data.add_field("purpose", "batch")
+            data.add_field("file", file_data, filename="batch.jsonl")
             async with session.post(url, headers=headers, data=data) as response:
-                run_status_obj.running = False
+                run_status.running = False
                 return await response.json()
 
-    async def flush_queue(self, queue, run_status_obj):
-        while run_status_obj.running:
-            item = await queue.get()
-            print('flush item type: ', type(item[1]))
-            if len(item) > 2:
+    async def flush_queue(self, query_buffer, run_status):
+        while run_status.running:
+            query = await query_buffer.get()
+            if len(query) > 2:
                 yield {
-                    "x": item[1]["x"],
-                    "query": item[1]["query"],
-                    "batch_id": str(item[2]),
-                    "request_id": str(item[0]),
+                    "x": query[1]["x"],
+                    "query": query[1]["query"],
+                    "batch_id": str(query[2]),
+                    "request_id": str(query[0]),
                 }
             else:
                 yield {
-                    "x": item[1]["x"],
-                    "query": item[1]["query"],
+                    "x": query[1]["x"],
+                    "query": query[1]["query"],
                     "batch_id": "",
-                    "request_id": str(item[0]),
+                    "request_id": str(query[0]),
                 }
 
-    async def create_batch(self, data, queue, run_status_obj):
-        objects = self.create_req_object(data, queue)
+    async def create_batch(self, data, query_buffer, run_state):
+        objects = self.create_req_objects(data, query_buffer)
         file = AsyncFileLikeObject(objects)
         file_data = file.read()
-        response = await self.upload_to_openai(file_data, queue, run_status_obj)
-        print(response['id'])
+        response = await self.upload_to_openai(file_data, run_state)
 
         job = self.client.batches.create(
-            input_file_id=response['id'],
+            input_file_id=response["id"],
             endpoint="/v1/chat/completions",
             completion_window="24h"
         )
-        await queue.put(("", {"x": "", "query": ""}, str(job.id)))
+        await query_buffer.put(("", {"x": "", "query": ""}, str(job.id)))
         return job
 
     def read_batch(self, queries, batch_id):
         batch = self.client.batches.retrieve(batch_id)
         # handle batch status
-        if batch.status == "failed":
-            raise Exception(f"Batch failed: {batch.error_file_id}")
-        elif batch.status == "in_progress":
-            raise Exception("Batch is still in progress")
-        elif batch.status == "completed":
-            if batch.output_file_id:
+        match batch.status:
+            case "failed":
+                raise RuntimeError(f"Batch failed: {batch.error_file_id}")
+            case "in_progress":
+                raise RuntimeError("Batch is still in progress")
+            case "completed":
+                if not batch.output_file_id:
+                    raise RuntimeError("Batch is marked \"completed\" but results are missing")
+
                 output_content = self.client.files.content(batch.output_file_id)
                 # output dict -> custom_id: response
                 responses = {}
                 for line in output_content.iter_lines():
                     line = json.loads(line)
-                    responses[line["custom_id"]] = line['response']['body']
+                    responses[line["custom_id"]] = line["response"]["body"]
 
                 for query in queries:
                     chat_completion_response = responses[query["request_id"]]
@@ -181,34 +178,36 @@ class BatchGPT(Model):
                     del query["batch_id"]
                     del query["request_id"]
                     yield from self.process_results(query, chat_completion_response)
+            case _:
+                raise NotImplementedError(f"Unexpected batch status \"{batch.status}\"")
 
     def process_results(self, inputs: dict[str, Any], chat_completion: Dict[str, Any]) -> Iterator[dict[str, Any]]:
-        for choice in chat_completion['choices']:
+        for choice in chat_completion["choices"]:
             response_text, top_token_logprobs = self.process_chat_completion(choice, self.token_scores_format)
             yield inputs | {
                 "responses": response_text,
                 "top_tokens": [x[0] for x in top_token_logprobs],
                 "top_tokens_logprobs": [x[1] for x in top_token_logprobs],
-                "input_token_count": chat_completion['usage']['prompt_tokens'],
-                "output_token_count": chat_completion['usage']['completion_tokens'],
+                "input_token_count": chat_completion["usage"]["prompt_tokens"],
+                "output_token_count": chat_completion["usage"]["completion_tokens"],
             }
 
     def process_chat_completion(self, chat_completion_choice: Dict[str, Any], token_scores_format):
         match token_scores_format:
             case TokenScoresFormat.FIRST_TOKEN:
-                first_token_data = chat_completion_choice['logprobs']['content'][0]
+                first_token_data = chat_completion_choice["logprobs"]["content"][0]
                 first_token_logprobs = [
-                    (top_logprob['token'], top_logprob['logprob'])
-                    for top_logprob in first_token_data['top_logprobs']
+                    (top_logprob["token"], top_logprob["logprob"])
+                    for top_logprob in first_token_data["top_logprobs"]
                 ]
-                return chat_completion_choice['message']['content'], first_token_logprobs
+                return chat_completion_choice["message"]["content"], first_token_logprobs
 
             case TokenScoresFormat.RESPONSE_TOKENS:
                 response_token_logprobs = [
-                    (token_data['token'], token_data['logprob'])
-                    for token_data in chat_completion_choice['logprobs']['content']
+                    (token_data["token"], token_data["logprob"])
+                    for token_data in chat_completion_choice["logprobs"]["content"]
                 ]
-                return chat_completion_choice['message']['content'], response_token_logprobs
+                return chat_completion_choice["message"]["content"], response_token_logprobs
 
             case _:
                 raise NotImplementedError(token_scores_format)
