@@ -92,7 +92,7 @@ class BatchWriter(BatchHandler):
                     "messages": [
                         {
                             "role": "user",
-                            "content": query["query"]
+                            "content": query["prompt"]
                         }
                     ],
                     "logprobs": True,

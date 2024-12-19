@@ -49,8 +49,8 @@ class GPT(Model):
         )
 
         for batch in tqdm.tqdm(dataloader, desc="Processing batches"):
-            for inputs in batch:
-                message = [{"role": "user", "content": inputs["query"]}]
+            for query in batch:
+                message = [{"role": "user", "content": query["prompt"]}]
                 chat_completion = self.generate(
                     message,
                     n=self.num_responses,
@@ -60,7 +60,7 @@ class GPT(Model):
                     temperature=self.temperature,
                 )
 
-                yield from self.process_results(inputs, chat_completion)
+                yield from self.process_results(query, chat_completion)
 
     def generate(self, message, **kwargs) -> ChatCompletion:
         max_retries = 3

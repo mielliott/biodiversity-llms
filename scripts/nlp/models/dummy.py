@@ -8,7 +8,7 @@ from .model import Model
 
 
 def echo_response(inputs: dict[str, Any]):
-    response = f"Echoing query \"{inputs['query']}\""
+    response = f"Echoing query prompt \"{inputs['prompt']}\""
     return inputs | {"responses": response}
 
 

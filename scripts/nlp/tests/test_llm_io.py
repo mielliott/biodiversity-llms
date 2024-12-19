@@ -14,10 +14,10 @@ def test_query_generator():
     queries = list(query_gen)
 
     assert queries == [
-        {"query_number": 0, "pattern_number": 0, "x": "apple", "y": "orange", "query": "just apple"},
-        {"query_number": 0, "pattern_number": 1, "x": "apple", "y": "orange", "query": "apple and orange"},
-        {"query_number": 1, "pattern_number": 0, "x": "horse", "y": "carriage", "query": "just horse"},
-        {"query_number": 1, "pattern_number": 1, "x": "horse", "y": "carriage", "query": "horse and carriage"},
+        {"query_number": 0, "pattern_number": 0, "x": "apple", "y": "orange", "prompt": "just apple"},
+        {"query_number": 0, "pattern_number": 1, "x": "apple", "y": "orange", "prompt": "apple and orange"},
+        {"query_number": 1, "pattern_number": 0, "x": "horse", "y": "carriage", "prompt": "just horse"},
+        {"query_number": 1, "pattern_number": 1, "x": "horse", "y": "carriage", "prompt": "horse and carriage"},
     ]
 
 

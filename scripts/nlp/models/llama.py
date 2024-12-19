@@ -96,7 +96,7 @@ class Llama(Model):
         )
 
         for batch_inputs in tqdm.tqdm(data_loader, desc="Processing batches"):
-            prompts = [self.construct_prompt(inputs["query"]) for inputs in batch_inputs]
+            prompts = [self.construct_prompt(inputs["prompt"]) for inputs in batch_inputs]
             input_tensors = self.tokenizer(prompts, return_tensors="pt", truncation=True, padding=True)
 
             input_details = [
@@ -155,11 +155,11 @@ class Llama(Model):
             # Implement TokenScoresFormat to return one or all tokens scores
             top_tokens, top_tokens_logprobs = self.get_top_k_scores(output_distributions[0], 5)
 
-            query = input['query']
+            prompt = input["prompt"]
             output_tokens_count = len(output_tokens)
             filtered_input = {k: v for k, v in input.items() if k not in ["prompt", "tensor", "mask"]}
             yield filtered_input | {
-                "query": query,
+                "prompt": prompt,
                 "responses": response_text,
                 "top_tokens": top_tokens,
                 "top_tokens_logprobs": top_tokens_logprobs,

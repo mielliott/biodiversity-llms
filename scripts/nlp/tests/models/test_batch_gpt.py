@@ -9,8 +9,8 @@ def test_gpt_3_5_batch_write():
     ))
 
     results_stream = gpt.run(iter([
-        {"creature": "bear", "query": "What do bears eat?"},
-        {"creature": "toad", "query": "What do toads eat?"}
+        {"query_number": 0, "pattern_number": 0, "creature": "bear", "prompt": "What do bears eat?"},
+        {"query_number": 1, "pattern_number": 0, "creature": "toad", "prompt": "What do toads eat?"}
     ]))
 
     results = list(results_stream)
@@ -39,22 +39,22 @@ def test_gpt_3_5_read_batch():
 
     result = results[0]
     assert result["creature"] == "bear"
-    assert result["query"] == "What do bears eat?"
+    assert result["prompt"] == "What do bears eat?"
     assert result["input_token_count"] == 12
     assert len(result["top_tokens"]) == 5
     assert len(result["top_tokens_logprobs"]) == 5
 
     assert set(result.keys()) == {
-        "creature", "query", "responses", "top_tokens", "top_tokens_logprobs", "input_token_count", "output_token_count"
+        "creature", "prompt", "responses", "top_tokens", "top_tokens_logprobs", "input_token_count", "output_token_count"
     }
 
     result = results[1]
     assert result["creature"] == "toad"
-    assert result["query"] == "What do toads eat?"
+    assert result["prompt"] == "What do toads eat?"
     assert result["input_token_count"] == 13
     assert len(result["top_tokens"]) == 5
     assert len(result["top_tokens_logprobs"]) == 5
 
     assert set(result.keys()) == {
-        "creature", "query", "responses", "top_tokens", "top_tokens_logprobs", "input_token_count", "output_token_count"
+        "creature", "prompt", "responses", "top_tokens", "top_tokens_logprobs", "input_token_count", "output_token_count"
     }
