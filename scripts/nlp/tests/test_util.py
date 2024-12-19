@@ -1,5 +1,12 @@
 import io
+from types import SimpleNamespace
 from typing import Any
+
+
+def mock_static(**attributes):
+    def supplier(*args, **kwargs):
+        return SimpleNamespace(**attributes)
+    return supplier
 
 
 def make_tsv_stream(data: list[dict[str, Any]]) -> io.StringIO:

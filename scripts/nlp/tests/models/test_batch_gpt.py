@@ -1,21 +1,18 @@
 
-import collections
 from types import SimpleNamespace
-from typing import NamedTuple
 import openai
 import openai.resources
 from args import BatchProcess, Params, TokenScoresFormat
 from models.batch_gpt import BatchGPT
+from tests.test_util import mock_static
 
 
 def test_gpt_3_5_batch_write(monkeypatch):
-    def mock_files_create(*args, **kwargs):
-        return SimpleNamespace(id="file-test")
-
-    def mock_batches_create(*args, **kwargs):
+    def mock_batches_create(*args, input_file_id, **kwargs):
+        assert input_file_id == "file-test"
         return SimpleNamespace(id="batch-test")
 
-    monkeypatch.setattr(openai.resources.files.Files, "create", mock_files_create)
+    monkeypatch.setattr(openai.resources.files.Files, "create", mock_static(id="file-test"))
     monkeypatch.setattr(openai.resources.batches.Batches, "create", mock_batches_create)
 
     gpt = BatchGPT(Params(
@@ -35,7 +32,7 @@ def test_gpt_3_5_batch_write(monkeypatch):
     ]
 
 
-def test_gpt_3_5_read_batch():
+def test_gpt_3_5_read_batch(monkeypatch):
     gpt = BatchGPT(Params(
         model_name="gpt-3.5-turbo-0125",
         batch=BatchProcess.READ,
