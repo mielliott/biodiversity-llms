@@ -1,15 +1,26 @@
 idigbio_api: https://beta-search.idigbio.org/v2
 random_seed: 69847
-taxonomy_fields:
+record_fields:
   - kingdom
   - phylum
   - family
   - genus
   - specificepithet
-location_fields:
   - countrycode
   - stateprovince
   - county
+absence_shuffle_fields:
+  - countrycode
+  - stateprovince
+  - county
+absence_validation_fields:
+  - kingdom
+  - phylum
+  - family
+  - genus
+  - specificepithet
+  - countrycode
+  - stateprovince
 qa_fields:
   - kingdom
   - phylum

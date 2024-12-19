@@ -10,7 +10,7 @@ rule get_kingdom_records:
         phyla=lambda wildcards: config["download"]["kingdoms"][wildcards.kingdom][
             "phyla"
         ],
-        required_fields=config["taxonomy_fields"] + config["location_fields"],
+        required_fields=config["record_fields"],
     log:
         notebook="results/{kingdom}.py.ipynb",
     conda:

@@ -8,9 +8,7 @@ rule extract_records_as_tsv:
     output:
         temp("results/records.tsv"),
     params:
-        fields=",".join(
-            [field for field in config["taxonomy_fields"] + config["location_fields"]]
-        ),
+        fields=",".join(config["record_fields"]),
     log:
         "logs/records.tsv",
     shell:
@@ -18,6 +16,7 @@ rule extract_records_as_tsv:
         unzip -p {input.records}\
         | jq .indexTerms\
         | mlr --ijson --otsv template -f {params.fields}\
+        | sed 's/"//g'\
         | mlr --tsv uniq -a\
         1> {output} 2> {log}
         """
