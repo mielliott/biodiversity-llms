@@ -13,6 +13,7 @@ class FileLikeObject(IOBase, IO[bytes]):
             if self.offset == len(self.chunk):
                 try:
                     self.chunk = next(self.source)
+                    self.offset = 0
                 except StopIteration:
                     return
             to_yield = min(size, len(self.chunk) - self.offset)
