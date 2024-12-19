@@ -14,8 +14,9 @@ def make_request_id(query: dict) -> str:
     return json.dumps({k: query[k] for k in ("query_number", "pattern_number")})
 
 
-def parse_request_id(request_id: str) -> dict:
-    return json.loads(request_id)
+def parse_request_id(request_id: str) -> tuple[int, int]:
+    data = json.loads(request_id)
+    return data["query_number"], data["pattern_number"]
 
 
 @ModelRegistry.register("batch_gpt")
