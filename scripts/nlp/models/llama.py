@@ -133,10 +133,10 @@ class Llama(Model):
                     **kwargs,
                 )
             except RuntimeError as e:
-                print(f"Error during generation: {e}")
-                print(f"Input shape: {input_ids.shape}")
-                print(f"Attention mask shape: {attention_mask.shape}")
-                print(f"Device: {self.model.device}")
+                print(f"Error during generation: {e}", file=sys.stderr)
+                print(f"Input shape: {input_ids.shape}", file=sys.stderr)
+                print(f"Attention mask shape: {attention_mask.shape}", file=sys.stderr)
+                print(f"Device: {self.model.device}", file=sys.stderr)
                 raise
 
     def process_results(self, inputs: list[dict[str, Any]], outputs: GenerateOutput | LongTensor) -> Iterator[dict[str, Any]]:
