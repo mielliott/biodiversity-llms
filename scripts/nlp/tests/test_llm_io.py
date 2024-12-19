@@ -5,7 +5,21 @@ from llm_io import IOHandler
 from tests import test_util
 
 
-def test_query_generator():
+def test_passthrough():
+    handler = IOHandler([], [])
+
+    tsv = test_util.make_tsv_stream([{"x": "apple", "y": "orange"}, {"x": "horse", "y": "carriage"}])
+    query_gen = handler.make_queries(tsv)
+
+    queries = list(query_gen)
+
+    assert queries == [
+        {"query_number": 0, "x": "apple", "y": "orange"},
+        {"query_number": 1, "x": "horse", "y": "carriage"},
+    ]
+
+
+def test_patterns():
     handler = IOHandler(["just {x}", "{x} and {y}"], [])
 
     tsv = test_util.make_tsv_stream([{"x": "apple", "y": "orange"}, {"x": "horse", "y": "carriage"}])

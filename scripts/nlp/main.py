@@ -31,7 +31,7 @@ def main():
     load_dotenv(override=True, verbose=True)
 
     parser = argparse.ArgumentParser(description="Submit your questions to LLM of your choice")
-    parser.add_argument("patterns", nargs="+")
+    parser.add_argument("patterns", nargs="*")
     parser.add_argument("--required-fields", "-f", default=[], type=",".split)
     parser.add_argument("--model-category", "-mc", default="gpt", type=str, choices=ModelRegistry.list_models())
     parser.add_argument("--test", "-x", action="store_true")
@@ -66,6 +66,7 @@ def main():
     params = cast(Params, args)
     runner = ExperimentRunner(args.model_category, params, io_handler)
     runner.run_experiment(sys.stdin)
+
 
 if __name__ == "__main__":
     main()
