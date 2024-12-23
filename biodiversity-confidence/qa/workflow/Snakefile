@@ -9,17 +9,18 @@ configfile: "config/qa/occurrence.yml"
 configfile: "config/llm/gpt-4o-mini-2024-07-18.yml"
 
 
-qa_command_env = os.path.expandvars(config["qa"]["command_env"])
+qa_command_env = os.path.expandvars(config["qa_command_env"])
 
-qa_command_args = convert_args_dict_to_cli(config["qa"]["command_args"])
+qa_command_args = convert_args_dict_to_cli(config["qa_command_args"])
 
 qa_questions = " ".join(
-    [f'"{q} {config["qa"]["query_suffix"]}"' for q in config["qa"]["query_templates"]]
+    [f'"{q} {config["qa_query_suffix"]}"' for q in config["qa_query_templates"]]
 )
 
 
-include: "rules/local_batch_qa.smk"
-include: "rules/remote_batch_qa.smk"
+include: "rules/query-batching.smk"
+include: "rules/batch-api-qa.smk"
+include: "rules/llm-qa.smk"
 
 
 rule all:
