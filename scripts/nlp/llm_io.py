@@ -4,11 +4,13 @@ from typing import Any, Generator, Iterable, Iterator, TextIO
 
 
 class IOHandler:
-    tsv_args: dict[str, Any] = dict(
+    TSV_ARGS: dict[str, Any] = dict(
         delimiter="\t",
         lineterminator="\n",
         escapechar="\\",
-        quoting=csv.QUOTE_NONE
+        quoting=csv.QUOTE_MINIMAL,
+        doublequote=True,
+        quotechar="\""
     )
 
     def __init__(self, patterns: list[str], required_fields: list[str]):
@@ -24,7 +26,7 @@ class IOHandler:
         return zip(*args)
 
     def make_queries(self, lines: TextIO) -> Iterator[dict[str, Any]]:
-        for query_number, query in enumerate(csv.DictReader(lines, None, **self.tsv_args)):
+        for query_number, query in enumerate(csv.DictReader(lines, None, strict=True, **self.TSV_ARGS)):
             for expanded_query in self.query_preprocessor.expand(query):
                 yield {"query_number": query_number} | expanded_query
 
@@ -34,7 +36,7 @@ class IOHandler:
         if missing_fields:
             raise RuntimeError("Missing output field(s): " + ", ".join(missing_fields))
 
-        writer = csv.DictWriter(out_stream, first_result.keys(), **self.tsv_args)
+        writer = csv.DictWriter(out_stream, first_result.keys(), strict=True, **self.TSV_ARGS)
         writer.writeheader()
         writer.writerows(itertools.chain([first_result], results))
 

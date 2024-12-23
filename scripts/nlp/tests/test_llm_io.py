@@ -1,4 +1,4 @@
-import csv
+import ast
 import io
 import pandas as pd
 from llm_io import IOHandler
@@ -64,10 +64,16 @@ def test_read_escaped_output_tsv_with_pandas():
         "field\t1": "value\t1",
         "field\n2": "value\n2",
         "field\r3": "value\r3",
+        "field\"3": "value\"3",
+        "list": ["safe", "un'safe"]
     }]))
 
     in_stream = io.StringIO(out_stream.getvalue())
-    table = pd.read_csv(in_stream, sep="\t", escapechar="\\", quoting=csv.QUOTE_NONE)
+    table = pd.read_csv(
+        in_stream,
+        converters={"list": ast.literal_eval},
+        **(IOHandler.TSV_ARGS)
+    )
 
     assert len(table) == 1
 
@@ -76,4 +82,6 @@ def test_read_escaped_output_tsv_with_pandas():
         "field\t1": "value\t1",
         "field\n2": "value\n2",
         "field\r3": "value\r3",
+        "field\"3": "value\"3",
+        "list": ["safe", "un'safe"]
     }

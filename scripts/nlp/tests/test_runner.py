@@ -22,10 +22,10 @@ def test_runner(capsys):
 
     assert tsv == (
         "query_number\tpattern_number\tx\ty\tprompt\tresponses\n"
-        "0\t0\tapple\torange\tjust apple\tEchoing query prompt \\\"just apple\\\"\n"
-        "0\t1\tapple\torange\tapple and orange\tEchoing query prompt \\\"apple and orange\\\"\n"
-        "1\t0\thorse\tcarriage\tjust horse\tEchoing query prompt \\\"just horse\\\"\n"
-        "1\t1\thorse\tcarriage\thorse and carriage\tEchoing query prompt \\\"horse and carriage\\\"\n"
+        "0\t0\tapple\torange\tjust apple\t\"Echoing query prompt \"\"just apple\"\"\"\n"
+        "0\t1\tapple\torange\tapple and orange\t\"Echoing query prompt \"\"apple and orange\"\"\"\n"
+        "1\t0\thorse\tcarriage\tjust horse\t\"Echoing query prompt \"\"just horse\"\"\"\n"
+        "1\t1\thorse\tcarriage\thorse and carriage\t\"Echoing query prompt \"\"horse and carriage\"\"\"\n"
     )
 
 
@@ -43,8 +43,8 @@ def test_runner_with_disk_io(capsys):
 
     assert tsv == (
         "query_number\tpattern_number\tgenus\tspecificepithet\tcountry\tprompt\tresponses\n"
-        "0\t0\tPanicum\tlaxiflorum\tNepal\tDoes species Panicum laxiflorum live in Nepal?\tEchoing query prompt \\\"Does species Panicum laxiflorum live in Nepal?\\\"\n"
-        "1\t0\tFenestella\tcarinata\tUganda\tDoes species Fenestella carinata live in Uganda?\tEchoing query prompt \\\"Does species Fenestella carinata live in Uganda?\\\"\n"
+        "0\t0\tPanicum\tlaxiflorum\tNepal\tDoes species Panicum laxiflorum live in Nepal?\t\"Echoing query prompt \"\"Does species Panicum laxiflorum live in Nepal?\"\"\"\n"
+        "1\t0\tFenestella\tcarinata\tUganda\tDoes species Fenestella carinata live in Uganda?\t\"Echoing query prompt \"\"Does species Fenestella carinata live in Uganda?\"\"\"\n"
     )
 
 
