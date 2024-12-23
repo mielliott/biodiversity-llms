@@ -30,26 +30,3 @@ rule zip_records:
         rm -f {output} &&\
         zip {output} {input}
         """
-
-
-rule package_and_sign:
-    input:
-        "results/records.zip",
-    output:
-        "results/manifest",
-    shell:
-        """
-        #!/bin/bash
-        # Archive a copy of records.zip using its hash as the file name
-        mkdir -p signed &&\
-        cp results/records.zip signed/$(md5sum {input} | cut -c -32) &&\
-
-        # Record the hash of the latest records.zip
-        md5sum {input}\
-        | sed "s/  /\t/"\
-        | paste - <(date)\
-        > {output} &&\
-
-        # Concat the results to a persistent manifest
-        cat {output} >> signed/manifest
-        """

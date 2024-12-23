@@ -4,6 +4,7 @@ include: "rules/make-absence-tsv.smk"
 include: "rules/make-presence-tsv.smk"
 include: "rules/make-occurrence-qa-tsv.smk"
 include: "rules/make-taxonomy-questions.smk"
+include: "rules/version.smk"
 
 
 rule sample_idigbio:
