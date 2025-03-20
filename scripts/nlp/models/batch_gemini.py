@@ -31,7 +31,7 @@ class BatchGemini(Model):
             "location": os.getenv("GCP_LOCATION"),
             "bucket_name": os.getenv("GCP_STORAGE_BUCKET_NAME")
         }
-        print(gcp)
+
         match params.batch:
             case BatchProcess.WRITE:
                 self.handler = BatchWriter(params, gcp)
@@ -177,7 +177,6 @@ class BatchReader(BatchHandler):
                     """Reference: https://ai.google.dev/api/generate-content#v1beta.GenerateContentResponse"""
                     chat_completion = query_response_data["response"]
                     for query_response in self.process_results(chat_completion):
-                        print('something', query_response)
                         yield {
                             "batch_id": batch_id,
                         } | query_response
