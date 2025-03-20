@@ -25,7 +25,13 @@ class GCPArgs():
 
 @ModelRegistry.register("batch_gemini")
 class BatchGemini(Model):
-    def __init__ (self, params: Params, gcp: GCPArgs):
+    def __init__(self, params: Params):
+        gcp: GCPArgs = {
+            "project_id": os.getenv("GCP_PROJECT_ID"),
+            "location": os.getenv("GCP_LOCATION"),
+            "bucket_name": os.getenv("GCP_STORAGE_BUCKET_NAME")
+        }
+        print(gcp)
         match params.batch:
             case BatchProcess.WRITE:
                 self.handler = BatchWriter(params, gcp)
@@ -53,20 +59,25 @@ class BatchHandler():
 class BatchWriter(BatchHandler):
     def __init__(self, params: Params, gcp: GCPArgs) -> None:
         self.model_name = params.model_name
-        self.gemini_request_args = {
-            "maxOutputTokens": params.max_tokens,
-            "temperature": params.temperature,
-            "topP": params.top_p,
-            "responseLogprobs": True,
-            "logprobs": MAX_TOP_LOGPROBS,   
-        }
+
+        # prepare request arguments
+        self.generation_configs = {}
+        if params.max_tokens is not None:
+            self.generation_configs["maxOutputTokens"] = params.max_tokens
+        if params.temperature is not None:
+            self.generation_configs["temperature"] = params.temperature
+        if params.top_p is not None:
+            self.generation_configs["topP"] = params.top_p
+
+        self.generation_configs["responseLogprobs"] = True
+        self.generation_configs["logprobs"] = MAX_TOP_LOGPROBS
         
         self.timeout = params.timeout
         self.output_uri = ""
 
-        self.project_id = gcp.project_id
-        self.location = gcp.location
-        self.bucket_name = gcp.bucket_name
+        self.project_id = gcp["project_id"]
+        self.location = gcp["location"]
+        self.bucket_name = gcp["bucket_name"]
         self.credentials = service_account.Credentials.from_service_account_file(
             os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 
@@ -123,9 +134,9 @@ class BatchReader(BatchHandler):
     def __init__(self, params: Params, gcp: GCPArgs) -> None:
         self.token_score_format = params.scores
         
-        self.project_id = gcp.project_id
-        self.location = gcp.location
-        self.bucket_name = gcp.bucket_name
+        self.project_id = gcp["project_id"]
+        self.location = gcp["location"]
+        self.bucket_name = gcp["bucket_name"]
         self.credentials = service_account.Credentials.from_service_account_file(
             os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
     
