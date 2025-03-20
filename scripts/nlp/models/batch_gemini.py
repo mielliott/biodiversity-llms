@@ -29,7 +29,7 @@ Read Batch:
 """
 
 @dataclass(init=True, frozen=True)
-class GCPArgs():
+class GcpArgs():
     """Arguments for Google Cloud Platform"""
     project_id: str
     location: str
@@ -38,7 +38,7 @@ class GCPArgs():
 @ModelRegistry.register("batch_gemini")
 class BatchGemini(Model):
     def __init__(self, params: Params):
-        gcp: GCPArgs = {
+        gcp: GcpArgs = {
             "project_id": os.getenv("GCP_PROJECT_ID"),
             "location": os.getenv("GCP_LOCATION"),
             "bucket_name": os.getenv("GCP_STORAGE_BUCKET_NAME")
@@ -69,7 +69,7 @@ class BatchHandler():
 
 
 class BatchWriter(BatchHandler):
-    def __init__(self, params: Params, gcp: GCPArgs) -> None:
+    def __init__(self, params: Params, gcp: GcpArgs) -> None:
         self.model_name = params.model_name
 
         """Reference: https://ai.google.dev/api/generate-content#v1beta.GenerationConfig"""
@@ -141,7 +141,7 @@ class BatchWriter(BatchHandler):
         
 
 class BatchReader(BatchHandler):
-    def __init__(self, params: Params, gcp: GCPArgs) -> None:
+    def __init__(self, params: Params, gcp: GcpArgs) -> None:
         self.token_score_format = params.scores
         
         self.project_id = gcp["project_id"]
