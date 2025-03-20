@@ -16,6 +16,18 @@ from .registry import ModelRegistry
 MAX_TOP_LOGPROBS = 5 # limits for Gemini
 
 
+"""
+Examples:
+Create Batch: 
+    echo -e "species\tlocation\nAcer saccharum\tArkansas" | python main.py -mc "batch_gemini" -m "gemini-1.5-flash-002" --batch write "Does {species} naturally occur in {location}? Yes or no"
+    
+    # outputs: batch_id
+
+
+Read Batch: 
+    echo -e "species\tlocation\tbatch_id\nAcer saccharum\tArkansas\tprojects/{gcpProjectId}/locations/{gcpLocation}/batchPredictionJobs/{batchJobName}" | python main.py -mc "batch_gemini" -m "gemini-1.5-flash-002" --batch read --scores first_token
+"""
+
 @dataclass(init=True, frozen=True)
 class GCPArgs():
     """Arguments for Google Cloud Platform"""
@@ -60,7 +72,7 @@ class BatchWriter(BatchHandler):
     def __init__(self, params: Params, gcp: GCPArgs) -> None:
         self.model_name = params.model_name
 
-        # prepare request arguments
+        """Reference: https://ai.google.dev/api/generate-content#v1beta.GenerationConfig"""
         self.generation_configs = {}
         if params.max_tokens is not None:
             self.generation_configs["maxOutputTokens"] = params.max_tokens
@@ -88,11 +100,10 @@ class BatchWriter(BatchHandler):
                 "request": {
                     "contents": [{
                         "parts": {
-                            "text": query
+                            "text": query["prompt"]
                         },
                         "role": "user"
                     }],
-                    """Reference: https://ai.google.dev/api/generate-content#v1beta.GenerationConfig"""
                     "generation_config": self.generation_configs
                 }
             }
@@ -118,16 +129,15 @@ class BatchWriter(BatchHandler):
         blob.upload_from_string(requests_byte_stream.read())
         
         gcs_input_uri = f"gs://{self.bucket_name}/{gcs_input_path}"
-        print(f"Uploaded input file to {gcs_input_uri}")
-
         gcs_output_dest = f"gs://{self.bucket_name}/outputs/batch_results_{batch_id}"
-        genai_client.batches.create(
+
+        job = genai_client.batches.create(
             model=self.model_name,
             src=gcs_input_uri,
             config=CreateBatchJobConfig(dest=gcs_output_dest)
         )
 
-        yield {"batch_id": batch_id}
+        yield {"batch_id": job.name}
         
 
 class BatchReader(BatchHandler):
@@ -146,43 +156,59 @@ class BatchReader(BatchHandler):
             yield from self.read_batch(batch_id)
             
     def read_batch(self, batch_id):
-        batch_resource_name = f"projects/{self.project_id}/locations/{self.location}/batchPredictionJobs/{batch_id}"
         genai_client = genai.Client(
             vertexai=True, 
             project=self.project_id, 
             location=self.location
         )
-        storage_client = storage.Client(credentials=self.credentials)
-        batch_bucket = storage_client.bucket(self.bucket_name)
         
-        batch = genai_client.batches.get(name=batch_resource_name)
+        batch = genai_client.batches.get(name=batch_id)
         
         match batch.state:
             case JobState.JOB_STATE_FAILED:
                 raise RuntimeError(f"Batch failed: {batch.error_file_id}")
             case JobState.JOB_STATE_PENDING:
                 raise RuntimeError("Batch is still in progress")
+            case JobState.JOB_STATE_RUNNING:
+                raise RuntimeError("Batch is still running")
             case JobState.JOB_STATE_SUCCEEDED:
-                if not batch.output_file_id:
+                if not batch.dest.gcs_uri:
                     raise RuntimeError("Batch is marked \"completed\" but results are missing")
-                
-                output_blob = batch_bucket.blob(
-                    f"outputs/batch_results_{batch_id}/0")
-                output_content = output_blob.download_as_string().decode('utf-8')
-                
-                for line in output_content.strip().split('\n'):
-                    if not line:
-                        continue
-                    query_response_data = json.loads(line)
-                    """Reference: https://ai.google.dev/api/generate-content#v1beta.GenerateContentResponse"""
-                    chat_completion = query_response_data["response"]
-                    for query_response in self.process_results(chat_completion):
-                        yield {
-                            "batch_id": batch_id,
-                        } | query_response
+                output_folder_uri = batch.dest.gcs_uri
+                # Parse the GCS URI to get prefix
+                # Format: gs://bucket-name/path/to/folder
+                uri_parts = output_folder_uri.replace(
+                    "gs://", "").split("/", 1)
+                bucket_name = uri_parts[0]
+                prefix = uri_parts[1] if len(uri_parts) > 1 else ""
+
+                storage_client = storage.Client(credentials=self.credentials)
+                batch_bucket = storage_client.bucket(bucket_name)
+                blobs = list(batch_bucket.list_blobs(prefix=prefix))
+                prediction_files = [
+                    blob for blob in blobs if blob.name.endswith('predictions.jsonl')]
+
+                if prediction_files:
+                    # Use the first prediction file found
+                    prediction_blob = prediction_files[0]
+                    output_content = prediction_blob.download_as_string().decode('utf-8')
+
+                    for line in output_content.strip().split('\n'):
+                        if not line:
+                            continue
+                        query_response_data = json.loads(line)
+                        """Reference: https://ai.google.dev/api/generate-content#v1beta.GenerateContentResponse"""
+                        chat_completion = query_response_data["response"]
+                        for query_response in self.process_results(chat_completion):
+                            yield {
+                                "batch_id": batch_id,
+                            } | query_response
+                else:
+                    RuntimeError("No prediction results found")
+
             case _:
                 raise NotImplementedError(
-                    f"Unexpected batch status \"{batch.status}\"")
+                    f"Unexpected batch status \"{batch.state}\"")
             
     def process_results(self, chat_completion):
         for choice in chat_completion["candidates"]:
@@ -206,9 +232,8 @@ class BatchReader(BatchHandler):
                 return chat_completion_choice["content"]["parts"][0]["text"], first_token_logprobs
             case TokenScoresFormat.RESPONSE_TOKENS:
                 response_token_logprobs = [
-                    (token_data["candidates"]["token"], token_data["candidates"]["logProbability"])
-                    for token_data in chat_completion_choice["logprobsResult"]["topCandidates"]
+                    (candidate["token"], candidate["logProbability"]) for token_data in chat_completion_choice["logprobsResult"]["topCandidates"] for candidate in token_data["candidates"]
                 ]
-                return chat_completion_choice["content"]["parts"]["text"], response_token_logprobs
+                return chat_completion_choice["content"]["parts"][0]["text"], response_token_logprobs
             case _:
                 raise NotImplementedError(self.token_score_format)

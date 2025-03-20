@@ -39,7 +39,10 @@ def patch_google_apis(monkeypatch):
     mock_batches.create.return_value = mock_batch
     mock_batches.get.return_value = SimpleNamespace(
         state="JOB_STATE_SUCCEEDED",
-        output_file_id="output-file-1"
+        output_file_id="output-file-1",
+        dest=SimpleNamespace(
+            gcs_uri="gs://test-bucket/outputs/batch-0"
+        )
     )
 
     # Set up patches
@@ -128,30 +131,24 @@ def test_gemini_batch_read(patch_google_apis):
                     }
                 }
             ],
-            "createTime": "2025-03-17T16:56:31.843123Z",
-            "modelVersion": "gemini-1.5-flash-002@default",
-            "responseId": "P1TYZ_O6M42ShMIPjNqGeQ",
             "usageMetadata": {
                 "promptTokenCount": 5,
                 "candidatesTokenCount": 15,
                 "totalTokenCount": 20
             }
-        },
+        }
     }
 
-    mock_responses = [
-        json.dumps(mock_gemini_response),
-        # tweak the second response
-        json.dumps({**mock_gemini_response, 
-                   "response": {**mock_gemini_response["response"], 
-                                "candidates": [{**mock_gemini_response["response"]["candidates"][0], 
-                                              "content": {"parts": [{"text": "Toads eat insects, worms, and small invertebrates."}], 
-                                                         "role": "model"}}]}})
-    ]
-    # setup the return value for download_as_string
+    # Setup mock predictions output blob
+    mock_prediction_blob = MagicMock()
+    mock_prediction_blob.name = "outputs/batch-0/0001_predictions.jsonl"
+    patch_google_apis["storage"]["bucket"].list_blobs.return_value = [
+        mock_prediction_blob]
     mock_response_bytes = MagicMock()
-    mock_response_bytes.decode.return_value = "\n".join(mock_responses)
-    patch_google_apis["storage"]["blob"].download_as_string.return_value = mock_response_bytes
+    mock_response_bytes.decode.return_value = json.dumps(
+        mock_gemini_response)
+    mock_prediction_blob.download_as_string.return_value = mock_response_bytes
+    patch_google_apis["storage"]["bucket"].blob.return_value = mock_prediction_blob
 
     gemini = BatchGemini(
         Params(
@@ -165,10 +162,10 @@ def test_gemini_batch_read(patch_google_apis):
         {"batch_id": "batch-0"}
     ])))
 
-    assert len(results) == 2
+    assert len(results) == 1
     assert results[0]["batch_id"] == "batch-0"
-    assert "Bears eat a variety of foods including berries, fish, and honey." in results[0]["responses"]
+    assert results[0]["responses"] == "Bears eat a variety of foods including berries, fish, and honey."
     assert results[0]["top_tokens"] == ["Bears", "The", "These", "Most", "Wild"]
     assert results[0]["top_tokens_logprobs"] == [-0.01, -1.5, -2.0, -3.0, -3.5]
-    assert results[1]["batch_id"] == "batch-0"
-    assert "Toads eat insects, worms, and small invertebrates." in results[1]["responses"]
+    assert results[0]["input_token_count"] == 5
+    assert results[0]["output_token_count"] == 15
