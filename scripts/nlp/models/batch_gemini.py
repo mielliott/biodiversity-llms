@@ -54,9 +54,10 @@ class BatchWriter(BatchHandler):
     def __init__(self, params: Params, gcp: GCPArgs) -> None:
         self.model_name = params.model_name
         self.gemini_request_args = {
-            "max_tokens": params.max_tokens,
+            "maxOutputTokens": params.max_tokens,
             "temperature": params.temperature,
-            "top_p": params.top_p,
+            "topP": params.top_p,
+            "responseLogprobs": True,
             "logprobs": MAX_TOP_LOGPROBS,   
         }
         
@@ -71,15 +72,6 @@ class BatchWriter(BatchHandler):
 
 
     def create_req_objects(self, queries):
-        """Reference: https://ai.google.dev/api/generate-content#v1beta.GenerationConfig"""
-        generation_configs = {
-            "temperature": 1,
-            "topP": 0.7,
-            "maxOutputTokens": 100,
-            "responseLogprobs": True,
-            "logprobs": 5,
-        }
-
         for query in queries:
             request = {
                 "request": {
@@ -89,7 +81,8 @@ class BatchWriter(BatchHandler):
                         },
                         "role": "user"
                     }],
-                    "generation_config": generation_configs
+                    """Reference: https://ai.google.dev/api/generate-content#v1beta.GenerationConfig"""
+                    "generation_config": self.generation_configs
                 }
             }
             yield (json.dumps(request) + "\n").encode()
